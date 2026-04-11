@@ -754,8 +754,7 @@
 
             <div class="swap-row">
               <label>quote status</label>
-              <input id="quoteStatusField" class="swap-input" type="text" value="Quote engine not connected yet"
-                readonly>
+              <input id="quoteStatusField" class="swap-input" type="text" value="No quote yet" readonly>
             </div>
 
             <div class="cta-row">
@@ -854,8 +853,15 @@
       const INTERNAL_FEE_RATE = 0;
       const MARKET_ROUTE_ENABLED = false;
 
-      function setStatus(message) {
+      function setAppStatus(message) {
         if (status) status.textContent = message;
+      }
+
+      function setQuoteStatus(message) {
+        if (quoteStatusField) quoteStatusField.value = message;
+      }
+
+      function setQuoteStatus(message) {
         if (quoteStatusField) quoteStatusField.value = message;
       }
 
@@ -947,20 +953,24 @@
       }
 
       function updateRouteGuidance(cigo, usdt) {
-        if (!buyCigoBtn || !swapBtn || !quoteBtn) return;
+        const buyBtn = document.getElementById('buyCigoBtn');
+        const swapBtn = document.getElementById('swapBtn');
+        const quoteBtn = document.getElementById('quoteBtn');
+
+        if (!buyBtn || !swapBtn || !quoteBtn) return;
 
         if (cigo > 0) {
-          buyCigoBtn.textContent = 'buy more CIGO (market)';
-          quoteBtn.textContent = usdt > 0 ? 'Compare CIGO exit paths' : 'Quote CIGO exit';
-          swapBtn.textContent = 'Convert CIGO';
+          buyBtn.textContent = 'buy more CIGO (market)';
+          quoteBtn.textContent = usdt > 0 ? 'Compare exit paths' : 'Quote exit';
+          swapBtn.textContent = 'Convert';
         } else if (usdt > 0) {
-          buyCigoBtn.textContent = 'buy CIGO with USDT';
-          quoteBtn.textContent = 'Quote USDT entry';
-          swapBtn.textContent = 'Convert USDT';
+          buyBtn.textContent = 'buy CIGO with USDT';
+          quoteBtn.textContent = 'Quote entry';
+          swapBtn.textContent = 'Convert';
         } else {
-          buyCigoBtn.textContent = 'buy CIGO (market)';
+          buyBtn.textContent = 'buy CIGO (market)';
           quoteBtn.textContent = 'Get quote';
-          swapBtn.textContent = 'Convert / trade';
+          swapBtn.textContent = 'Convert';
         }
       }
 
@@ -1063,7 +1073,7 @@
         if (!onBSC) {
           clearWalletSummary();
           updateRouteGuidance(0, 0);
-          setStatus('Wrong network. Switch to BNB Chain.');
+          setAppStatus('Wrong network. Switch to BNB Chain.');
 
           if (connectBtn) {
             connectBtn.textContent = 'Wrong network';
@@ -1083,9 +1093,11 @@
           connectBtn.textContent = 'Wallet connected';
         }
 
-        setStatus(
+        setAppStatus(
           `Connected: ${address.slice(0, 6)}...${address.slice(-4)} | BNB: ${bnb.toFixed(4)} | CIGO: ${cigo.toFixed(2)} | USDT: ${usdt.toFixed(2)}`
         );
+
+        setQuoteStatus('Ready for quote');
       }
 
       buyCigoBtn?.addEventListener('click', (e) => {
@@ -1110,7 +1122,7 @@
           await refreshWalletState(accounts[0]);
         } catch (err) {
           console.error(err);
-          setStatus(`Connection failed: ${err.message || err}`);
+          setAppStatus(`Connection failed: ${err.message || err}`);
         }
       });
 
@@ -1120,14 +1132,14 @@
             if (!accounts || !accounts.length) {
               clearWalletSummary();
               updateRouteGuidance(0, 0);
-              setStatus('Wallet disconnected');
+              setAppStatus('Wallet disconnected');
               return;
             }
 
             await refreshWalletState(accounts[0]);
           } catch (err) {
             console.error(err);
-            setStatus(`Wallet update failed: ${err.message || err}`);
+            setAppStatus(`Wallet update failed: ${err.message || err}`);
           }
         });
 
@@ -1138,7 +1150,7 @@
             if (!accounts || !accounts.length) {
               clearWalletSummary();
               updateRouteGuidance(0, 0);
-              setStatus('Wallet disconnected');
+              setAppStatus('Wallet disconnected');
               return;
             }
 
@@ -1147,7 +1159,7 @@
             if (!onBSC) {
               clearWalletSummary();
               updateRouteGuidance(0, 0);
-              setStatus('Wrong network. Switch to BNB Chain.');
+              setAppStatus('Wrong network. Switch to BNB Chain.');
 
               if (connectBtn) {
                 connectBtn.textContent = 'Wrong network';
@@ -1159,7 +1171,7 @@
             await refreshWalletState(accounts[0]);
           } catch (err) {
             console.error(err);
-            setStatus(`Chain update failed: ${err.message || err}`);
+            setAppStatus(`Chain update failed: ${err.message || err}`);
           }
         });
       }
@@ -1168,68 +1180,68 @@
         const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
 
         if (!from || !to) {
-          setStatus('Select both a from asset and a to asset.');
+          setQuoteStatus('Select both a from asset and a to asset.');
           return;
         }
 
         if (!isValidAmount) {
-          setStatus('Enter a valid amount greater than zero.');
+          setQuoteStatus('Enter a valid amount greater than zero.');
           return;
         }
 
         if (from === to) {
-          setStatus('Choose two different assets.');
+          setQouteStatus('Choose two different assets.');
           return;
         }
 
         const manualQuote = getManualQuote(from, to, amount);
 
         if (manualQuote) {
-          setStatus(
+          setQouteStatus(
             `Internal quote: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
           );
           return;
         }
 
         if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
-          setStatus(
+          setQouteStatus(
             `Optional market route detected: ${rawAmount} ${from} → ${to}. Public routing is currently disabled while internal basis testing is active.`
           );
           return;
         }
 
-        setStatus('This route is not active in the current shell.');
+        setQuoteStatus('This route is not active in the current shell.');
       });
 
       swapBtn?.addEventListener('click', () => {
         const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
 
         if (!from || !to) {
-          setStatus('Select both a from asset and a to asset.');
+          setQouteStatus('Select both a from asset and a to asset.');
           return;
         }
 
         if (!isValidAmount) {
-          setStatus('Enter a valid amount greater than zero.');
+          setQuoteStatus('Enter a valid amount greater than zero.');
           return;
         }
 
         if (from === to) {
-          setStatus('Choose two different assets.');
+          setQuoteStatus('Choose two different assets.');
           return;
         }
 
         const manualQuote = getManualQuote(from, to, amount);
 
         if (manualQuote) {
-          setStatus(
+          setQuoteStatus(
             `Internal conversion path: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | internal fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)} | settlement not automated yet`
           );
           return;
         }
 
         if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
-          setStatus(
+          setQuoteStatus(
             `Optional public market route detected for ${rawAmount} ${from} → ${to}. Routing is intentionally disabled for now.`
           );
           return;
@@ -1242,7 +1254,7 @@
           // }
         }
 
-        setStatus('This route is not active in the current shell.');
+        setQuoteStatus('This route is not active in the current shell.');
       });
 
       copyButtons.forEach((button) => {
