@@ -840,12 +840,13 @@
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
       const CIGO_USD_BASIS = 0.01;
       const COSIGO_USD_BASIS = 0.0045;
+      const INTERNAL_FEE_RATE = 0;
+      const MARKET_ROUTE_ENABLED = false;
       const walletUSDTEl = document.getElementById('walletUSDT');
       const WBNB_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
       const fromTokenEl = document.getElementById('fromToken');
       const toTokenEl = document.getElementById('toToken');
       const amountInEl = document.getElementById('amountIn');
-      const MARKET_ROUTE_ENABLED = false;
 
       function setStatus(message) {
         if (status) status.textContent = message;
@@ -1047,11 +1048,15 @@
 
           if (!fromUsd || !toUsd) return null;
 
-          const usdValue = amount * fromUsd;
-          const output = usdValue / toUsd;
+          const grossUsdValue = amount * fromUsd;
+          const feeUsdValue = grossUsdValue * INTERNAL_FEE_RATE;
+          const netUsdValue = grossUsdValue - feeUsdValue;
+          const output = netUsdValue / toUsd;
 
           return {
-            usdValue,
+            grossUsdValue,
+            feeUsdValue,
+            netUsdValue,
             output
           };
         }
@@ -1273,7 +1278,7 @@
       }
 
       quoteBtn?.addEventListener('click', () => {
-        const { from, to, rawAmount, isValidAmount } = getSelectedRoute();
+        const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
 
         if (!from || !to) {
           setStatus('Select both a from asset and a to asset.');
@@ -1290,29 +1295,27 @@
           return;
         }
 
-        const description = getRouteDescription(from, to);
+        const manualQuote = getManualQuote(from, to, amount);
 
-        if (from === 'CIGO' && to === 'COSIGO') {
+        if (manualQuote) {
           setStatus(
-            `${description} Entered amount: ${rawAmount} ${from}. Official conversion basis is handled through the COSIGO path, not a public swap pool.`
+            `Internal quote: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
           );
           return;
         }
 
-        const swapUrl = buildPancakeSwapUrl(from, to);
-
-        if (swapUrl) {
+        if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
           setStatus(
-            `${description} Entered amount: ${rawAmount} ${from}. Ready to route through PancakeSwap.`
+            `Optional market route detected: ${rawAmount} ${from} → ${to}. Public routing is currently disabled while internal basis testing is active.`
           );
           return;
         }
 
-        setStatus(description);
+        setStatus('This route is not active in the current shell.');
       });
 
       swapBtn?.addEventListener('click', () => {
-        const { from, to, rawAmount, isValidAmount } = getSelectedRoute();
+        const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
 
         if (!from || !to) {
           setStatus('Select both a from asset and a to asset.');
@@ -1329,21 +1332,30 @@
           return;
         }
 
-        if (from === 'CIGO' && to === 'COSIGO') {
-          setStatus(`Routing ${rawAmount} CIGO toward the official COSIGO path...`);
-          window.open('https://coins.cosigo.io/', '_blank');
+        const manualQuote = getManualQuote(from, to, amount);
+
+        if (manualQuote) {
+          setStatus(
+            `Internal conversion path: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | internal fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)} | settlement not automated yet`
+          );
           return;
         }
 
-        const swapUrl = buildPancakeSwapUrl(from, to);
-
-        if (swapUrl) {
-          setStatus(`Routing ${rawAmount} ${from} to ${to} through PancakeSwap...`);
-          window.open(swapUrl, '_blank');
+        if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
+          setStatus(
+            `Optional public market route detected for ${rawAmount} ${from} → ${to}. Routing is intentionally disabled for now.`
+          );
           return;
+
+          // Uncomment later if you want public market routing back:
+          // const swapUrl = buildPancakeSwapUrl(from, to);
+          // if (swapUrl) {
+          //   window.open(swapUrl, '_blank');
+          //   return;
+          // }
         }
 
-        setStatus('This route is not live yet in the current shell.');
+        setStatus('This route is not active in the current shell.');
       });
 
       copyButtons.forEach((button) => {
