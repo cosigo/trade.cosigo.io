@@ -750,129 +750,171 @@
   </footer>
 
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const status = document.getElementById('swapStatus');
-    const connectBtn = document.getElementById('connectBtn');
-    const quoteBtn = document.getElementById('quoteBtn');
-    const swapBtn = document.getElementById('swapBtn');
-    const buyCigoBtn = document.getElementById('buyCigoBtn');
-    const copyButtons = document.querySelectorAll('[data-copy]');
+    document.addEventListener('DOMContentLoaded', () => {
+      const status = document.getElementById('swapStatus');
+      const connectBtn = document.getElementById('connectBtn');
+      const quoteBtn = document.getElementById('quoteBtn');
+      const swapBtn = document.getElementById('swapBtn');
+      const buyCigoBtn = document.getElementById('buyCigoBtn');
+      const copyButtons = document.querySelectorAll('[data-copy]');
+      const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
 
-    function setStatus(message) {
-      if (status) status.textContent = message;
-    }
-
-    async function copyText(value) {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(value);
-        return true;
+      function setStatus(message) {
+        if (status) status.textContent = message;
       }
 
-      const ta = document.createElement('textarea');
-      ta.value = value;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      ta.style.pointerEvents = 'none';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
+      async function copyText(value) {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(value);
+          return true;
+        }
 
-      let ok = false;
-      try {
-        ok = document.execCommand('copy');
-      } catch (err) {
-        ok = false;
-      }
+        const ta = document.createElement('textarea');
+        ta.value = value;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        ta.style.pointerEvents = 'none';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
 
-      document.body.removeChild(ta);
-      return ok;
-    }
-
-    async function ensureBSC() {
-      const { ethereum } = window;
-      if (!ethereum) throw new Error('MetaMask not found');
-
-      const chainId = await ethereum.request({ method: 'eth_chainId' });
-
-      if (chainId !== '0x38') {
+        let ok = false;
         try {
-          await ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x38' }]
-          });
+          ok = document.execCommand('copy');
         } catch (err) {
-          alert('Switch to BNB Chain manually');
-          throw err;
+          ok = false;
+        }
+
+        document.body.removeChild(ta);
+        return ok;
+      }
+
+      async function ensureBSC() {
+        const { ethereum } = window;
+        if (!ethereum) throw new Error('MetaMask not found');
+
+        const chainId = await ethereum.request({ method: 'eth_chainId' });
+
+        if (chainId !== '0x38') {
+          try {
+            await ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x38' }]
+            });
+          } catch (err) {
+            alert('Switch to BNB Chain manually');
+            throw err;
+          }
         }
       }
-    }
 
-    async function getBNBBalance(address) {
-      const balance = await window.ethereum.request({
-        method: 'eth_getBalance',
-        params: [address, 'latest']
-      });
-
-      return parseInt(balance, 16) / 1e18;
-    }
-
-    buyCigoBtn?.addEventListener('click', (e) => {
-      e.preventDefault();
-      const url = 'https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
-      window.open(url, '_blank');
-    });
-
-    connectBtn?.addEventListener('click', async () => {
-      if (!window.ethereum) {
-        alert('MetaMask not found');
-        return;
-      }
-
-      try {
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts'
+      async function getBNBBalance(address) {
+        const balance = await window.ethereum.request({
+          method: 'eth_getBalance',
+          params: [address, 'latest']
         });
 
-        await ensureBSC();
-
-        const address = accounts[0];
-        const bnb = await getBNBBalance(address);
-
-        setStatus(`Connected: ${address.slice(0, 6)}...${address.slice(-4)} | BNB: ${bnb.toFixed(4)}`);
-      } catch (err) {
-        console.error(err);
-        setStatus(`Connection failed: ${err.message || err}`);
+        return parseInt(balance, 16) / 1e18;
       }
-    });
 
-    quoteBtn?.addEventListener('click', () => {
-      setStatus('Quote system coming next — routing logic placeholder active.');
-    });
+      async function getCigoBalance(address) {
+        const data =
+          '0x70a08231' + address.toLowerCase().replace(/^0x/, '').padStart(64, '0');
 
-    swapBtn?.addEventListener('click', () => {
-      setStatus('Trade action is not live yet. This shell is for controlled UX and flow staging.');
-    });
+        const result = await window.ethereum.request({
+          method: 'eth_call',
+          params: [
+            {
+              to: CIGO_ADDRESS,
+              data
+            },
+            'latest'
+          ]
+        });
 
-    copyButtons.forEach((button) => {
-      button.addEventListener('click', async () => {
-        const value = button.getAttribute('data-copy');
-        const original = button.textContent;
+        return parseInt(result, 16) / 1e18;
+      }
 
-        try {
-          const ok = await copyText(value);
-          button.textContent = ok ? 'Copied' : 'Copy failed';
-        } catch (err) {
-          button.textContent = 'Copy failed';
+      function updateRouteGuidance(cigo) {
+        const buyBtn = document.getElementById('buyCigoBtn');
+        const swapBtn = document.getElementById('swapBtn');
+        const quoteBtn = document.getElementById('quoteBtn');
+
+        if (!buyBtn || !swapBtn || !quoteBtn) return;
+
+        if (cigo > 0) {
+          buyBtn.textContent = 'buy more CIGO';
+          quoteBtn.textContent = 'Plan exit';
+          swapBtn.textContent = 'Exit / convert';
+        } else {
+          buyBtn.textContent = 'buy CIGO';
+          quoteBtn.textContent = 'Get quote';
+          swapBtn.textContent = 'Trade / convert';
+        }
+      }
+
+      buyCigoBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = 'https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
+        window.open(url, '_blank');
+      });
+
+      connectBtn?.addEventListener('click', async () => {
+        if (!window.ethereum) {
+          alert('MetaMask not found');
+          return;
         }
 
-        setTimeout(() => {
-          button.textContent = original;
-        }, 1200);
+        try {
+          const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts'
+          });
+
+          await ensureBSC();
+
+          const address = accounts[0];
+          const bnb = await getBNBBalance(address);
+          const cigo = await getCigoBalance(address);
+
+          updateRouteGuidance(cigo);
+
+          setStatus(
+            `Connected: ${address.slice(0, 6)}...${address.slice(-4)} | BNB: ${bnb.toFixed(4)} | CIGO: ${cigo.toFixed(2)}`
+          );
+        } catch (err) {
+          console.error(err);
+          setStatus(`Connection failed: ${err.message || err}`);
+        }
+      });
+
+      quoteBtn?.addEventListener('click', () => {
+        setStatus('Quote system coming next — routing logic placeholder active.');
+      });
+
+      swapBtn?.addEventListener('click', () => {
+        setStatus('Trade action is not live yet. This shell is for controlled UX and flow staging.');
+      });
+
+      copyButtons.forEach((button) => {
+        button.addEventListener('click', async () => {
+          const value = button.getAttribute('data-copy');
+          const original = button.textContent;
+
+          try {
+            const ok = await copyText(value);
+            button.textContent = ok ? 'Copied' : 'Copy failed';
+          } catch (err) {
+            button.textContent = 'Copy failed';
+          }
+
+          setTimeout(() => {
+            button.textContent = original;
+          }, 1200);
+        });
       });
     });
-  });
-</script>
+  </script>
 </body>
 
 </html>
