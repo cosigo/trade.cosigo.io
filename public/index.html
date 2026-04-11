@@ -657,7 +657,9 @@
             For speculative exposure, fast movement, and visible market action. This is the outer market rail.
           </p>
           <div class="mini-actions">
-            <a class="btn btn-primary" id="buyCigoBtn">buy CIGO</a>
+            <a class="btn btn-primary" id="buyCigoBtn"
+              href="https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560"
+              target="_blank" rel="noopener">buy CIGO</a>
             <a class="btn btn-secondary"
               href="https://pancakeswap.finance/info/v2/tokens/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560"
               target="_blank" rel="noopener">view token info</a>
@@ -932,7 +934,7 @@
         return parseInt(result, 16) / 1e18;
       }
 
-      function updateRouteGuidance(cigo) {
+      function updateRouteGuidance(cigo, usdt) {
         const buyBtn = document.getElementById('buyCigoBtn');
         const swapBtn = document.getElementById('swapBtn');
         const quoteBtn = document.getElementById('quoteBtn');
@@ -941,8 +943,12 @@
 
         if (cigo > 0) {
           buyBtn.textContent = 'buy more CIGO';
-          quoteBtn.textContent = 'Plan exit';
+          quoteBtn.textContent = usdt > 0 ? 'Compare exit routes' : 'Plan exit';
           swapBtn.textContent = 'Exit / convert';
+        } else if (usdt > 0) {
+          buyBtn.textContent = 'buy CIGO with USDT';
+          quoteBtn.textContent = 'Plan entry';
+          swapBtn.textContent = 'Trade into CIGO';
         } else {
           buyBtn.textContent = 'buy CIGO';
           quoteBtn.textContent = 'Get quote';
@@ -965,6 +971,41 @@
         }
       }
 
+      function clearWalletSummary() {
+        if (walletAddressEl) walletAddressEl.textContent = 'Not connected';
+        if (walletBNBEl) walletBNBEl.textContent = '0.0000';
+        if (walletCIGOEl) walletCIGOEl.textContent = '0.00';
+        if (walletUSDTEl) walletUSDTEl.textContent = '0.00';
+      }
+
+      async function isBSC() {
+        if (!window.ethereum) return false;
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        return chainId === '0x38';
+      }
+
+      async function refreshWalletState(address) {
+        const onBSC = await isBSC();
+
+        if (!onBSC) {
+          clearWalletSummary();
+          updateRouteGuidance(0, 0);
+          setStatus('Wrong network. Switch to BNB Chain.');
+          return;
+        }
+
+        const bnb = await getBNBBalance(address);
+        const cigo = await getCigoBalance(address);
+        const usdt = await getUsdtBalance(address);
+
+        updateRouteGuidance(cigo, usdt);
+        updateWalletSummary(address, bnb, cigo, usdt);
+
+        setStatus(
+          `Connected: ${address.slice(0, 6)}...${address.slice(-4)} | BNB: ${bnb.toFixed(4)} | CIGO: ${cigo.toFixed(2)} | USDT: ${usdt.toFixed(2)}`
+        );
+      }
+
       buyCigoBtn?.addEventListener('click', (e) => {
         e.preventDefault();
         const url = 'https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
@@ -985,21 +1026,57 @@
           await ensureBSC();
 
           const address = accounts[0];
-          const bnb = await getBNBBalance(address);
-          const cigo = await getCigoBalance(address);
-          const usdt = await getUsdtBalance(address);
-
-          updateRouteGuidance(cigo);
-          updateWalletSummary(address, bnb, cigo, usdt);
-
-          setStatus(
-            `Connected: ${address.slice(0, 6)}...${address.slice(-4)} | BNB: ${bnb.toFixed(4)} | CIGO: ${cigo.toFixed(2)} | USDT: ${usdt.toFixed(2)}`
-          );
+          await refreshWalletState(address);
         } catch (err) {
           console.error(err);
           setStatus(`Connection failed: ${err.message || err}`);
         }
       });
+
+      if (window.ethereum) {
+        window.ethereum.on('accountsChanged', async (accounts) => {
+          try {
+            if (!accounts || !accounts.length) {
+              clearWalletSummary();
+              updateRouteGuidance(0, 0);
+              setStatus('Wallet disconnected');
+              return;
+            }
+
+            await refreshWalletState(accounts[0]);
+          } catch (err) {
+            console.error(err);
+            setStatus(`Wallet update failed: ${err.message || err}`);
+          }
+        });
+
+        window.ethereum.on('chainChanged', async () => {
+          try {
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+
+            if (!accounts || !accounts.length) {
+              clearWalletSummary();
+              updateRouteGuidance(0, 0);
+              setStatus('Wallet disconnected');
+              return;
+            }
+
+            const onBSC = await isBSC();
+
+            if (!onBSC) {
+              clearWalletSummary();
+              updateRouteGuidance(0, 0);
+              setStatus('Wrong network. Switch to BNB Chain.');
+              return;
+            }
+
+            await refreshWalletState(accounts[0]);
+          } catch (err) {
+            console.error(err);
+            setStatus(`Chain update failed: ${err.message || err}`);
+          }
+        });
+      }
 
       quoteBtn?.addEventListener('click', () => {
         setStatus('Quote system coming next — routing logic placeholder active.');
@@ -1026,6 +1103,20 @@
           }, 1200);
         });
       });
+      (async () => {
+        if (!window.ethereum) return;
+
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+
+          if (accounts && accounts.length) {
+            await ensureBSC();
+            await refreshWalletState(accounts[0]);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      })();
     });
   </script>
 </body>
