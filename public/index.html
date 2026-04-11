@@ -328,6 +328,68 @@
       margin-top: 18px;
     }
 
+    .request-panel {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.request-head {
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.request-card {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.request-empty {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.request-body {
+  display: grid;
+  gap: 10px;
+}
+
+.request-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.request-row:first-child {
+  border-top: 0;
+}
+
+.request-row strong {
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.request-row span {
+  font-family: var(--mono);
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .request-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
     .swap-grid {
       display: grid;
       grid-template-columns: 1fr .9fr;
@@ -738,6 +800,30 @@
               </select>
             </div>
 
+            <div class="request-panel">
+  <div class="request-head">conversion request</div>
+  <div class="request-card" id="requestCard">
+    <div class="request-empty" id="requestEmpty">No conversion request created yet.</div>
+
+    <div class="request-body" id="requestBody" hidden>
+      <div class="request-row"><strong>request id</strong><span id="requestId">-</span></div>
+      <div class="request-row"><strong>timestamp</strong><span id="requestTime">-</span></div>
+      <div class="request-row"><strong>wallet</strong><span id="requestWallet">-</span></div>
+      <div class="request-row"><strong>route</strong><span id="requestRoute">-</span></div>
+      <div class="request-row"><strong>input</strong><span id="requestInput">-</span></div>
+      <div class="request-row"><strong>output</strong><span id="requestOutput">-</span></div>
+      <div class="request-row"><strong>basis value</strong><span id="requestValue">-</span></div>
+      <div class="request-row"><strong>fee</strong><span id="requestFee">-</span></div>
+      <div class="request-row"><strong>status</strong><span id="requestStatus">draft</span></div>
+
+      <div class="cta-row">
+        <button class="btn btn-secondary" type="button" id="copyRequestBtn">Copy request</button>
+        <button class="btn btn-secondary" type="button" id="clearRequestBtn">Clear request</button>
+      </div>
+    </div>
+  </div>
+</div>
+
             <div class="swap-row">
               <label for="toToken">to</label>
               <select id="toToken" class="swap-select">
@@ -845,6 +931,20 @@
       const amountInEl = document.getElementById('amountIn');
       const quoteStatusField = document.getElementById('quoteStatusField');
 
+      const requestEmptyEl = document.getElementById('requestEmpty');
+const requestBodyEl = document.getElementById('requestBody');
+const requestIdEl = document.getElementById('requestId');
+const requestTimeEl = document.getElementById('requestTime');
+const requestWalletEl = document.getElementById('requestWallet');
+const requestRouteEl = document.getElementById('requestRoute');
+const requestInputEl = document.getElementById('requestInput');
+const requestOutputEl = document.getElementById('requestOutput');
+const requestValueEl = document.getElementById('requestValue');
+const requestFeeEl = document.getElementById('requestFee');
+const requestStatusEl = document.getElementById('requestStatus');
+const copyRequestBtn = document.getElementById('copyRequestBtn');
+const clearRequestBtn = document.getElementById('clearRequestBtn');
+
       const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
       const WBNB_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
@@ -854,12 +954,10 @@
       const INTERNAL_FEE_RATE = 0;
       const MARKET_ROUTE_ENABLED = false;
 
+      let currentRequest = null;
+
       function setAppStatus(message) {
         if (status) status.textContent = message;
-      }
-
-      function setQuoteStatus(message) {
-        if (quoteStatusField) quoteStatusField.value = message;
       }
 
       function setQuoteStatus(message) {
@@ -1178,51 +1276,51 @@
       }
 
       quoteBtn?.addEventListener('click', () => {
-        const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
+  const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
 
-        if (!from || !to) {
-          setQuoteStatus('Select both a from asset and a to asset.');
-          return;
-        }
+  if (!from || !to) {
+    setQuoteStatus('Select both a from asset and a to asset.');
+    return;
+  }
 
-        if (!isValidAmount) {
-          setQuoteStatus('Enter a valid amount greater than zero.');
-          return;
-        }
+  if (!isValidAmount) {
+    setQuoteStatus('Enter a valid amount greater than zero.');
+    return;
+  }
 
-        if (from === to) {
-          setQuoteStatus('Choose two different assets.');
-          return;
-        }
+  if (from === to) {
+    setQuoteStatus('Choose two different assets.');
+    return;
+  }
 
-        const manualQuote = getManualQuote(from, to, amount);
+  const manualQuote = getManualQuote(from, to, amount);
 
-        if (manualQuote) {
-          if (
-            (from === 'CIGO' && to === 'COSIGO') ||
-            (from === 'COSIGO' && to === 'CIGO')
-          ) {
-            setQuoteStatus(
-              `Direct internal conversion: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
-            );
-            return;
-          }
+  if (manualQuote) {
+    if (
+      (from === 'CIGO' && to === 'COSIGO') ||
+      (from === 'COSIGO' && to === 'CIGO')
+    ) {
+      setQuoteStatus(
+        `Direct internal conversion: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
+      );
+      return;
+    }
 
-          setQuoteStatus(
-            `Internal quote: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
-          );
-          return;
-        }
+    setQuoteStatus(
+      `Internal quote: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
+    );
+    return;
+  }
 
-        if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
-          setQuoteStatus(
-            `BNB route detected: external market path only. ${rawAmount} ${from} → ${to}. Public routing is currently disabled while internal basis testing is active.`
-          );
-          return;
-        }
+  if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
+    setQuoteStatus(
+      `BNB route detected: external market path only. ${rawAmount} ${from} → ${to}. Public routing is currently disabled while internal basis testing is active.`
+    );
+    return;
+  }
 
-        setQuoteStatus('This route is not active in the current shell.');
-      });
+  setQuoteStatus('This route is not active in the current shell.');
+});
 
       swapBtn?.addEventListener('click', () => {
         const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
@@ -1245,16 +1343,6 @@
         const manualQuote = getManualQuote(from, to, amount);
 
         if (manualQuote) {
-          if (
-            (from === 'CIGO' && to === 'COSIGO') ||
-            (from === 'COSIGO' && to === 'CIGO')
-          ) {
-            setQuoteStatus(
-              `Direct internal conversion path: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | internal fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)} | settlement not automated yet`
-            );
-            return;
-          }
-
           setQuoteStatus(
             `Internal conversion path: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | internal fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)} | settlement not automated yet`
           );
@@ -1263,7 +1351,7 @@
 
         if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
           setQuoteStatus(
-            `BNB route detected: external market path only. ${rawAmount} ${from} → ${to}. Routing is intentionally disabled for now.`
+            `Optional public market route detected for ${rawAmount} ${from} → ${to}. Routing is intentionally disabled for now.`
           );
           return;
 
