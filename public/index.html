@@ -733,6 +733,7 @@
               <select id="fromToken" class="swap-select">
                 <option>CIGO</option>
                 <option>USDT</option>
+                <option>COSIGO</option>
                 <option>BNB</option>
               </select>
             </div>
@@ -740,10 +741,10 @@
             <div class="swap-row">
               <label for="toToken">to</label>
               <select id="toToken" class="swap-select">
-                <option>USDT</option>
                 <option>CIGO</option>
-                <option>BNB</option>
+                <option>USDT</option>
                 <option>COSIGO</option>
+                <option>BNB</option>
               </select>
             </div>
 
@@ -1190,22 +1191,32 @@
         }
 
         if (from === to) {
-          setQouteStatus('Choose two different assets.');
+          setQuoteStatus('Choose two different assets.');
           return;
         }
 
         const manualQuote = getManualQuote(from, to, amount);
 
         if (manualQuote) {
-          setQouteStatus(
+          if (
+            (from === 'CIGO' && to === 'COSIGO') ||
+            (from === 'COSIGO' && to === 'CIGO')
+          ) {
+            setQuoteStatus(
+              `Direct internal conversion: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
+            );
+            return;
+          }
+
+          setQuoteStatus(
             `Internal quote: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
           );
           return;
         }
 
         if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
-          setQouteStatus(
-            `Optional market route detected: ${rawAmount} ${from} → ${to}. Public routing is currently disabled while internal basis testing is active.`
+          setQuoteStatus(
+            `BNB route detected: external market path only. ${rawAmount} ${from} → ${to}. Public routing is currently disabled while internal basis testing is active.`
           );
           return;
         }
@@ -1217,7 +1228,7 @@
         const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
 
         if (!from || !to) {
-          setQouteStatus('Select both a from asset and a to asset.');
+          setQuoteStatus('Select both a from asset and a to asset.');
           return;
         }
 
@@ -1234,6 +1245,16 @@
         const manualQuote = getManualQuote(from, to, amount);
 
         if (manualQuote) {
+          if (
+            (from === 'CIGO' && to === 'COSIGO') ||
+            (from === 'COSIGO' && to === 'CIGO')
+          ) {
+            setQuoteStatus(
+              `Direct internal conversion path: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | internal fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)} | settlement not automated yet`
+            );
+            return;
+          }
+
           setQuoteStatus(
             `Internal conversion path: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | internal fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)} | settlement not automated yet`
           );
@@ -1242,7 +1263,7 @@
 
         if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
           setQuoteStatus(
-            `Optional public market route detected for ${rawAmount} ${from} → ${to}. Routing is intentionally disabled for now.`
+            `BNB route detected: external market path only. ${rawAmount} ${from} → ${to}. Routing is intentionally disabled for now.`
           );
           return;
 
