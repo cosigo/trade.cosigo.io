@@ -742,6 +742,7 @@
               <select id="toToken" class="swap-select">
                 <option>USDT</option>
                 <option>CIGO</option>
+                <option>BNB</option>
                 <option>COSIGO</option>
               </select>
             </div>
@@ -838,6 +839,10 @@
       const walletCIGOEl = document.getElementById('walletCIGO');
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
       const walletUSDTEl = document.getElementById('walletUSDT');
+      const WBNB_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+      const fromTokenEl = document.getElementById('fromToken');
+      const toTokenEl = document.getElementById('toToken');
+      const amountInEl = document.getElementById('amountIn');
 
       function setStatus(message) {
         if (status) status.textContent = message;
@@ -1049,6 +1054,72 @@
         }
       });
 
+      function getSelectedRoute() {
+        const from = fromTokenEl?.value || '';
+        const to = toTokenEl?.value || '';
+        const rawAmount = amountInEl?.value || '';
+        const amount = Number(rawAmount);
+
+        return {
+          from,
+          to,
+          rawAmount,
+          amount,
+          isValidAmount: Number.isFinite(amount) && amount > 0
+        };
+      }
+
+      function buildPancakeSwapUrl(from, to) {
+        const base = 'https://pancakeswap.finance/swap?chain=bsc';
+
+        const tokenMap = {
+          BNB: 'BNB',
+          WBNB: WBNB_ADDRESS,
+          CIGO: CIGO_ADDRESS,
+          USDT: USDT_ADDRESS
+        };
+
+        const inputCurrency = tokenMap[from];
+        const outputCurrency = tokenMap[to];
+
+        if (!inputCurrency || !outputCurrency) return null;
+
+        // Pancake handles native BNB in the UI; keep BNB as literal for input if needed.
+        return `${base}&inputCurrency=${encodeURIComponent(inputCurrency)}&outputCurrency=${encodeURIComponent(outputCurrency)}`;
+      }
+
+      function updateQuoteStatus(message) {
+        setStatus(message);
+      }
+
+      function getRouteDescription(from, to) {
+        if (from === 'BNB' && to === 'CIGO') {
+          return 'Public market route: buy CIGO with BNB on PancakeSwap.';
+        }
+
+        if (from === 'USDT' && to === 'CIGO') {
+          return 'Public market route: buy CIGO with USDT on PancakeSwap.';
+        }
+
+        if (from === 'CIGO' && to === 'USDT') {
+          return 'Public market route: exit CIGO into USDT on PancakeSwap.';
+        }
+
+        if (from === 'CIGO' && to === 'COSIGO') {
+          return 'Controlled route: move from speculative CIGO into the COSIGO reference path.';
+        }
+
+        if (from === 'CIGO' && to === 'BNB') {
+          return 'Public market route: exit CIGO into BNB on PancakeSwap.';
+        }
+
+        if (from === to) {
+          return 'Choose two different assets.';
+        }
+
+        return 'This route is not live yet in the current shell.';
+      }
+
       if (window.ethereum) {
         window.ethereum.on('accountsChanged', async (accounts) => {
           try {
@@ -1109,11 +1180,77 @@
       }
 
       quoteBtn?.addEventListener('click', () => {
-        setStatus('Quote system coming next — routing logic placeholder active.');
+        const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
+
+        if (!from || !to) {
+          updateQuoteStatus('Select both a from asset and a to asset.');
+          return;
+        }
+
+        if (!isValidAmount) {
+          updateQuoteStatus('Enter a valid amount greater than zero.');
+          return;
+        }
+
+        if (from === to) {
+          updateQuoteStatus('Choose two different assets.');
+          return;
+        }
+
+        const description = getRouteDescription(from, to);
+
+        if (from === 'CIGO' && to === 'COSIGO') {
+          updateQuoteStatus(
+            `${description} Entered amount: ${rawAmount} ${from}. Official conversion basis is handled through the COSIGO path, not a public swap pool.`
+          );
+          return;
+        }
+
+        const swapUrl = buildPancakeSwapUrl(from, to);
+
+        if (swapUrl) {
+          updateQuoteStatus(
+            `${description} Entered amount: ${rawAmount} ${from}. Ready to route through PancakeSwap.`
+          );
+          return;
+        }
+
+        updateQuoteStatus(description);
       });
 
       swapBtn?.addEventListener('click', () => {
-        setStatus('Trade action is not live yet. This shell is for controlled UX and flow staging.');
+        const { from, to, rawAmount, isValidAmount } = getSelectedRoute();
+
+        if (!from || !to) {
+          updateQuoteStatus('Select both a from asset and a to asset.');
+          return;
+        }
+
+        if (!isValidAmount) {
+          updateQuoteStatus('Enter a valid amount greater than zero.');
+          return;
+        }
+
+        if (from === to) {
+          updateQuoteStatus('Choose two different assets.');
+          return;
+        }
+
+        if (from === 'CIGO' && to === 'COSIGO') {
+          updateQuoteStatus(`Routing ${rawAmount} CIGO toward the official COSIGO path...`);
+          window.open('https://coins.cosigo.io/', '_blank');
+          return;
+        }
+
+        const swapUrl = buildPancakeSwapUrl(from, to);
+
+        if (swapUrl) {
+          updateQuoteStatus(`Routing ${rawAmount} ${from} to ${to} through PancakeSwap...`);
+          window.open(swapUrl, '_blank');
+          return;
+        }
+
+        updateQuoteStatus('This route is not live yet in the current shell.');
       });
 
       copyButtons.forEach((button) => {
