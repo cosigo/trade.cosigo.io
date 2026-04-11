@@ -379,6 +379,57 @@
       font-size: 14px;
     }
 
+    .wallet-summary {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .wallet-summary-head {
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .wallet-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .wallet-cell {
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .wallet-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .wallet-value {
+      display: block;
+      font-family: var(--mono);
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    @media (max-width: 640px) {
+      .wallet-summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .link-list {
       display: grid;
       gap: 12px;
@@ -652,6 +703,24 @@
             swap logic will be connected next.
           </p>
 
+          <div class="wallet-summary" id="walletSummary">
+            <div class="wallet-summary-head">wallet status</div>
+            <div class="wallet-summary-grid">
+              <div class="wallet-cell">
+                <span class="wallet-label">address</span>
+                <span class="wallet-value" id="walletAddress">Not connected</span>
+              </div>
+              <div class="wallet-cell">
+                <span class="wallet-label">BNB</span>
+                <span class="wallet-value" id="walletBNB">0.0000</span>
+              </div>
+              <div class="wallet-cell">
+                <span class="wallet-label">CIGO</span>
+                <span class="wallet-value" id="walletCIGO">0.00</span>
+              </div>
+            </div>
+          </div>
+
           <div class="swap-box">
             <div class="swap-row">
               <label for="fromToken">from</label>
@@ -758,6 +827,9 @@
       const buyCigoBtn = document.getElementById('buyCigoBtn');
       const copyButtons = document.querySelectorAll('[data-copy]');
       const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
+      const walletAddressEl = document.getElementById('walletAddress');
+      const walletBNBEl = document.getElementById('walletBNB');
+      const walletCIGOEl = document.getElementById('walletCIGO');
 
       function setStatus(message) {
         if (status) status.textContent = message;
@@ -854,6 +926,18 @@
         }
       }
 
+      function updateWalletSummary(address, bnb, cigo) {
+        if (walletAddressEl) {
+          walletAddressEl.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+        }
+        if (walletBNBEl) {
+          walletBNBEl.textContent = bnb.toFixed(4);
+        }
+        if (walletCIGOEl) {
+          walletCIGOEl.textContent = cigo.toFixed(2);
+        }
+      }
+
       buyCigoBtn?.addEventListener('click', (e) => {
         e.preventDefault();
         const url = 'https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
@@ -878,6 +962,7 @@
           const cigo = await getCigoBalance(address);
 
           updateRouteGuidance(cigo);
+          updateWalletSummary(address, bnb, cigo);
 
           setStatus(
             `Connected: ${address.slice(0, 6)}...${address.slice(-4)} | BNB: ${bnb.toFixed(4)} | CIGO: ${cigo.toFixed(2)}`
