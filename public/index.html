@@ -976,6 +976,10 @@
         if (walletBNBEl) walletBNBEl.textContent = '0.0000';
         if (walletCIGOEl) walletCIGOEl.textContent = '0.00';
         if (walletUSDTEl) walletUSDTEl.textContent = '0.00';
+
+        if (connectBtn) {
+          connectBtn.textContent = 'Connect wallet';
+        }
       }
 
       async function isBSC() {
@@ -991,6 +995,11 @@
           clearWalletSummary();
           updateRouteGuidance(0, 0);
           setStatus('Wrong network. Switch to BNB Chain.');
+
+          if (connectBtn) {
+            connectBtn.textContent = 'Wrong network';
+          }
+
           return;
         }
 
@@ -1000,6 +1009,10 @@
 
         updateRouteGuidance(cigo, usdt);
         updateWalletSummary(address, bnb, cigo, usdt);
+
+        if (connectBtn) {
+          connectBtn.textContent = 'Wallet connected';
+        }
 
         setStatus(
           `Connected: ${address.slice(0, 6)}...${address.slice(-4)} | BNB: ${bnb.toFixed(4)} | CIGO: ${cigo.toFixed(2)} | USDT: ${usdt.toFixed(2)}`
@@ -1031,6 +1044,9 @@
           console.error(err);
           setStatus(`Connection failed: ${err.message || err}`);
         }
+        if (connectBtn) {
+          connectBtn.textContent = 'Wallet connected';
+        }
       });
 
       if (window.ethereum) {
@@ -1040,10 +1056,19 @@
               clearWalletSummary();
               updateRouteGuidance(0, 0);
               setStatus('Wallet disconnected');
+
+              if (connectBtn) {
+                connectBtn.textContent = 'Connect wallet';
+              }
+
               return;
             }
 
             await refreshWalletState(accounts[0]);
+
+            if (connectBtn) {
+              connectBtn.textContent = 'Wallet connected';
+            }
           } catch (err) {
             console.error(err);
             setStatus(`Wallet update failed: ${err.message || err}`);
@@ -1067,6 +1092,11 @@
               clearWalletSummary();
               updateRouteGuidance(0, 0);
               setStatus('Wrong network. Switch to BNB Chain.');
+
+              if (connectBtn) {
+                connectBtn.textContent = 'Wrong network';
+              }
+
               return;
             }
 
