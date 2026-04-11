@@ -838,11 +838,14 @@
       const walletBNBEl = document.getElementById('walletBNB');
       const walletCIGOEl = document.getElementById('walletCIGO');
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
+      const CIGO_USD_BASIS = 0.01;
+      const COSIGO_USD_BASIS = 0.0045;
       const walletUSDTEl = document.getElementById('walletUSDT');
       const WBNB_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
       const fromTokenEl = document.getElementById('fromToken');
       const toTokenEl = document.getElementById('toToken');
       const amountInEl = document.getElementById('amountIn');
+      const MARKET_ROUTE_ENABLED = false;
 
       function setStatus(message) {
         if (status) status.textContent = message;
@@ -947,17 +950,17 @@
         if (!buyBtn || !swapBtn || !quoteBtn) return;
 
         if (cigo > 0) {
-          buyBtn.textContent = 'buy more CIGO';
-          quoteBtn.textContent = usdt > 0 ? 'Compare exit routes' : 'Plan exit';
-          swapBtn.textContent = 'Exit / convert';
+          buyBtn.textContent = 'buy more CIGO (market)';
+          quoteBtn.textContent = usdt > 0 ? 'Compare CIGO exit paths' : 'Quote CIGO exit';
+          swapBtn.textContent = 'Convert CIGO';
         } else if (usdt > 0) {
           buyBtn.textContent = 'buy CIGO with USDT';
-          quoteBtn.textContent = 'Plan entry';
-          swapBtn.textContent = 'Trade into CIGO';
+          quoteBtn.textContent = 'Quote USDT entry';
+          swapBtn.textContent = 'Convert USDT';
         } else {
-          buyBtn.textContent = 'buy CIGO';
+          buyBtn.textContent = 'buy CIGO (market)';
           quoteBtn.textContent = 'Get quote';
-          swapBtn.textContent = 'Trade / convert';
+          swapBtn.textContent = 'Convert / trade';
         }
       }
 
@@ -1020,6 +1023,36 @@
             rawAmount,
             amount,
             isValidAmount: Number.isFinite(amount) && amount > 0
+          };
+        }
+
+        function formatQuoteNumber(value, digits = 6) {
+          return Number(value).toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: digits
+          });
+        }
+
+        function getManualQuote(from, to, amount) {
+          if (!Number.isFinite(amount) || amount <= 0) return null;
+
+          const usdMap = {
+            USDT: 1,
+            CIGO: CIGO_USD_BASIS,
+            COSIGO: COSIGO_USD_BASIS
+          };
+
+          const fromUsd = usdMap[from];
+          const toUsd = usdMap[to];
+
+          if (!fromUsd || !toUsd) return null;
+
+          const usdValue = amount * fromUsd;
+          const output = usdValue / toUsd;
+
+          return {
+            usdValue,
+            output
           };
         }
 
