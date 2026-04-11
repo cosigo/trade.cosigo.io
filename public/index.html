@@ -397,7 +397,7 @@
 
     .wallet-summary-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 12px;
     }
 
@@ -718,6 +718,10 @@
                 <span class="wallet-label">CIGO</span>
                 <span class="wallet-value" id="walletCIGO">0.00</span>
               </div>
+              <div class="wallet-cell">
+                <span class="wallet-label">USDT</span>
+                <span class="wallet-value" id="walletUSDT">0.00</span>
+              </div>
             </div>
           </div>
 
@@ -830,6 +834,8 @@
       const walletAddressEl = document.getElementById('walletAddress');
       const walletBNBEl = document.getElementById('walletBNB');
       const walletCIGOEl = document.getElementById('walletCIGO');
+      const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
+      const walletUSDTEl = document.getElementById('walletUSDT');
 
       function setStatus(message) {
         if (status) status.textContent = message;
@@ -908,6 +914,24 @@
         return parseInt(result, 16) / 1e18;
       }
 
+      async function getUsdtBalance(address) {
+        const data =
+          '0x70a08231' + address.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+
+        const result = await window.ethereum.request({
+          method: 'eth_call',
+          params: [
+            {
+              to: USDT_ADDRESS,
+              data
+            },
+            'latest'
+          ]
+        });
+
+        return parseInt(result, 16) / 1e18;
+      }
+
       function updateRouteGuidance(cigo) {
         const buyBtn = document.getElementById('buyCigoBtn');
         const swapBtn = document.getElementById('swapBtn');
@@ -926,7 +950,7 @@
         }
       }
 
-      function updateWalletSummary(address, bnb, cigo) {
+      function updateWalletSummary(address, bnb, cigo, usdt) {
         if (walletAddressEl) {
           walletAddressEl.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
         }
@@ -935,6 +959,9 @@
         }
         if (walletCIGOEl) {
           walletCIGOEl.textContent = cigo.toFixed(2);
+        }
+        if (walletUSDTEl) {
+          walletUSDTEl.textContent = usdt.toFixed(2);
         }
       }
 
@@ -960,12 +987,13 @@
           const address = accounts[0];
           const bnb = await getBNBBalance(address);
           const cigo = await getCigoBalance(address);
+          const usdt = await getUsdtBalance(address);
 
           updateRouteGuidance(cigo);
-          updateWalletSummary(address, bnb, cigo);
+          updateWalletSummary(address, bnb, cigo, usdt);
 
           setStatus(
-            `Connected: ${address.slice(0, 6)}...${address.slice(-4)} | BNB: ${bnb.toFixed(4)} | CIGO: ${cigo.toFixed(2)}`
+            `Connected: ${address.slice(0, 6)}...${address.slice(-4)} | BNB: ${bnb.toFixed(4)} | CIGO: ${cigo.toFixed(2)} | USDT: ${usdt.toFixed(2)}`
           );
         } catch (err) {
           console.error(err);
