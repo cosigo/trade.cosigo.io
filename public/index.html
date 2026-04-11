@@ -754,7 +754,8 @@
 
             <div class="swap-row">
               <label>quote status</label>
-              <input class="swap-input" type="text" value="Quote engine not connected yet" readonly>
+              <input id="quoteStatusField" class="swap-input" type="text" value="Quote engine not connected yet"
+                readonly>
             </div>
 
             <div class="cta-row">
@@ -833,23 +834,29 @@
       const swapBtn = document.getElementById('swapBtn');
       const buyCigoBtn = document.getElementById('buyCigoBtn');
       const copyButtons = document.querySelectorAll('[data-copy]');
-      const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
+
       const walletAddressEl = document.getElementById('walletAddress');
       const walletBNBEl = document.getElementById('walletBNB');
       const walletCIGOEl = document.getElementById('walletCIGO');
+      const walletUSDTEl = document.getElementById('walletUSDT');
+
+      const fromTokenEl = document.getElementById('fromToken');
+      const toTokenEl = document.getElementById('toToken');
+      const amountInEl = document.getElementById('amountIn');
+      const quoteStatusField = document.getElementById('quoteStatusField');
+
+      const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
+      const WBNB_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+
       const CIGO_USD_BASIS = 0.01;
       const COSIGO_USD_BASIS = 0.0045;
       const INTERNAL_FEE_RATE = 0;
       const MARKET_ROUTE_ENABLED = false;
-      const walletUSDTEl = document.getElementById('walletUSDT');
-      const WBNB_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
-      const fromTokenEl = document.getElementById('fromToken');
-      const toTokenEl = document.getElementById('toToken');
-      const amountInEl = document.getElementById('amountIn');
 
       function setStatus(message) {
         if (status) status.textContent = message;
+        if (quoteStatusField) quoteStatusField.value = message;
       }
 
       async function copyText(value) {
@@ -898,6 +905,12 @@
         }
       }
 
+      async function isBSC() {
+        if (!window.ethereum) return false;
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        return chainId === '0x38';
+      }
+
       async function getBNBBalance(address) {
         const balance = await window.ethereum.request({
           method: 'eth_getBalance',
@@ -907,7 +920,7 @@
         return parseInt(balance, 16) / 1e18;
       }
 
-      async function getCigoBalance(address) {
+      async function getTokenBalance(address, tokenAddress) {
         const data =
           '0x70a08231' + address.toLowerCase().replace(/^0x/, '').padStart(64, '0');
 
@@ -915,7 +928,7 @@
           method: 'eth_call',
           params: [
             {
-              to: CIGO_ADDRESS,
+              to: tokenAddress,
               data
             },
             'latest'
@@ -923,43 +936,29 @@
         });
 
         return parseInt(result, 16) / 1e18;
+      }
+
+      async function getCigoBalance(address) {
+        return getTokenBalance(address, CIGO_ADDRESS);
       }
 
       async function getUsdtBalance(address) {
-        const data =
-          '0x70a08231' + address.toLowerCase().replace(/^0x/, '').padStart(64, '0');
-
-        const result = await window.ethereum.request({
-          method: 'eth_call',
-          params: [
-            {
-              to: USDT_ADDRESS,
-              data
-            },
-            'latest'
-          ]
-        });
-
-        return parseInt(result, 16) / 1e18;
+        return getTokenBalance(address, USDT_ADDRESS);
       }
 
       function updateRouteGuidance(cigo, usdt) {
-        const buyBtn = document.getElementById('buyCigoBtn');
-        const swapBtn = document.getElementById('swapBtn');
-        const quoteBtn = document.getElementById('quoteBtn');
-
-        if (!buyBtn || !swapBtn || !quoteBtn) return;
+        if (!buyCigoBtn || !swapBtn || !quoteBtn) return;
 
         if (cigo > 0) {
-          buyBtn.textContent = 'buy more CIGO (market)';
+          buyCigoBtn.textContent = 'buy more CIGO (market)';
           quoteBtn.textContent = usdt > 0 ? 'Compare CIGO exit paths' : 'Quote CIGO exit';
           swapBtn.textContent = 'Convert CIGO';
         } else if (usdt > 0) {
-          buyBtn.textContent = 'buy CIGO with USDT';
+          buyCigoBtn.textContent = 'buy CIGO with USDT';
           quoteBtn.textContent = 'Quote USDT entry';
           swapBtn.textContent = 'Convert USDT';
         } else {
-          buyBtn.textContent = 'buy CIGO (market)';
+          buyCigoBtn.textContent = 'buy CIGO (market)';
           quoteBtn.textContent = 'Get quote';
           swapBtn.textContent = 'Convert / trade';
         }
@@ -991,10 +990,71 @@
         }
       }
 
-      async function isBSC() {
-        if (!window.ethereum) return false;
-        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-        return chainId === '0x38';
+      function getSelectedRoute() {
+        const from = fromTokenEl?.value || '';
+        const to = toTokenEl?.value || '';
+        const rawAmount = amountInEl?.value || '';
+        const amount = Number(rawAmount);
+
+        return {
+          from,
+          to,
+          rawAmount,
+          amount,
+          isValidAmount: Number.isFinite(amount) && amount > 0
+        };
+      }
+
+      function formatQuoteNumber(value, digits = 6) {
+        return Number(value).toLocaleString(undefined, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: digits
+        });
+      }
+
+      function getManualQuote(from, to, amount) {
+        if (!Number.isFinite(amount) || amount <= 0) return null;
+
+        const usdMap = {
+          USDT: 1,
+          CIGO: CIGO_USD_BASIS,
+          COSIGO: COSIGO_USD_BASIS
+        };
+
+        const fromUsd = usdMap[from];
+        const toUsd = usdMap[to];
+
+        if (!fromUsd || !toUsd) return null;
+
+        const grossUsdValue = amount * fromUsd;
+        const feeUsdValue = grossUsdValue * INTERNAL_FEE_RATE;
+        const netUsdValue = grossUsdValue - feeUsdValue;
+        const output = netUsdValue / toUsd;
+
+        return {
+          grossUsdValue,
+          feeUsdValue,
+          netUsdValue,
+          output
+        };
+      }
+
+      function buildPancakeSwapUrl(from, to) {
+        const base = 'https://pancakeswap.finance/swap?chain=bsc';
+
+        const tokenMap = {
+          BNB: 'BNB',
+          WBNB: WBNB_ADDRESS,
+          CIGO: CIGO_ADDRESS,
+          USDT: USDT_ADDRESS
+        };
+
+        const inputCurrency = tokenMap[from];
+        const outputCurrency = tokenMap[to];
+
+        if (!inputCurrency || !outputCurrency) return null;
+
+        return `${base}&inputCurrency=${encodeURIComponent(inputCurrency)}&outputCurrency=${encodeURIComponent(outputCurrency)}`;
       }
 
       async function refreshWalletState(address) {
@@ -1010,100 +1070,6 @@
           }
 
           return;
-        }
-
-        function getSelectedRoute() {
-          const from = fromTokenEl?.value || '';
-          const to = toTokenEl?.value || '';
-          const rawAmount = amountInEl?.value || '';
-          const amount = Number(rawAmount);
-
-          return {
-            from,
-            to,
-            rawAmount,
-            amount,
-            isValidAmount: Number.isFinite(amount) && amount > 0
-          };
-        }
-
-        function formatQuoteNumber(value, digits = 6) {
-          return Number(value).toLocaleString(undefined, {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: digits
-          });
-        }
-
-        function getManualQuote(from, to, amount) {
-          if (!Number.isFinite(amount) || amount <= 0) return null;
-
-          const usdMap = {
-            USDT: 1,
-            CIGO: CIGO_USD_BASIS,
-            COSIGO: COSIGO_USD_BASIS
-          };
-
-          const fromUsd = usdMap[from];
-          const toUsd = usdMap[to];
-
-          if (!fromUsd || !toUsd) return null;
-
-          const grossUsdValue = amount * fromUsd;
-          const feeUsdValue = grossUsdValue * INTERNAL_FEE_RATE;
-          const netUsdValue = grossUsdValue - feeUsdValue;
-          const output = netUsdValue / toUsd;
-
-          return {
-            grossUsdValue,
-            feeUsdValue,
-            netUsdValue,
-            output
-          };
-        }
-
-        function buildPancakeSwapUrl(from, to) {
-          const base = 'https://pancakeswap.finance/swap?chain=bsc';
-
-          const tokenMap = {
-            BNB: WBNB_ADDRESS,
-            CIGO: CIGO_ADDRESS,
-            USDT: USDT_ADDRESS
-          };
-
-          const inputCurrency = tokenMap[from];
-          const outputCurrency = tokenMap[to];
-
-          if (!inputCurrency || !outputCurrency) return null;
-
-          return `${base}&inputCurrency=${encodeURIComponent(inputCurrency)}&outputCurrency=${encodeURIComponent(outputCurrency)}`;
-        }
-
-        function getRouteDescription(from, to) {
-          if (from === 'BNB' && to === 'CIGO') {
-            return 'Public market route: buy CIGO with BNB on PancakeSwap.';
-          }
-
-          if (from === 'USDT' && to === 'CIGO') {
-            return 'Public market route: buy CIGO with USDT on PancakeSwap.';
-          }
-
-          if (from === 'CIGO' && to === 'USDT') {
-            return 'Public market route: exit CIGO into USDT on PancakeSwap.';
-          }
-
-          if (from === 'CIGO' && to === 'BNB') {
-            return 'Public market route: exit CIGO into BNB on PancakeSwap.';
-          }
-
-          if (from === 'CIGO' && to === 'COSIGO') {
-            return 'Controlled route: move from speculative CIGO into the COSIGO reference path.';
-          }
-
-          if (from === to) {
-            return 'Choose two different assets.';
-          }
-
-          return 'This route is not live yet in the current shell.';
         }
 
         const bnb = await getBNBBalance(address);
@@ -1123,6 +1089,7 @@
       }
 
       buyCigoBtn?.addEventListener('click', (e) => {
+        if (!MARKET_ROUTE_ENABLED) return;
         e.preventDefault();
         const url = 'https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
         window.open(url, '_blank');
@@ -1140,83 +1107,12 @@
           });
 
           await ensureBSC();
-
-          const address = accounts[0];
-          await refreshWalletState(address);
+          await refreshWalletState(accounts[0]);
         } catch (err) {
           console.error(err);
           setStatus(`Connection failed: ${err.message || err}`);
         }
-        if (connectBtn) {
-          connectBtn.textContent = 'Wallet connected';
-        }
       });
-
-      function getSelectedRoute() {
-        const from = fromTokenEl?.value || '';
-        const to = toTokenEl?.value || '';
-        const rawAmount = amountInEl?.value || '';
-        const amount = Number(rawAmount);
-
-        return {
-          from,
-          to,
-          rawAmount,
-          amount,
-          isValidAmount: Number.isFinite(amount) && amount > 0
-        };
-      }
-
-      function buildPancakeSwapUrl(from, to) {
-        const base = 'https://pancakeswap.finance/swap?chain=bsc';
-
-        const tokenMap = {
-          BNB: 'BNB',
-          WBNB: WBNB_ADDRESS,
-          CIGO: CIGO_ADDRESS,
-          USDT: USDT_ADDRESS
-        };
-
-        const inputCurrency = tokenMap[from];
-        const outputCurrency = tokenMap[to];
-
-        if (!inputCurrency || !outputCurrency) return null;
-
-        // Pancake handles native BNB in the UI; keep BNB as literal for input if needed.
-        return `${base}&inputCurrency=${encodeURIComponent(inputCurrency)}&outputCurrency=${encodeURIComponent(outputCurrency)}`;
-      }
-
-      function updateQuoteStatus(message) {
-        setStatus(message);
-      }
-
-      function getRouteDescription(from, to) {
-        if (from === 'BNB' && to === 'CIGO') {
-          return 'Public market route: buy CIGO with BNB on PancakeSwap.';
-        }
-
-        if (from === 'USDT' && to === 'CIGO') {
-          return 'Public market route: buy CIGO with USDT on PancakeSwap.';
-        }
-
-        if (from === 'CIGO' && to === 'USDT') {
-          return 'Public market route: exit CIGO into USDT on PancakeSwap.';
-        }
-
-        if (from === 'CIGO' && to === 'COSIGO') {
-          return 'Controlled route: move from speculative CIGO into the COSIGO reference path.';
-        }
-
-        if (from === 'CIGO' && to === 'BNB') {
-          return 'Public market route: exit CIGO into BNB on PancakeSwap.';
-        }
-
-        if (from === to) {
-          return 'Choose two different assets.';
-        }
-
-        return 'This route is not live yet in the current shell.';
-      }
 
       if (window.ethereum) {
         window.ethereum.on('accountsChanged', async (accounts) => {
@@ -1225,19 +1121,10 @@
               clearWalletSummary();
               updateRouteGuidance(0, 0);
               setStatus('Wallet disconnected');
-
-              if (connectBtn) {
-                connectBtn.textContent = 'Connect wallet';
-              }
-
               return;
             }
 
             await refreshWalletState(accounts[0]);
-
-            if (connectBtn) {
-              connectBtn.textContent = 'Wallet connected';
-            }
           } catch (err) {
             console.error(err);
             setStatus(`Wallet update failed: ${err.message || err}`);
@@ -1375,6 +1262,7 @@
           }, 1200);
         });
       });
+
       (async () => {
         if (!window.ethereum) return;
 
