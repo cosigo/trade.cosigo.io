@@ -383,6 +383,42 @@
       word-break: break-word;
     }
 
+    .request-status-pill {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .03em;
+      word-break: normal;
+    }
+
+    .request-status-draft {
+      background: rgba(255, 184, 77, 0.10);
+      border-color: rgba(255, 184, 77, 0.28);
+      color: #ffd28a;
+    }
+
+    .request-status-submitted {
+      background: rgba(103, 168, 255, 0.10);
+      border-color: rgba(103, 168, 255, 0.28);
+      color: #cfe3ff;
+    }
+
+    .request-status-reviewed {
+      background: rgba(168, 120, 255, 0.10);
+      border-color: rgba(168, 120, 255, 0.28);
+      color: #e3d4ff;
+    }
+
+    .request-status-completed {
+      background: rgba(71, 209, 140, 0.10);
+      border-color: rgba(71, 209, 140, 0.28);
+      color: #c9f5df;
+    }
+
     @media (max-width: 640px) {
       .request-row {
         grid-template-columns: 1fr;
@@ -849,7 +885,7 @@
             <div class="cta-row">
               <button class="btn btn-primary" type="button" id="connectBtn">Connect wallet</button>
               <button class="btn btn-secondary" type="button" id="quoteBtn">Get quote</button>
-              <button class="btn btn-secondary" type="button" id="swapBtn">Trade / convert</button>
+              <button class="btn btn-secondary" type="button" id="swapBtn">Trade / Convert</button>
             </div>
 
             <div class="swap-note" id="swapStatus">
@@ -984,6 +1020,35 @@
         if (status === 'reviewed') return 'Reviewed and ready for completion';
         if (status === 'completed') return 'Completed';
         return status || '-';
+      }
+
+      function applyRequestStatusStyle(status) {
+        if (!requestStatusEl) return;
+
+        requestStatusEl.className = '';
+
+        if (!status) return;
+
+        requestStatusEl.classList.add('request-status-pill');
+
+        if (status === 'draft') {
+          requestStatusEl.classList.add('request-status-draft');
+          return;
+        }
+
+        if (status === 'submitted') {
+          requestStatusEl.classList.add('request-status-submitted');
+          return;
+        }
+
+        if (status === 'reviewed') {
+          requestStatusEl.classList.add('request-status-reviewed');
+          return;
+        }
+
+        if (status === 'completed') {
+          requestStatusEl.classList.add('request-status-completed');
+        }
       }
 
       async function copyText(value) {
@@ -1240,6 +1305,7 @@
           if (requestValueEl) requestValueEl.textContent = '-';
           if (requestFeeEl) requestFeeEl.textContent = '-';
           if (requestStatusEl) requestStatusEl.textContent = 'draft';
+          applyRequestStatusStyle('');
 
           return;
         }
@@ -1268,6 +1334,7 @@
         if (requestValueEl) requestValueEl.textContent = `$${basisValue}`;
         if (requestFeeEl) requestFeeEl.textContent = `$${feeAmount}`;
         if (requestStatusEl) requestStatusEl.textContent = getRequestStatusText(statusText);
+        applyRequestStatusStyle(statusText);
       }
 
       function saveRequest(request) {
