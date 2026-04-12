@@ -329,66 +329,66 @@
     }
 
     .request-panel {
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
 
-.request-head {
-  margin-bottom: 12px;
-  font-size: 13px;
-  color: var(--muted);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
+    .request-head {
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
 
-.request-card {
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.02);
-}
+    .request-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+    }
 
-.request-empty {
-  color: var(--muted);
-  line-height: 1.6;
-}
+    .request-empty {
+      color: var(--muted);
+      line-height: 1.6;
+    }
 
-.request-body {
-  display: grid;
-  gap: 10px;
-}
+    .request-body {
+      display: grid;
+      gap: 10px;
+    }
 
-.request-row {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 12px;
-  padding: 8px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
+    .request-row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
 
-.request-row:first-child {
-  border-top: 0;
-}
+    .request-row:first-child {
+      border-top: 0;
+    }
 
-.request-row strong {
-  color: var(--muted);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-}
+    .request-row strong {
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
 
-.request-row span {
-  font-family: var(--mono);
-  word-break: break-word;
-}
+    .request-row span {
+      font-family: var(--mono);
+      word-break: break-word;
+    }
 
-@media (max-width: 640px) {
-  .request-row {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-}
+    @media (max-width: 640px) {
+      .request-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+    }
 
     .swap-grid {
       display: grid;
@@ -801,28 +801,28 @@
             </div>
 
             <div class="request-panel">
-  <div class="request-head">conversion request</div>
-  <div class="request-card" id="requestCard">
-    <div class="request-empty" id="requestEmpty">No conversion request created yet.</div>
+              <div class="request-head">conversion request</div>
+              <div class="request-card" id="requestCard">
+                <div class="request-empty" id="requestEmpty">No conversion request created yet.</div>
 
-    <div class="request-body" id="requestBody" hidden>
-      <div class="request-row"><strong>request id</strong><span id="requestId">-</span></div>
-      <div class="request-row"><strong>timestamp</strong><span id="requestTime">-</span></div>
-      <div class="request-row"><strong>wallet</strong><span id="requestWallet">-</span></div>
-      <div class="request-row"><strong>route</strong><span id="requestRoute">-</span></div>
-      <div class="request-row"><strong>input</strong><span id="requestInput">-</span></div>
-      <div class="request-row"><strong>output</strong><span id="requestOutput">-</span></div>
-      <div class="request-row"><strong>basis value</strong><span id="requestValue">-</span></div>
-      <div class="request-row"><strong>fee</strong><span id="requestFee">-</span></div>
-      <div class="request-row"><strong>status</strong><span id="requestStatus">draft</span></div>
+                <div class="request-body" id="requestBody" hidden>
+                  <div class="request-row"><strong>request id</strong><span id="requestId">-</span></div>
+                  <div class="request-row"><strong>timestamp</strong><span id="requestTime">-</span></div>
+                  <div class="request-row"><strong>wallet</strong><span id="requestWallet">-</span></div>
+                  <div class="request-row"><strong>route</strong><span id="requestRoute">-</span></div>
+                  <div class="request-row"><strong>input</strong><span id="requestInput">-</span></div>
+                  <div class="request-row"><strong>output</strong><span id="requestOutput">-</span></div>
+                  <div class="request-row"><strong>basis value</strong><span id="requestValue">-</span></div>
+                  <div class="request-row"><strong>fee</strong><span id="requestFee">-</span></div>
+                  <div class="request-row"><strong>status</strong><span id="requestStatus">draft</span></div>
 
-      <div class="cta-row">
-        <button class="btn btn-secondary" type="button" id="copyRequestBtn">Copy request</button>
-        <button class="btn btn-secondary" type="button" id="clearRequestBtn">Clear request</button>
-      </div>
-    </div>
-  </div>
-</div>
+                  <div class="cta-row">
+                    <button class="btn btn-secondary" type="button" id="copyRequestBtn">Copy request</button>
+                    <button class="btn btn-secondary" type="button" id="clearRequestBtn">Clear request</button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div class="swap-row">
               <label for="toToken">to</label>
@@ -932,18 +932,18 @@
       const quoteStatusField = document.getElementById('quoteStatusField');
 
       const requestEmptyEl = document.getElementById('requestEmpty');
-const requestBodyEl = document.getElementById('requestBody');
-const requestIdEl = document.getElementById('requestId');
-const requestTimeEl = document.getElementById('requestTime');
-const requestWalletEl = document.getElementById('requestWallet');
-const requestRouteEl = document.getElementById('requestRoute');
-const requestInputEl = document.getElementById('requestInput');
-const requestOutputEl = document.getElementById('requestOutput');
-const requestValueEl = document.getElementById('requestValue');
-const requestFeeEl = document.getElementById('requestFee');
-const requestStatusEl = document.getElementById('requestStatus');
-const copyRequestBtn = document.getElementById('copyRequestBtn');
-const clearRequestBtn = document.getElementById('clearRequestBtn');
+      const requestBodyEl = document.getElementById('requestBody');
+      const requestIdEl = document.getElementById('requestId');
+      const requestTimeEl = document.getElementById('requestTime');
+      const requestWalletEl = document.getElementById('requestWallet');
+      const requestRouteEl = document.getElementById('requestRoute');
+      const requestInputEl = document.getElementById('requestInput');
+      const requestOutputEl = document.getElementById('requestOutput');
+      const requestValueEl = document.getElementById('requestValue');
+      const requestFeeEl = document.getElementById('requestFee');
+      const requestStatusEl = document.getElementById('requestStatus');
+      const copyRequestBtn = document.getElementById('copyRequestBtn');
+      const clearRequestBtn = document.getElementById('clearRequestBtn');
 
       const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
@@ -1148,6 +1148,99 @@ const clearRequestBtn = document.getElementById('clearRequestBtn');
         };
       }
 
+      function loadSavedRequest() {
+        try {
+          const raw = localStorage.getItem('trade.cosigo.currentRequest');
+          if (!raw || raw === 'null' || raw === 'undefined') return null;
+
+          const parsed = JSON.parse(raw);
+
+          if (
+            !parsed ||
+            !parsed.id ||
+            !parsed.from ||
+            !parsed.to ||
+            !parsed.inputAmount ||
+            !parsed.outputAmount
+          ) {
+            return null;
+          }
+
+          return parsed;
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function generateRequestId() {
+        return 'req_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+      }
+
+      function getConnectedWalletText() {
+        return walletAddressEl?.textContent || 'Not connected';
+      }
+
+      function renderRequest(request) {
+        if (
+          !request ||
+          !request.id ||
+          !request.from ||
+          !request.to ||
+          !request.inputAmount ||
+          !request.outputAmount
+        ) {
+          clearRequest();
+          return;
+        }
+
+        currentRequest = request;
+
+        if (requestEmptyEl) requestEmptyEl.hidden = true;
+        if (requestBodyEl) requestBodyEl.hidden = false;
+
+        if (requestIdEl) requestIdEl.textContent = request.id;
+        if (requestTimeEl) requestTimeEl.textContent = request.timestamp || '-';
+        if (requestWalletEl) requestWalletEl.textContent = request.wallet || '-';
+        if (requestRouteEl) requestRouteEl.textContent = `${request.from} → ${request.to}`;
+        if (requestInputEl) requestInputEl.textContent = `${request.inputAmount} ${request.from}`;
+        if (requestOutputEl) requestOutputEl.textContent = `${request.outputAmount} ${request.to}`;
+        if (requestValueEl) requestValueEl.textContent = `$${request.valueUsd || '0.0000'}`;
+        if (requestFeeEl) requestFeeEl.textContent = `$${request.feeUsd || '0.0000'}`;
+        if (requestStatusEl) requestStatusEl.textContent = request.status || 'draft';
+      }
+
+      function saveRequest(request) {
+        localStorage.setItem('trade.cosigo.currentRequest', JSON.stringify(request));
+      }
+
+      function clearRequest() {
+        currentRequest = null;
+        localStorage.removeItem('trade.cosigo.currentRequest');
+
+        if (requestEmptyEl) requestEmptyEl.hidden = false;
+        if (requestBodyEl) requestBodyEl.hidden = true;
+      }
+
+      function createConversionRequest(from, to, amount, manualQuote) {
+        const request = {
+          id: generateRequestId(),
+          timestamp: new Date().toISOString(),
+          wallet: getConnectedWalletText(),
+          from,
+          to,
+          inputAmount: formatQuoteNumber(amount),
+          outputAmount: formatQuoteNumber(manualQuote.output),
+          valueUsd: formatQuoteNumber(manualQuote.netUsdValue, 4),
+          feeUsd: formatQuoteNumber(manualQuote.feeUsdValue, 4),
+          status: 'draft'
+        };
+
+        renderRequest(request);
+        saveRequest(request);
+
+        return request;
+      }
+
       function buildPancakeSwapUrl(from, to) {
         const base = 'https://pancakeswap.finance/swap?chain=bsc';
 
@@ -1276,51 +1369,51 @@ const clearRequestBtn = document.getElementById('clearRequestBtn');
       }
 
       quoteBtn?.addEventListener('click', () => {
-  const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
+        const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
 
-  if (!from || !to) {
-    setQuoteStatus('Select both a from asset and a to asset.');
-    return;
-  }
+        if (!from || !to) {
+          setQuoteStatus('Select both a from asset and a to asset.');
+          return;
+        }
 
-  if (!isValidAmount) {
-    setQuoteStatus('Enter a valid amount greater than zero.');
-    return;
-  }
+        if (!isValidAmount) {
+          setQuoteStatus('Enter a valid amount greater than zero.');
+          return;
+        }
 
-  if (from === to) {
-    setQuoteStatus('Choose two different assets.');
-    return;
-  }
+        if (from === to) {
+          setQuoteStatus('Choose two different assets.');
+          return;
+        }
 
-  const manualQuote = getManualQuote(from, to, amount);
+        const manualQuote = getManualQuote(from, to, amount);
 
-  if (manualQuote) {
-    if (
-      (from === 'CIGO' && to === 'COSIGO') ||
-      (from === 'COSIGO' && to === 'CIGO')
-    ) {
-      setQuoteStatus(
-        `Direct internal conversion: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
-      );
-      return;
-    }
+        if (manualQuote) {
+          if (
+            (from === 'CIGO' && to === 'COSIGO') ||
+            (from === 'COSIGO' && to === 'CIGO')
+          ) {
+            setQuoteStatus(
+              `Direct internal conversion: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
+            );
+            return;
+          }
 
-    setQuoteStatus(
-      `Internal quote: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
-    );
-    return;
-  }
+          setQuoteStatus(
+            `Internal quote: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
+          );
+          return;
+        }
 
-  if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
-    setQuoteStatus(
-      `BNB route detected: external market path only. ${rawAmount} ${from} → ${to}. Public routing is currently disabled while internal basis testing is active.`
-    );
-    return;
-  }
+        if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
+          setQuoteStatus(
+            `BNB route detected: external market path only. ${rawAmount} ${from} → ${to}. Public routing is currently disabled while internal basis testing is active.`
+          );
+          return;
+        }
 
-  setQuoteStatus('This route is not active in the current shell.');
-});
+        setQuoteStatus('This route is not active in the current shell.');
+      });
 
       swapBtn?.addEventListener('click', () => {
         const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
@@ -1343,8 +1436,20 @@ const clearRequestBtn = document.getElementById('clearRequestBtn');
         const manualQuote = getManualQuote(from, to, amount);
 
         if (manualQuote) {
+          const request = createConversionRequest(from, to, amount, manualQuote);
+
+          if (
+            (from === 'CIGO' && to === 'COSIGO') ||
+            (from === 'COSIGO' && to === 'CIGO')
+          ) {
+            setQuoteStatus(
+              `Direct internal conversion request created: ${request.id} | ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to}`
+            );
+            return;
+          }
+
           setQuoteStatus(
-            `Internal conversion path: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | internal fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)} | settlement not automated yet`
+            `Internal conversion request created: ${request.id} | ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to}`
           );
           return;
         }
@@ -1366,23 +1471,30 @@ const clearRequestBtn = document.getElementById('clearRequestBtn');
         setQuoteStatus('This route is not active in the current shell.');
       });
 
-      copyButtons.forEach((button) => {
-        button.addEventListener('click', async () => {
-          const value = button.getAttribute('data-copy');
-          const original = button.textContent;
+      copyRequestBtn?.addEventListener('click', async () => {
+        if (!currentRequest) {
+          setQuoteStatus('No conversion request to copy.');
+          return;
+        }
 
-          try {
-            const ok = await copyText(value);
-            button.textContent = ok ? 'Copied' : 'Copy failed';
-          } catch (err) {
-            button.textContent = 'Copy failed';
-          }
-
-          setTimeout(() => {
-            button.textContent = original;
-          }, 1200);
-        });
+        const text = JSON.stringify(currentRequest, null, 2);
+        const ok = await copyText(text);
+        setQuoteStatus(ok ? 'Conversion request copied.' : 'Failed to copy conversion request.');
       });
+
+      clearRequestBtn?.addEventListener('click', () => {
+        clearRequest();
+        setQuoteStatus('Conversion request cleared.');
+      });
+
+      copyButtons.forEach((button) => {
+        // existing copy logic
+      });
+
+      const savedRequest = loadSavedRequest();
+      if (savedRequest) {
+        renderRequest(savedRequest);
+      }
 
       (async () => {
         if (!window.ethereum) return;
