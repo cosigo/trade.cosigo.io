@@ -660,7 +660,8 @@
           </p>
 
           <div class="notice">
-            Version one is a controlled interface shell. The goal is to keep the user path inside the COSIGO system
+            This is the controlled trade interface for internal request-based conversion within the COSIGO system. The
+            goal is to keep the user path inside the COSIGO system
             instead of depending on random search results, generic token lists, or confusing third-party DEX flows.
           </div>
 
@@ -677,7 +678,7 @@
           <div class="status-grid">
             <div class="stat">
               <div class="stat-label">status</div>
-              <div class="stat-value">phase 1 shell live</div>
+              <div class="stat-value">manual request flow live</div>
             </div>
             <div class="stat">
               <div class="stat-label">speculative rail</div>
@@ -696,8 +697,8 @@
               <div class="stat-value">BNB Smart Chain first</div>
             </div>
             <div class="stat">
-              <div class="stat-label">goal</div>
-              <div class="stat-value">controlled UX and routing</div>
+              <div class="stat-label">current mode</div>
+              <div class="stat-value">user submission with admin review</div>
             </div>
           </div>
 
@@ -735,7 +736,7 @@
             For people who want a more stable landing point and less exposure to BNB-denominated volatility.
           </p>
           <div class="mini-actions">
-            <a class="btn btn-secondary" href="#swap">planned route shell</a>
+            <a class="btn btn-secondary" href="#swap">start conversion request</a>
             <a class="btn btn-secondary" href="https://market.cosigo.io/" target="_blank" rel="noopener">learn market
               context</a>
           </div>
@@ -761,9 +762,10 @@
       <h2>trade shell</h2>
       <div class="swap-grid">
         <article class="swap-shell">
-          <h3>exchange interface shell</h3>
+          <h3>exchange interface</h3>
           <p>
-            This is the initial live structure for the self-hosted exchange experience. Wallet connection, live balances, manual internal quoting, and server-backed conversion requests are now active. Next is request lifecycle review, persistence hardening, and controlled settlement flow.
+            Wallet connection, live balances, manual internal quoting, and server-backed conversion requests are active.
+            Requests can now be created, submitted, reviewed, and completed through the controlled trade workflow.
           </p>
 
           <div class="wallet-summary" id="walletSummary">
@@ -840,7 +842,7 @@
             </div>
 
             <div class="swap-row">
-              <label>quote status</label>
+              <label>trade status</label>
               <input id="quoteStatusField" class="swap-input" type="text" value="No quote yet" readonly>
             </div>
 
@@ -860,7 +862,7 @@
         <aside class="panel" id="verify">
           <h3>verify before action</h3>
           <p>
-            Always verify the token and path before trading, importing, or converting.
+            Always verify the asset, route, and destination before submitting a request.
           </p>
 
           <div class="link-list" style="margin-top:18px;">
@@ -907,7 +909,9 @@
   <footer class="footer wrap">
     <div class="footer-card">
       <strong>Phase note:</strong> this is the first real shell for
-      <strong>trade.cosigo.io</strong>. Phase note: this is the first working exchange shell for trade.cosigo.io. Wallet connection, live balances, manual quote logic, and server-backed conversion requests are active. Next steps are request submission lifecycle, review flow, and controlled settlement handling.
+      <strong>trade.cosigo.io</strong>. Phase note: This is the first working request-based exchange interface for
+      trade.cosigo.io. Wallet connection, live balances, manual quote logic, server-backed requests, and admin-reviewed
+      lifecycle handling are active.
     </div>
   </footer>
 
@@ -964,6 +968,22 @@
 
       function setQuoteStatus(message) {
         if (quoteStatusField) quoteStatusField.value = message;
+      }
+
+      function setAppStatus(message) {
+        if (status) status.textContent = message;
+      }
+
+      function setQuoteStatus(message) {
+        if (quoteStatusField) quoteStatusField.value = message;
+      }
+
+      function getRequestStatusText(status) {
+        if (status === 'draft') return 'Draft request created';
+        if (status === 'submitted') return 'Submitted and awaiting admin review';
+        if (status === 'reviewed') return 'Reviewed and ready for completion';
+        if (status === 'completed') return 'Completed';
+        return status || '-';
       }
 
       async function copyText(value) {
@@ -1247,7 +1267,7 @@
         if (requestOutputEl) requestOutputEl.textContent = `${outputAmount} ${toAsset}`;
         if (requestValueEl) requestValueEl.textContent = `$${basisValue}`;
         if (requestFeeEl) requestFeeEl.textContent = `$${feeAmount}`;
-        if (requestStatusEl) requestStatusEl.textContent = statusText;
+        if (requestStatusEl) requestStatusEl.textContent = getRequestStatusText(statusText);
       }
 
       function saveRequest(request) {
@@ -1287,7 +1307,7 @@
           `${API_BASE}/requests/${encodeURIComponent(currentRequest.id)}/status`,
           {
             method: 'POST',
-            body: JSON.stringify({ status: 'submitted' }),
+            body: JSON.stringify({ status: 'Submitted and awaiting admin review' }),
           }
         );
 
@@ -1297,7 +1317,7 @@
 
       function syncRequestButtons() {
         if (!submitRequestBtn) return;
-        submitRequestBtn.disabled = !currentRequest || currentRequest.status !== 'draft';
+        submitRequestBtn.disabled = !currentRequest || currentRequest.status !== 'Draft request created';
       }
 
       async function apiJson(url, options = {}) {
