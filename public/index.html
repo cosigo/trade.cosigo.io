@@ -1537,19 +1537,6 @@
               feeAmount: String(manualQuote.feeUsdValue)
             });
 
-            submitRequestBtn?.addEventListener('click', async () => {
-              try {
-                const request = await submitCurrentRequest();
-
-                if (request) {
-                  setQuoteStatus(`Request submitted: ${request.id}`);
-                }
-              } catch (err) {
-                console.error(err);
-                setQuoteStatus(`Submit failed: ${err.message || err}`);
-              }
-            });
-
             if (
               (from === 'CIGO' && to === 'COSIGO') ||
               (from === 'COSIGO' && to === 'CIGO')
@@ -1579,6 +1566,19 @@
         }
 
         setQuoteStatus('This route is not active in the current shell.');
+      });
+
+      submitRequestBtn?.addEventListener('click', async () => {
+        try {
+          const request = await submitCurrentRequest();
+
+          if (request) {
+            setQuoteStatus(`Request submitted: ${request.id}`);
+          }
+        } catch (err) {
+          console.error(err);
+          setQuoteStatus(`Submit failed: ${err.message || err}`);
+        }
       });
 
       copyRequestBtn?.addEventListener('click', async () => {
