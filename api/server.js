@@ -97,7 +97,7 @@ function getRouteType(fromAsset, toAsset) {
 }
 
 function isAdmin(req) {
-  return ADMIN_KEY && req.headers['x-trade-admin-key'] === ADMIN_KEY;
+  return Boolean(ADMIN_KEY) && req.headers['x-trade-admin-key'] === ADMIN_KEY;
 }
 
 async function writeJsonAtomic(filePath, data) {
@@ -109,6 +109,7 @@ async function writeJsonAtomic(filePath, data) {
 
 async function ensureDataLayout() {
   await fs.mkdir(path.join(DATA_DIR, 'history'), { recursive: true });
+
   try {
     await fs.access(INDEX_FILE);
   } catch {
@@ -154,12 +155,38 @@ async function readRequest(id) {
   return JSON.parse(raw);
 }
 
+async function listRequests({ status = '', limit = 100 } = {}) {
+  const index = await loadIndex();
+  const ids = Object.keys(index);
+  const items = [];
+
+  for (const id of ids) {
+    try {
+      const record = await readRequest(id);
+      if (!record) continue;
+      if (status && record.status !== status) continue;
+      items.push(record);
+    } catch (err) {
+      console.error(`Failed reading request ${id}`, err);
+    }
+  }
+
+  items.sort((a, b) => {
+    const aa = new Date(a.updatedAt || a.createdAt || 0).getTime();
+    const bb = new Date(b.updatedAt || b.createdAt || 0).getTime();
+    return bb - aa;
+  });
+
+  return items.slice(0, limit);
+}
+
 async function parseJsonBody(req) {
   return new Promise((resolve, reject) => {
     let raw = '';
 
     req.on('data', (chunk) => {
       raw += chunk;
+
       if (raw.length > 1024 * 1024) {
         reject(new Error('Request body too large'));
         req.destroy();
@@ -171,6 +198,7 @@ async function parseJsonBody(req) {
         resolve({});
         return;
       }
+
       try {
         resolve(JSON.parse(raw));
       } catch {
@@ -217,6 +245,7 @@ const server = http.createServer(async (req, res) => {
       if (!VALID_ASSETS.has(fromAsset) || !VALID_ASSETS.has(toAsset)) {
         throw new Error('Invalid asset symbol');
       }
+
       if (fromAsset === toAsset) {
         throw new Error('fromAsset and toAsset must be different');
       }
@@ -225,6 +254,7 @@ const server = http.createServer(async (req, res) => {
       if (routeType === 'unsupported') {
         throw new Error('Unsupported route');
       }
+
       if (routeType === 'external_market') {
         throw new Error('BNB routes are external-market-only and not server-settled here');
       }
@@ -264,6 +294,7 @@ const server = http.createServer(async (req, res) => {
           buildHistoryEntry({
             action: 'created',
             by: wallet,
+            fromStatus: null,
             toStatus: 'draft',
             note: 'Initial request created',
           }),
@@ -273,6 +304,21 @@ const server = http.createServer(async (req, res) => {
       await writeRequest(record);
 
       sendJson(res, 201, { ok: true, request: record });
+      return;
+    }
+
+    if (req.method === 'GET' && pathname === '/api/requests') {
+      if (!isAdmin(req)) {
+        sendError(res, 403, 'Admin key required');
+        return;
+      }
+
+      const status = String(url.searchParams.get('status') || '').trim().toLowerCase();
+      const limitRaw = Number(url.searchParams.get('limit') || 100);
+      const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 500) : 100;
+
+      const requests = await listRequests({ status, limit });
+      sendJson(res, 200, { ok: true, requests });
       return;
     }
 
@@ -301,16 +347,17 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      const previousStatus = record.status;
       const nextStatus = cleanString(body.status, 'status').toLowerCase();
-      const allowedNext = STATUS_FLOW[record.status] || [];
+      const allowedNext = STATUS_FLOW[previousStatus] || [];
 
-      if (record.status === nextStatus) {
+      if (previousStatus === nextStatus) {
         sendJson(res, 200, { ok: true, request: record });
         return;
       }
 
       if (!allowedNext.includes(nextStatus)) {
-        sendError(res, 400, `Invalid transition: ${record.status} -> ${nextStatus}`);
+        sendError(res, 400, `Invalid transition: ${previousStatus} -> ${nextStatus}`);
         return;
       }
 
@@ -322,12 +369,25 @@ const server = http.createServer(async (req, res) => {
 
       record.status = nextStatus;
       record.updatedAt = nowIso();
+
+      if (nextStatus === 'submitted' && !record.submittedAt) {
+        record.submittedAt = record.updatedAt;
+      }
+
+      if (nextStatus === 'reviewed' && !record.reviewedAt) {
+        record.reviewedAt = record.updatedAt;
+      }
+
+      if (nextStatus === 'completed' && !record.completedAt) {
+        record.completedAt = record.updatedAt;
+      }
+
       record.history = Array.isArray(record.history) ? record.history : [];
       record.history.push(
         buildHistoryEntry({
           action: 'status_changed',
           by: adminRequired ? 'admin' : record.wallet,
-          fromStatus: body.fromStatus || record.status,
+          fromStatus: previousStatus,
           toStatus: nextStatus,
           note: String(body.note || ''),
         })
@@ -357,3 +417,4 @@ ensureDataLayout()
     console.error('Failed to start trade-request-api', err);
     process.exit(1);
   });
+  

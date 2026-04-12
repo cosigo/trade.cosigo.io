@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>trade.cosigo.io admin</title>
+  <style>
+    body { margin:0; font-family:Inter,system-ui,sans-serif; background:#0b0f14; color:#eef3f9; }
+    .wrap { width:min(1100px, calc(100% - 24px)); margin:24px auto 60px; }
+    .card, .item {
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:18px;
+      padding:18px;
+      margin-bottom:16px;
+    }
+    input, select, button {
+      min-height:44px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(255,255,255,0.03);
+      color:#eef3f9;
+      padding:0 12px;
+      font:inherit;
+    }
+    button { cursor:pointer; font-weight:700; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .grid { display:grid; grid-template-columns:150px 1fr; gap:8px 12px; margin-top:10px; }
+    .label { color:#9cabbd; text-transform:uppercase; font-size:12px; letter-spacing:.08em; }
+    .mono { font-family:ui-monospace, SFMono-Regular, Consolas, monospace; word-break:break-word; }
+    .status { display:inline-block; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.14); font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
+    .msg { margin-top:12px; color:#9cabbd; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>trade admin queue</h1>
+      <div class="row">
+        <input id="adminKey" type="password" placeholder="Admin key" style="min-width:320px;">
+        <select id="statusFilter">
+          <option value="submitted">submitted</option>
+          <option value="reviewed">reviewed</option>
+          <option value="">all</option>
+        </select>
+        <button id="loadBtn" type="button">Load queue</button>
+      </div>
+      <div class="msg" id="msg">Ready.</div>
+    </div>
+
+    <div id="list"></div>
+  </div>
+
+  <script>
+    const adminKeyEl = document.getElementById('adminKey');
+    const statusFilterEl = document.getElementById('statusFilter');
+    const loadBtn = document.getElementById('loadBtn');
+    const listEl = document.getElementById('list');
+    const msgEl = document.getElementById('msg');
+
+    adminKeyEl.value = sessionStorage.getItem('trade.adminKey') || '';
+
+    function setMsg(text) {
+      msgEl.textContent = text;
+    }
+
+    function getAdminKey() {
+      const key = adminKeyEl.value.trim();
+      sessionStorage.setItem('trade.adminKey', key);
+      return key;
+    }
+
+    async function apiJson(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-trade-admin-key': getAdminKey(),
+          ...(options.headers || {}),
+        },
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || `Request failed (${response.status})`);
+      }
+
+      return data;
+    }
+
+    function renderRequests(items) {
+      listEl.innerHTML = '';
+
+      if (!items.length) {
+        listEl.innerHTML = '<div class="card">No matching requests found.</div>';
+        return;
+      }
+
+      for (const r of items) {
+        const div = document.createElement('div');
+        div.className = 'item';
+
+        const actions = [];
+        if (r.status === 'submitted') {
+          actions.push(`<button type="button" data-id="${r.id}" data-next="reviewed">Mark reviewed</button>`);
+        }
+        if (r.status === 'reviewed') {
+          actions.push(`<button type="button" data-id="${r.id}" data-next="completed">Mark completed</button>`);
+        }
+
+        div.innerHTML = `
+          <div class="row" style="justify-content:space-between;">
+            <strong>${r.route || `${r.fromAsset} → ${r.toAsset}`}</strong>
+            <span class="status">${r.status}</span>
+          </div>
+
+          <div class="grid">
+            <div class="label">request id</div><div class="mono">${r.id}</div>
+            <div class="label">created</div><div class="mono">${r.createdAt || '-'}</div>
+            <div class="label">submitted</div><div class="mono">${r.submittedAt || '-'}</div>
+            <div class="label">reviewed</div><div class="mono">${r.reviewedAt || '-'}</div>
+            <div class="label">completed</div><div class="mono">${r.completedAt || '-'}</div>
+            <div class="label">wallet</div><div class="mono">${r.wallet || '-'}</div>
+            <div class="label">input</div><div class="mono">${r.inputAmount} ${r.fromAsset}</div>
+            <div class="label">output</div><div class="mono">${r.outputAmount} ${r.toAsset}</div>
+            <div class="label">basis</div><div class="mono">$${r.basisValue ?? 0}</div>
+            <div class="label">fee</div><div class="mono">$${r.feeAmount ?? 0}</div>
+          </div>
+
+          <div class="row" style="margin-top:14px;">
+            ${actions.join('')}
+          </div>
+        `;
+
+        listEl.appendChild(div);
+      }
+
+      listEl.querySelectorAll('button[data-id]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const next = btn.getAttribute('data-next');
+
+          try {
+            setMsg(`Updating ${id} to ${next}...`);
+            await apiJson(`/api/requests/${encodeURIComponent(id)}/status`, {
+              method: 'POST',
+              body: JSON.stringify({
+                status: next,
+                note: `Admin changed status to ${next}`
+              }),
+            });
+            await loadQueue();
+            setMsg(`Updated ${id} to ${next}.`);
+          } catch (err) {
+            setMsg(`Update failed: ${err.message}`);
+          }
+        });
+      });
+    }
+
+    async function loadQueue() {
+      try {
+        const status = statusFilterEl.value;
+        const q = status ? `?status=${encodeURIComponent(status)}&limit=200` : '?limit=200';
+        setMsg('Loading queue...');
+        const data = await apiJson(`/api/requests${q}`);
+        renderRequests(data.requests || []);
+        setMsg(`Loaded ${data.requests?.length || 0} request(s).`);
+      } catch (err) {
+        listEl.innerHTML = '';
+        setMsg(`Load failed: ${err.message}`);
+      }
+    }
+
+    loadBtn.addEventListener('click', loadQueue);
+  </script>
+</body>
+</html>
