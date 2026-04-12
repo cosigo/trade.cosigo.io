@@ -819,6 +819,7 @@
                   <div class="cta-row">
                     <button class="btn btn-secondary" type="button" id="copyRequestBtn">Copy request</button>
                     <button class="btn btn-secondary" type="button" id="clearRequestBtn">Clear request</button>
+                    <button class="btn btn-secondary" id="submitRequestBtn" type="button">Submit request</button>
                   </div>
                 </div>
               </div>
@@ -944,6 +945,7 @@
       const requestStatusEl = document.getElementById('requestStatus');
       const copyRequestBtn = document.getElementById('copyRequestBtn');
       const clearRequestBtn = document.getElementById('clearRequestBtn');
+      const submitRequestBtn = document.getElementById('submitRequestBtn');
 
       const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
@@ -955,6 +957,8 @@
       const MARKET_ROUTE_ENABLED = false;
 
       let currentRequest = null;
+      let connectedAddress = null;
+      const API_BASE = '/api';
 
       function setAppStatus(message) {
         if (status) status.textContent = message;
@@ -1074,6 +1078,8 @@
       }
 
       function updateWalletSummary(address, bnb, cigo, usdt) {
+        connectedAddress = address;
+
         if (walletAddressEl) {
           walletAddressEl.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
         }
@@ -1089,6 +1095,8 @@
       }
 
       function clearWalletSummary() {
+        connectedAddress = null;
+
         if (walletAddressEl) walletAddressEl.textContent = 'Not connected';
         if (walletBNBEl) walletBNBEl.textContent = '0.0000';
         if (walletCIGOEl) walletCIGOEl.textContent = '0.00';
@@ -1148,27 +1156,45 @@
         };
       }
 
-      function loadSavedRequest() {
+      async function apiJson(url, options = {}) {
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {}),
+          },
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(data.error || `Request failed (${response.status})`);
+        }
+
+        return data;
+      }
+
+      async function loadSavedRequest() {
         try {
           const raw = localStorage.getItem('trade.cosigo.currentRequest');
-          if (!raw || raw === 'null' || raw === 'undefined') return null;
 
-          const parsed = JSON.parse(raw);
-
-          if (
-            !parsed ||
-            !parsed.id ||
-            !parsed.from ||
-            !parsed.to ||
-            !parsed.inputAmount ||
-            !parsed.outputAmount
-          ) {
-            return null;
+          if (!raw) {
+            saveRequest(null);
+            return;
           }
 
-          return parsed;
+          const saved = JSON.parse(raw);
+
+          if (!saved?.id) {
+            saveRequest(null);
+            return;
+          }
+
+          const data = await apiJson(`${API_BASE}/requests/${encodeURIComponent(saved.id)}`);
+          saveRequest(data.request);
         } catch (err) {
-          return null;
+          console.warn('Could not reload saved request', err);
+          saveRequest(null);
         }
       }
 
@@ -1181,64 +1207,117 @@
       }
 
       function renderRequest(request) {
-        if (
-          !request ||
-          !request.id ||
-          !request.from ||
-          !request.to ||
-          !request.inputAmount ||
-          !request.outputAmount
-        ) {
-          clearRequest();
+        if (!request || !request.id) {
+          currentRequest = null;
+
+          if (requestEmptyEl) requestEmptyEl.hidden = false;
+          if (requestBodyEl) requestBodyEl.hidden = true;
+
+          if (requestIdEl) requestIdEl.textContent = '-';
+          if (requestTimeEl) requestTimeEl.textContent = '-';
+          if (requestWalletEl) requestWalletEl.textContent = '-';
+          if (requestRouteEl) requestRouteEl.textContent = '-';
+          if (requestInputEl) requestInputEl.textContent = '-';
+          if (requestOutputEl) requestOutputEl.textContent = '-';
+          if (requestValueEl) requestValueEl.textContent = '-';
+          if (requestFeeEl) requestFeeEl.textContent = '-';
+          if (requestStatusEl) requestStatusEl.textContent = 'draft';
+
           return;
         }
 
         currentRequest = request;
 
+        const fromAsset = request.fromAsset || request.from || '-';
+        const toAsset = request.toAsset || request.to || '-';
+        const createdAt = request.createdAt || request.timestamp || '-';
+        const wallet = request.wallet || '-';
+        const inputAmount = request.inputAmount || '-';
+        const outputAmount = request.outputAmount || '-';
+        const basisValue = request.basisValue ?? request.valueUsd ?? 0;
+        const feeAmount = request.feeAmount ?? request.feeUsd ?? 0;
+        const statusText = request.status || 'draft';
+
         if (requestEmptyEl) requestEmptyEl.hidden = true;
         if (requestBodyEl) requestBodyEl.hidden = false;
 
         if (requestIdEl) requestIdEl.textContent = request.id;
-        if (requestTimeEl) requestTimeEl.textContent = request.timestamp || '-';
-        if (requestWalletEl) requestWalletEl.textContent = request.wallet || '-';
-        if (requestRouteEl) requestRouteEl.textContent = `${request.from} → ${request.to}`;
-        if (requestInputEl) requestInputEl.textContent = `${request.inputAmount} ${request.from}`;
-        if (requestOutputEl) requestOutputEl.textContent = `${request.outputAmount} ${request.to}`;
-        if (requestValueEl) requestValueEl.textContent = `$${request.valueUsd || '0.0000'}`;
-        if (requestFeeEl) requestFeeEl.textContent = `$${request.feeUsd || '0.0000'}`;
-        if (requestStatusEl) requestStatusEl.textContent = request.status || 'draft';
+        if (requestTimeEl) requestTimeEl.textContent = createdAt;
+        if (requestWalletEl) requestWalletEl.textContent = wallet;
+        if (requestRouteEl) requestRouteEl.textContent = `${fromAsset} → ${toAsset}`;
+        if (requestInputEl) requestInputEl.textContent = `${inputAmount} ${fromAsset}`;
+        if (requestOutputEl) requestOutputEl.textContent = `${outputAmount} ${toAsset}`;
+        if (requestValueEl) requestValueEl.textContent = `$${basisValue}`;
+        if (requestFeeEl) requestFeeEl.textContent = `$${feeAmount}`;
+        if (requestStatusEl) requestStatusEl.textContent = statusText;
       }
 
       function saveRequest(request) {
-        localStorage.setItem('trade.cosigo.currentRequest', JSON.stringify(request));
+        currentRequest = request || null;
+
+        if (currentRequest?.id) {
+          localStorage.setItem(
+            'trade.cosigo.currentRequest',
+            JSON.stringify({ id: currentRequest.id })
+          );
+        } else {
+          localStorage.removeItem('trade.cosigo.currentRequest');
+        }
+
+        renderRequest(currentRequest);
+        syncRequestButtons();
       }
 
       function clearRequest() {
-        currentRequest = null;
-        localStorage.removeItem('trade.cosigo.currentRequest');
-
-        if (requestEmptyEl) requestEmptyEl.hidden = false;
-        if (requestBodyEl) requestBodyEl.hidden = true;
+        saveRequest(null);
       }
 
-      function createConversionRequest(from, to, amount, manualQuote) {
-        const request = {
-          id: generateRequestId(),
-          timestamp: new Date().toISOString(),
-          wallet: getConnectedWalletText(),
-          from,
-          to,
-          inputAmount: formatQuoteNumber(amount),
-          outputAmount: formatQuoteNumber(manualQuote.output),
-          valueUsd: formatQuoteNumber(manualQuote.netUsdValue, 4),
-          feeUsd: formatQuoteNumber(manualQuote.feeUsdValue, 4),
-          status: 'draft'
-        };
+      async function createConversionRequest(payload) {
+        const data = await apiJson(`${API_BASE}/requests/create`, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
 
-        renderRequest(request);
-        saveRequest(request);
+        saveRequest(data.request);
+        return data.request;
+      }
 
-        return request;
+      async function submitCurrentRequest() {
+        if (!currentRequest?.id) return null;
+
+        const data = await apiJson(
+          `${API_BASE}/requests/${encodeURIComponent(currentRequest.id)}/status`,
+          {
+            method: 'POST',
+            body: JSON.stringify({ status: 'submitted' }),
+          }
+        );
+
+        saveRequest(data.request);
+        return data.request;
+      }
+
+      function syncRequestButtons() {
+        if (!submitRequestBtn) return;
+        submitRequestBtn.disabled = !currentRequest || currentRequest.status !== 'draft';
+      }
+
+      async function apiJson(url, options = {}) {
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {}),
+          },
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(data.error || `Request failed (${response.status})`);
+        }
+
+        return data;
       }
 
       function buildPancakeSwapUrl(from, to) {
@@ -1415,7 +1494,7 @@
         setQuoteStatus('This route is not active in the current shell.');
       });
 
-      swapBtn?.addEventListener('click', () => {
+      swapBtn?.addEventListener('click', async () => {
         const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
 
         if (!from || !to) {
@@ -1433,25 +1512,63 @@
           return;
         }
 
+        if (!connectedAddress) {
+          setQuoteStatus('Connect wallet first.');
+          return;
+        }
+
         const manualQuote = getManualQuote(from, to, amount);
 
         if (manualQuote) {
-          const request = createConversionRequest(from, to, amount, manualQuote);
+          try {
+            const request = await createConversionRequest({
+              wallet: connectedAddress,
+              fromAsset: from,
+              toAsset: to,
+              inputAmount: String(amount),
+              outputAmount: String(manualQuote.output),
+              basisValue: Number(manualQuote.netUsdValue),
+              basis: {
+                CIGO_USD_BASIS,
+                COSIGO_USD_BASIS,
+                USDT_USD_BASIS: 1
+              },
+              feeRate: INTERNAL_FEE_RATE,
+              feeAmount: String(manualQuote.feeUsdValue)
+            });
 
-          if (
-            (from === 'CIGO' && to === 'COSIGO') ||
-            (from === 'COSIGO' && to === 'CIGO')
-          ) {
+            submitRequestBtn?.addEventListener('click', async () => {
+              try {
+                const request = await submitCurrentRequest();
+
+                if (request) {
+                  setQuoteStatus(`Request submitted: ${request.id}`);
+                }
+              } catch (err) {
+                console.error(err);
+                setQuoteStatus(`Submit failed: ${err.message || err}`);
+              }
+            });
+
+            if (
+              (from === 'CIGO' && to === 'COSIGO') ||
+              (from === 'COSIGO' && to === 'CIGO')
+            ) {
+              setQuoteStatus(
+                `Direct internal conversion request created: ${request.id} | ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to}`
+              );
+              return;
+            }
+
             setQuoteStatus(
-              `Direct internal conversion request created: ${request.id} | ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to}`
+              `Internal conversion request created: ${request.id} | ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to}`
             );
             return;
+          } catch (err) {
+            console.error(err);
+            setQuoteStatus(`Conversion request failed: ${err.message || err}`);
+            return;
           }
-
-          setQuoteStatus(
-            `Internal conversion request created: ${request.id} | ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to}`
-          );
-          return;
         }
 
         if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
@@ -1459,13 +1576,6 @@
             `Optional public market route detected for ${rawAmount} ${from} → ${to}. Routing is intentionally disabled for now.`
           );
           return;
-
-          // Uncomment later if you want public market routing back:
-          // const swapUrl = buildPancakeSwapUrl(from, to);
-          // if (swapUrl) {
-          //   window.open(swapUrl, '_blank');
-          //   return;
-          // }
         }
 
         setQuoteStatus('This route is not active in the current shell.');
@@ -1491,10 +1601,7 @@
         // existing copy logic
       });
 
-      const savedRequest = loadSavedRequest();
-      if (savedRequest) {
-        renderRequest(savedRequest);
-      }
+      loadSavedRequest();
 
       (async () => {
         if (!window.ethereum) return;
