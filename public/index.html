@@ -419,6 +419,82 @@
       color: #c9f5df;
     }
 
+    .settlement-box {
+      margin-top: 14px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      display: grid;
+      gap: 10px;
+    }
+
+    .settlement-box[hidden] {
+      display: none !important;
+    }
+
+    .settlement-head {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .settlement-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+
+    .settlement-copy {
+      color: #d7e0ea;
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .settlement-copy strong {
+      color: #fff;
+    }
+
+    .settlement-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding-left: 18px;
+      color: #d7e0ea;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .settlement-note {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      color: #dce6f2;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .settlement-note strong {
+      color: #fff;
+    }
+
+    .settlement-pending {
+      border-color: rgba(103, 168, 255, 0.22);
+      background: rgba(103, 168, 255, 0.08);
+    }
+
+    .settlement-action {
+      border-color: rgba(168, 120, 255, 0.24);
+      background: rgba(168, 120, 255, 0.09);
+    }
+
+    .settlement-complete {
+      border-color: rgba(71, 209, 140, 0.24);
+      background: rgba(71, 209, 140, 0.09);
+    }
+
     @media (max-width: 640px) {
       .request-row {
         grid-template-columns: 1fr;
@@ -844,20 +920,21 @@
 
                 <div class="request-body" id="requestBody" hidden>
                   <div class="request-row"><strong>reference</strong><span id="requestId">-</span></div>
-                  <div class="request-row"><strong>timestamp</strong><span id="requestTime">-</span></div>
-                  <div class="request-row"><strong>wallet</strong><span id="requestWallet">-</span></div>
                   <div class="request-row"><strong>route</strong><span id="requestRoute">-</span></div>
                   <div class="request-row"><strong>input</strong><span id="requestInput">-</span></div>
                   <div class="request-row"><strong>output</strong><span id="requestOutput">-</span></div>
                   <div class="request-row"><strong>estimated value</strong><span id="requestValue">-</span></div>
-                  <div class="request-row"><strong>fee</strong><span id="requestFee">-</span></div>
                   <div class="request-row"><strong>status</strong><span id="requestStatus">draft</span></div>
-                  <div class="request-row" id="requestSubmittedRow" hidden><strong>submitted</strong><span
-                      id="requestSubmittedAt">-</span></div>
-                  <div class="request-row" id="requestReviewedRow" hidden><strong>reviewed</strong><span
-                      id="requestReviewedAt">-</span></div>
-                  <div class="request-row" id="requestCompletedRow" hidden><strong>completed</strong><span
-                      id="requestCompletedAt">-</span></div>
+
+                  <div class="settlement-box" id="settlementBox" hidden>
+                    <div class="settlement-head">next step</div>
+                    <div class="settlement-title" id="settlementTitle">No action yet</div>
+                    <div class="settlement-copy" id="settlementCopy">
+                      Create a request first to see the next step.
+                    </div>
+                    <ol class="settlement-list" id="settlementList" hidden></ol>
+                    <div class="settlement-note" id="settlementNote" hidden></div>
+                  </div>
 
                   <div class="cta-row">
                     <button class="btn btn-secondary" type="button" id="copyRequestBtn" hidden>Copy request</button>
@@ -1037,26 +1114,21 @@
       const requestEmptyEl = document.getElementById('requestEmpty');
       const requestBodyEl = document.getElementById('requestBody');
       const requestIdEl = document.getElementById('requestId');
-      const requestTimeEl = document.getElementById('requestTime');
-      const requestWalletEl = document.getElementById('requestWallet');
       const requestRouteEl = document.getElementById('requestRoute');
       const requestInputEl = document.getElementById('requestInput');
       const requestOutputEl = document.getElementById('requestOutput');
       const requestValueEl = document.getElementById('requestValue');
-      const requestFeeEl = document.getElementById('requestFee');
       const requestStatusEl = document.getElementById('requestStatus');
       const copyRequestBtn = document.getElementById('copyRequestBtn');
       const clearRequestBtn = document.getElementById('clearRequestBtn');
       const submitRequestBtn = document.getElementById('submitRequestBtn');
       const refreshRequestBtn = document.getElementById('refreshRequestBtn');
 
-      const requestSubmittedAtEl = document.getElementById('requestSubmittedAt');
-      const requestReviewedAtEl = document.getElementById('requestReviewedAt');
-      const requestCompletedAtEl = document.getElementById('requestCompletedAt');
-
-      const requestSubmittedRowEl = document.getElementById('requestSubmittedRow');
-      const requestReviewedRowEl = document.getElementById('requestReviewedRow');
-      const requestCompletedRowEl = document.getElementById('requestCompletedRow');
+      const settlementBoxEl = document.getElementById('settlementBox');
+      const settlementTitleEl = document.getElementById('settlementTitle');
+      const settlementCopyEl = document.getElementById('settlementCopy');
+      const settlementListEl = document.getElementById('settlementList');
+      const settlementNoteEl = document.getElementById('settlementNote');
 
       const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
@@ -1069,6 +1141,11 @@
 
       let currentRequest = null;
       let connectedAddress = null;
+      let currentBalances = {
+        BNB: 0,
+        CIGO: 0,
+        USDT: 0
+      };
       const API_BASE = '/api';
 
       function setAppStatus(message) {
@@ -1215,37 +1292,47 @@
         if (cigo > 0) {
           buyBtn.textContent = 'buy more CIGO (market)';
           quoteBtn.textContent = usdt > 0 ? 'Compare exit paths' : 'Quote exit';
-          swapBtn.textContent = 'Convert';
+          swapBtn.textContent = 'Request swap';
         } else if (usdt > 0) {
           buyBtn.textContent = 'buy CIGO with USDT';
           quoteBtn.textContent = 'Quote entry';
-          swapBtn.textContent = 'Convert';
+          swapBtn.textContent = 'Request swap';
         } else {
           buyBtn.textContent = 'buy CIGO (market)';
           quoteBtn.textContent = 'Get quote';
-          swapBtn.textContent = 'Convert';
+          swapBtn.textContent = 'Request swap';
         }
       }
 
       function updateWalletSummary(address, bnb, cigo, usdt) {
         connectedAddress = address;
+        currentBalances = {
+          BNB: Number(bnb) || 0,
+          CIGO: Number(cigo) || 0,
+          USDT: Number(usdt) || 0
+        };
 
         if (walletAddressEl) {
           walletAddressEl.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
         }
         if (walletBNBEl) {
-          walletBNBEl.textContent = bnb.toFixed(4);
+          walletBNBEl.textContent = currentBalances.BNB.toFixed(4);
         }
         if (walletCIGOEl) {
-          walletCIGOEl.textContent = cigo.toFixed(2);
+          walletCIGOEl.textContent = currentBalances.CIGO.toFixed(2);
         }
         if (walletUSDTEl) {
-          walletUSDTEl.textContent = usdt.toFixed(2);
+          walletUSDTEl.textContent = currentBalances.USDT.toFixed(2);
         }
       }
 
       function clearWalletSummary() {
         connectedAddress = null;
+        currentBalances = {
+          BNB: 0,
+          CIGO: 0,
+          USDT: 0
+        };
 
         if (walletAddressEl) walletAddressEl.textContent = 'Not connected';
         if (walletBNBEl) walletBNBEl.textContent = '0.0000';
@@ -1277,6 +1364,55 @@
           minimumFractionDigits: 0,
           maximumFractionDigits: digits
         });
+      }
+
+      function formatAssetAmount(value, asset) {
+        const num = Number(value);
+
+        if (!Number.isFinite(num)) return '-';
+
+        let digits = 2;
+        if (asset === 'BNB') digits = 4;
+        if (asset === 'CIGO') digits = 2;
+        if (asset === 'USDT') digits = 2;
+        if (asset === 'COSIGO') digits = 2;
+
+        return num.toLocaleString(undefined, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: digits
+        });
+      }
+
+      function formatUsdAmount(value) {
+  const num = Number(value);
+
+  if (!Number.isFinite(num)) return '$0.00';
+
+  return `$${num.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
+
+      function getAvailableBalance(asset) {
+        if (asset === 'BNB') return currentBalances.BNB;
+        if (asset === 'CIGO') return currentBalances.CIGO;
+        if (asset === 'USDT') return currentBalances.USDT;
+        return null;
+      }
+
+      function getBalanceCheck(asset, amount) {
+        const available = getAvailableBalance(asset);
+
+        if (available == null) {
+          return { ok: true, available: null, checked: false };
+        }
+
+        return {
+          ok: Number(amount) <= Number(available) + 1e-12,
+          available,
+          checked: true
+        };
       }
 
       function getManualQuote(from, to, amount) {
@@ -1369,26 +1505,16 @@
           if (requestBodyEl) requestBodyEl.hidden = true;
 
           if (requestIdEl) requestIdEl.textContent = '-';
-          if (requestTimeEl) requestTimeEl.textContent = '-';
-          if (requestWalletEl) requestWalletEl.textContent = '-';
           if (requestRouteEl) requestRouteEl.textContent = '-';
           if (requestInputEl) requestInputEl.textContent = '-';
           if (requestOutputEl) requestOutputEl.textContent = '-';
           if (requestValueEl) requestValueEl.textContent = '-';
-          if (requestFeeEl) requestFeeEl.textContent = '-';
           if (requestStatusEl) requestStatusEl.textContent = getRequestStatusText('draft');
           applyRequestStatusStyle('');
 
-          if (requestSubmittedAtEl) requestSubmittedAtEl.textContent = '-';
-          if (requestReviewedAtEl) requestReviewedAtEl.textContent = '-';
-          if (requestCompletedAtEl) requestCompletedAtEl.textContent = '-';
-
-          if (requestSubmittedRowEl) requestSubmittedRowEl.hidden = true;
-          if (requestReviewedRowEl) requestReviewedRowEl.hidden = true;
-          if (requestCompletedRowEl) requestCompletedRowEl.hidden = true;
+          renderSettlementBox(null);
 
           if (requestPanelEl) requestPanelEl.hidden = true;
-
           return;
         }
 
@@ -1396,12 +1522,9 @@
 
         const fromAsset = request.fromAsset || request.from || '-';
         const toAsset = request.toAsset || request.to || '-';
-        const createdAt = request.createdAt || request.timestamp || '-';
-        const wallet = request.wallet || '-';
         const inputAmount = request.inputAmount || '-';
         const outputAmount = request.outputAmount || '-';
         const basisValue = request.basisValue ?? request.valueUsd ?? 0;
-        const feeAmount = request.feeAmount ?? request.feeUsd ?? 0;
         const statusText = request.status || 'draft';
         const displayId = request.id || request.localDraftId || '-';
 
@@ -1409,23 +1532,15 @@
         if (requestBodyEl) requestBodyEl.hidden = false;
 
         if (requestIdEl) requestIdEl.textContent = displayId;
-        if (requestTimeEl) requestTimeEl.textContent = createdAt;
-        if (requestWalletEl) requestWalletEl.textContent = wallet;
         if (requestRouteEl) requestRouteEl.textContent = `${fromAsset} → ${toAsset}`;
-        if (requestInputEl) requestInputEl.textContent = `${inputAmount} ${fromAsset}`;
-        if (requestOutputEl) requestOutputEl.textContent = `${outputAmount} ${toAsset}`;
-        if (requestValueEl) requestValueEl.textContent = `$${basisValue}`;
-        if (requestFeeEl) requestFeeEl.textContent = `$${feeAmount}`;
+        if (requestInputEl) requestInputEl.textContent = `${formatAssetAmount(inputAmount, fromAsset)} ${fromAsset}`;
+        if (requestOutputEl) requestOutputEl.textContent = `${formatAssetAmount(outputAmount, toAsset)} ${toAsset}`;
+        if (requestValueEl) requestValueEl.textContent = formatUsdAmount(basisValue);
         if (requestStatusEl) requestStatusEl.textContent = getRequestStatusText(statusText);
         applyRequestStatusStyle(statusText);
 
-        if (requestSubmittedAtEl) requestSubmittedAtEl.textContent = request.submittedAt || '-';
-        if (requestReviewedAtEl) requestReviewedAtEl.textContent = request.reviewedAt || '-';
-        if (requestCompletedAtEl) requestCompletedAtEl.textContent = request.completedAt || '-';
+        renderSettlementBox(request);
 
-        if (requestSubmittedRowEl) requestSubmittedRowEl.hidden = !request.submittedAt;
-        if (requestReviewedRowEl) requestReviewedRowEl.hidden = !request.reviewedAt;
-        if (requestCompletedRowEl) requestCompletedRowEl.hidden = !request.completedAt;
         if (requestPanelEl) requestPanelEl.hidden = false;
       }
 
@@ -1578,6 +1693,149 @@
           setQuoteStatus(`Refresh failed: ${err.message || err}`);
         }
       });
+
+      // ADD below getConnectedWalletText()
+
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function setSettlementState({ title, copy, steps = [], note = '', tone = '' }) {
+        if (!settlementBoxEl) return;
+
+        settlementBoxEl.hidden = false;
+        settlementBoxEl.className = 'settlement-box';
+
+        if (tone) {
+          settlementBoxEl.classList.add(tone);
+        }
+
+        if (settlementTitleEl) {
+          settlementTitleEl.textContent = title || 'Next step';
+        }
+
+        if (settlementCopyEl) {
+          settlementCopyEl.innerHTML = copy || '';
+        }
+
+        if (settlementListEl) {
+          if (steps.length) {
+            settlementListEl.hidden = false;
+            settlementListEl.innerHTML = steps
+              .map((step) => `<li>${escapeHtml(step)}</li>`)
+              .join('');
+          } else {
+            settlementListEl.hidden = true;
+            settlementListEl.innerHTML = '';
+          }
+        }
+
+        if (settlementNoteEl) {
+          if (note) {
+            settlementNoteEl.hidden = false;
+            settlementNoteEl.innerHTML = note;
+          } else {
+            settlementNoteEl.hidden = true;
+            settlementNoteEl.innerHTML = '';
+          }
+        }
+      }
+
+      function renderSettlementBox(request) {
+        if (!settlementBoxEl) return;
+
+        if (!request || (!request.id && !request.isLocalDraft && !request.localDraftId)) {
+          settlementBoxEl.hidden = true;
+          if (settlementListEl) {
+            settlementListEl.hidden = true;
+            settlementListEl.innerHTML = '';
+          }
+          if (settlementNoteEl) {
+            settlementNoteEl.hidden = true;
+            settlementNoteEl.innerHTML = '';
+          }
+          return;
+        }
+
+        const fromAsset = request.fromAsset || request.from || '-';
+        const toAsset = request.toAsset || request.to || '-';
+        const inputAmount = request.inputAmount || '-';
+        const outputAmount = request.outputAmount || '-';
+        const routeText = `${formatAssetAmount(inputAmount, fromAsset)} ${fromAsset} → ${formatAssetAmount(outputAmount, toAsset)} ${toAsset}`;
+        const statusText = request.status || 'draft';
+
+        if (statusText === 'draft') {
+          setSettlementState({
+            title: 'Ready to send',
+            copy: `Your request has been created on this device only. Review <strong>${escapeHtml(routeText)}</strong>, then click <strong>Send request</strong> when you are ready.`,
+            steps: [
+              'Confirm the route and amount.',
+              'Click Send request.',
+              'Return later to refresh status if needed.'
+            ],
+            note: '<strong>Not yet submitted:</strong> this request is still local and has not entered the review queue.',
+            tone: ''
+          });
+          return;
+        }
+
+        if (statusText === 'submitted') {
+          setSettlementState({
+            title: 'Waiting for review',
+            copy: `Your request for <strong>${escapeHtml(routeText)}</strong> has been sent and is now pending review.`,
+            steps: [
+              'No payment action is required yet.',
+              'Use Refresh status to check for the next step.',
+              'Wait until the status changes to Action required.'
+            ],
+            note: '<strong>Pending review:</strong> settlement instructions will appear here after approval.',
+            tone: 'settlement-pending'
+          });
+          return;
+        }
+
+        if (statusText === 'reviewed') {
+          setSettlementState({
+            title: 'Action required',
+            copy: `Your request for <strong>${escapeHtml(routeText)}</strong> has been reviewed. The next step is controlled settlement.`,
+            steps: [
+              `Prepare to send the ${fromAsset} side of this request exactly as reviewed.`,
+              'Use only the settlement address and amount provided by COSIGO operations.',
+              'Keep the transaction hash or payment proof ready for confirmation.',
+              `After receipt is confirmed, the ${toAsset} side can be completed and this request can move to finished.`
+            ],
+            note: `<strong>Important:</strong> do not send funds to any random wallet shown elsewhere. Settlement should follow the approved route for reference <strong>${escapeHtml(request.id || request.localDraftId || '-')}</strong>.`,
+            tone: 'settlement-action'
+          });
+          return;
+        }
+
+        if (statusText === 'completed') {
+          setSettlementState({
+            title: 'Request completed',
+            copy: `The request for <strong>${escapeHtml(routeText)}</strong> has been marked complete.`,
+            steps: [
+              'Review your wallet balances.',
+              'Keep the request reference for your records.',
+              'Create a new request if you want to start another conversion.'
+            ],
+            note: '<strong>Completed:</strong> the managed workflow for this request has been finished.',
+            tone: 'settlement-complete'
+          });
+          return;
+        }
+
+        setSettlementState({
+          title: 'Request status',
+          copy: `Current status: <strong>${escapeHtml(statusText)}</strong>.`,
+          note: 'Refresh status to check for updates.'
+        });
+      }
 
       function buildPancakeSwapUrl(from, to) {
         const base = 'https://pancakeswap.finance/swap?chain=bsc';
