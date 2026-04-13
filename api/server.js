@@ -79,6 +79,55 @@ function cleanNonNegativeAmount(value, fieldName) {
   return out;
 }
 
+function cleanOptionalString(value, maxLen = 500) {
+  const out = String(value ?? '').trim();
+  return out.slice(0, maxLen);
+}
+
+function cleanSettlementPayload(body, record) {
+  const settlementAsset = cleanString(
+    body.settlementAsset ?? record.fromAsset,
+    'settlementAsset'
+  ).toUpperCase();
+
+  if (!VALID_ASSETS.has(settlementAsset)) {
+    throw new Error('Invalid settlementAsset');
+  }
+
+  if (settlementAsset !== record.fromAsset) {
+    throw new Error(`settlementAsset must match request fromAsset (${record.fromAsset})`);
+  }
+
+  const settlementAmount = cleanPositiveAmount(
+    body.settlementAmount ?? record.inputAmount,
+    'settlementAmount'
+  );
+
+  const settlementNetwork = cleanString(
+    body.settlementNetwork ?? 'BNB Smart Chain',
+    'settlementNetwork'
+  );
+
+  const settlementAddress = cleanString(body.settlementAddress, 'settlementAddress');
+  if (!isEthAddress(settlementAddress)) {
+    throw new Error('settlementAddress must be a full 0x address');
+  }
+
+  const settlementNote = cleanOptionalString(body.settlementNote, 500);
+  const settlementWindow = cleanOptionalString(body.settlementWindow, 200);
+
+  return {
+    asset: settlementAsset,
+    amount: settlementAmount,
+    network: settlementNetwork,
+    address: settlementAddress,
+    note: settlementNote,
+    window: settlementWindow,
+    assignedAt: nowIso(),
+    assignedBy: 'admin',
+  };
+}
+
 function cleanNumber(value, fieldName, min = 0) {
   const out = Number(value);
   if (!Number.isFinite(out)) {
@@ -290,6 +339,7 @@ const server = http.createServer(async (req, res) => {
         feeRate,
         feeAmount,
         status: 'draft',
+        settlement: null,
         history: [
           buildHistoryEntry({
             action: 'created',
@@ -367,8 +417,17 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      if (nextStatus === 'reviewed') {
+        record.settlement = cleanSettlementPayload(body, record);
+      }
+
       record.status = nextStatus;
       record.updatedAt = nowIso();
+
+      if (nextStatus === 'completed' && record.settlement) {
+        record.settlement.completedAt = record.updatedAt;
+        record.settlement.completedNote = cleanOptionalString(body.completedNote, 500);
+      }
 
       if (nextStatus === 'submitted' && !record.submittedAt) {
         record.submittedAt = record.updatedAt;
@@ -417,4 +476,3 @@ ensureDataLayout()
     console.error('Failed to start trade-request-api', err);
     process.exit(1);
   });
-  
