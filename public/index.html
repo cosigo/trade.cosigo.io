@@ -800,8 +800,8 @@
         <article class="swap-shell">
           <h3>exchange interface</h3>
           <p>
-            Wallet connection, live balances, manual internal quoting, and server-backed conversion requests are active.
-            Requests can now be created, submitted, reviewed, and completed through the controlled trade workflow.
+            Wallet connection, live balances, manual internal quoting, and local draft creation are active.
+            Requests are written to the server when they are sent for review through the controlled trade workflow.
           </p>
 
           <div class="wallet-summary" id="walletSummary">
@@ -837,26 +837,34 @@
               </select>
             </div>
 
-            <div class="request-panel">
+            <div class="request-panel" id="requestPanel">
               <div class="request-head">conversion request</div>
               <div class="request-card" id="requestCard">
                 <div class="request-empty" id="requestEmpty">No conversion request created yet.</div>
 
                 <div class="request-body" id="requestBody" hidden>
-                  <div class="request-row"><strong>request id</strong><span id="requestId">-</span></div>
+                  <div class="request-row"><strong>reference</strong><span id="requestId">-</span></div>
                   <div class="request-row"><strong>timestamp</strong><span id="requestTime">-</span></div>
                   <div class="request-row"><strong>wallet</strong><span id="requestWallet">-</span></div>
                   <div class="request-row"><strong>route</strong><span id="requestRoute">-</span></div>
                   <div class="request-row"><strong>input</strong><span id="requestInput">-</span></div>
                   <div class="request-row"><strong>output</strong><span id="requestOutput">-</span></div>
-                  <div class="request-row"><strong>basis value</strong><span id="requestValue">-</span></div>
+                  <div class="request-row"><strong>estimated value</strong><span id="requestValue">-</span></div>
                   <div class="request-row"><strong>fee</strong><span id="requestFee">-</span></div>
                   <div class="request-row"><strong>status</strong><span id="requestStatus">draft</span></div>
+                  <div class="request-row" id="requestSubmittedRow" hidden><strong>submitted</strong><span
+                      id="requestSubmittedAt">-</span></div>
+                  <div class="request-row" id="requestReviewedRow" hidden><strong>reviewed</strong><span
+                      id="requestReviewedAt">-</span></div>
+                  <div class="request-row" id="requestCompletedRow" hidden><strong>completed</strong><span
+                      id="requestCompletedAt">-</span></div>
 
                   <div class="cta-row">
-                    <button class="btn btn-secondary" type="button" id="copyRequestBtn">Copy request</button>
-                    <button class="btn btn-secondary" type="button" id="clearRequestBtn">Clear request</button>
-                    <button class="btn btn-secondary" id="submitRequestBtn" type="button">Submit request</button>
+                    <button class="btn btn-secondary" type="button" id="copyRequestBtn" hidden>Copy request</button>
+                    <button class="btn btn-secondary" type="button" id="clearRequestBtn" hidden>Clear request</button>
+                    <button class="btn btn-secondary" id="submitRequestBtn" type="button" hidden>Send request</button>
+                    <button class="btn btn-secondary" type="button" id="refreshRequestBtn" hidden>Refresh
+                      status</button>
                   </div>
                 </div>
               </div>
@@ -885,18 +893,74 @@
             <div class="cta-row">
               <button class="btn btn-primary" type="button" id="connectBtn">Connect wallet</button>
               <button class="btn btn-secondary" type="button" id="quoteBtn">Get quote</button>
-              <button class="btn btn-secondary" type="button" id="swapBtn">Trade / Convert</button>
+              <button class="btn btn-secondary" type="button" id="swapBtn">Request swap</button>
             </div>
 
             <div class="swap-note" id="swapStatus">
-              Wallet integration and live routing are next. This shell is here to establish the final structure and user
-              path.
+              Get a quote first, then create and submit your request. After review, check back here for the next step or
+              final status.
             </div>
           </div>
         </article>
 
         <aside class="panel" id="verify">
-          <h3>verify before action</h3>
+          <h3>How this works</h3>
+          <p>
+            This interface uses a request flow. Your request is created first, then submitted,
+            then reviewed and completed through the controlled trade process.
+          </p>
+
+          <div class="link-list" style="margin-top:18px;">
+            <div class="link-item">
+              <strong>step 1</strong>
+              connect your wallet on BNB Chain
+            </div>
+
+            <div class="link-item">
+              <strong>step 2</strong>
+              choose the asset you want to move from and the asset you want to move into
+            </div>
+
+            <div class="link-item">
+              <strong>step 3</strong>
+              enter the amount you want to convert
+            </div>
+
+            <div class="link-item">
+              <strong>step 4</strong>
+              click <em>Get quote</em> to preview the result
+            </div>
+
+            <div class="link-item">
+              <strong>step 5</strong>
+              click <em>Request swap</em> to create your request
+            </div>
+
+            <div class="link-item">
+              <strong>step 6</strong>
+              review the request card and confirm the route, amount, and status
+            </div>
+
+            <div class="link-item">
+              <strong>step 7</strong>
+              click <em>Send request</em> to send your request for review
+            </div>
+
+            <div class="link-item">
+              <strong>step 8</strong>
+              wait for review and completion, then reload later to check final status
+            </div>
+          </div>
+
+          <div class="token-note" style="margin-top:18px;">
+            <strong>status guide:</strong><br>
+            Not yet submitted = request is still on this device only.<br>
+            Pending review = request was sent and is waiting for approval.<br>
+            Action required = check the request for the next step.<br>
+            Completed = the request lifecycle is finished.
+          </div>
+
+          <h3 style="margin-top:22px;">verify before action</h3>
           <p>
             Always verify the asset, route, and destination before submitting a request.
           </p>
@@ -944,10 +1008,9 @@
 
   <footer class="footer wrap">
     <div class="footer-card">
-      <strong>Phase note:</strong> this is the first real shell for
-      <strong>trade.cosigo.io</strong>. Phase note: This is the first working request-based exchange interface for
-      trade.cosigo.io. Wallet connection, live balances, manual quote logic, server-backed requests, and admin-reviewed
-      lifecycle handling are active.
+      <strong>Phase note:</strong> this is the first working request-based exchange interface for
+      <strong>trade.cosigo.io</strong>. Wallet connection, live balances, manual quote logic,
+      local draft creation, submitted server-backed requests, and admin-reviewed lifecycle handling are active.
     </div>
   </footer>
 
@@ -970,6 +1033,7 @@
       const amountInEl = document.getElementById('amountIn');
       const quoteStatusField = document.getElementById('quoteStatusField');
 
+      const requestPanelEl = document.getElementById('requestPanel');
       const requestEmptyEl = document.getElementById('requestEmpty');
       const requestBodyEl = document.getElementById('requestBody');
       const requestIdEl = document.getElementById('requestId');
@@ -984,6 +1048,15 @@
       const copyRequestBtn = document.getElementById('copyRequestBtn');
       const clearRequestBtn = document.getElementById('clearRequestBtn');
       const submitRequestBtn = document.getElementById('submitRequestBtn');
+      const refreshRequestBtn = document.getElementById('refreshRequestBtn');
+
+      const requestSubmittedAtEl = document.getElementById('requestSubmittedAt');
+      const requestReviewedAtEl = document.getElementById('requestReviewedAt');
+      const requestCompletedAtEl = document.getElementById('requestCompletedAt');
+
+      const requestSubmittedRowEl = document.getElementById('requestSubmittedRow');
+      const requestReviewedRowEl = document.getElementById('requestReviewedRow');
+      const requestCompletedRowEl = document.getElementById('requestCompletedRow');
 
       const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
@@ -1006,18 +1079,10 @@
         if (quoteStatusField) quoteStatusField.value = message;
       }
 
-      function setAppStatus(message) {
-        if (status) status.textContent = message;
-      }
-
-      function setQuoteStatus(message) {
-        if (quoteStatusField) quoteStatusField.value = message;
-      }
-
       function getRequestStatusText(status) {
-        if (status === 'draft') return 'Draft request created';
-        if (status === 'submitted') return 'Submitted and awaiting admin review';
-        if (status === 'reviewed') return 'Reviewed and ready for completion';
+        if (status === 'draft') return 'Not yet submitted';
+        if (status === 'submitted') return 'Pending review';
+        if (status === 'reviewed') return 'Action required';
         if (status === 'completed') return 'Completed';
         return status || '-';
       }
@@ -1077,6 +1142,8 @@
         document.body.removeChild(ta);
         return ok;
       }
+
+      if (requestPanelEl) requestPanelEl.hidden = true;
 
       async function ensureBSC() {
         const { ethereum } = window;
@@ -1268,6 +1335,11 @@
 
           const saved = JSON.parse(raw);
 
+          if (saved?.isLocalDraft) {
+            saveRequest(saved);
+            return;
+          }
+
           if (!saved?.id) {
             saveRequest(null);
             return;
@@ -1290,7 +1362,7 @@
       }
 
       function renderRequest(request) {
-        if (!request || !request.id) {
+        if (!request || (!request.id && !request.isLocalDraft && !request.localDraftId)) {
           currentRequest = null;
 
           if (requestEmptyEl) requestEmptyEl.hidden = false;
@@ -1304,8 +1376,18 @@
           if (requestOutputEl) requestOutputEl.textContent = '-';
           if (requestValueEl) requestValueEl.textContent = '-';
           if (requestFeeEl) requestFeeEl.textContent = '-';
-          if (requestStatusEl) requestStatusEl.textContent = 'draft';
+          if (requestStatusEl) requestStatusEl.textContent = getRequestStatusText('draft');
           applyRequestStatusStyle('');
+
+          if (requestSubmittedAtEl) requestSubmittedAtEl.textContent = '-';
+          if (requestReviewedAtEl) requestReviewedAtEl.textContent = '-';
+          if (requestCompletedAtEl) requestCompletedAtEl.textContent = '-';
+
+          if (requestSubmittedRowEl) requestSubmittedRowEl.hidden = true;
+          if (requestReviewedRowEl) requestReviewedRowEl.hidden = true;
+          if (requestCompletedRowEl) requestCompletedRowEl.hidden = true;
+
+          if (requestPanelEl) requestPanelEl.hidden = true;
 
           return;
         }
@@ -1321,11 +1403,12 @@
         const basisValue = request.basisValue ?? request.valueUsd ?? 0;
         const feeAmount = request.feeAmount ?? request.feeUsd ?? 0;
         const statusText = request.status || 'draft';
+        const displayId = request.id || request.localDraftId || '-';
 
         if (requestEmptyEl) requestEmptyEl.hidden = true;
         if (requestBodyEl) requestBodyEl.hidden = false;
 
-        if (requestIdEl) requestIdEl.textContent = request.id;
+        if (requestIdEl) requestIdEl.textContent = displayId;
         if (requestTimeEl) requestTimeEl.textContent = createdAt;
         if (requestWalletEl) requestWalletEl.textContent = wallet;
         if (requestRouteEl) requestRouteEl.textContent = `${fromAsset} → ${toAsset}`;
@@ -1335,12 +1418,26 @@
         if (requestFeeEl) requestFeeEl.textContent = `$${feeAmount}`;
         if (requestStatusEl) requestStatusEl.textContent = getRequestStatusText(statusText);
         applyRequestStatusStyle(statusText);
+
+        if (requestSubmittedAtEl) requestSubmittedAtEl.textContent = request.submittedAt || '-';
+        if (requestReviewedAtEl) requestReviewedAtEl.textContent = request.reviewedAt || '-';
+        if (requestCompletedAtEl) requestCompletedAtEl.textContent = request.completedAt || '-';
+
+        if (requestSubmittedRowEl) requestSubmittedRowEl.hidden = !request.submittedAt;
+        if (requestReviewedRowEl) requestReviewedRowEl.hidden = !request.reviewedAt;
+        if (requestCompletedRowEl) requestCompletedRowEl.hidden = !request.completedAt;
+        if (requestPanelEl) requestPanelEl.hidden = false;
       }
 
       function saveRequest(request) {
         currentRequest = request || null;
 
-        if (currentRequest?.id) {
+        if (currentRequest?.isLocalDraft) {
+          localStorage.setItem(
+            'trade.cosigo.currentRequest',
+            JSON.stringify(currentRequest)
+          );
+        } else if (currentRequest?.id) {
           localStorage.setItem(
             'trade.cosigo.currentRequest',
             JSON.stringify({ id: currentRequest.id })
@@ -1357,24 +1454,70 @@
         saveRequest(null);
       }
 
-      async function createConversionRequest(payload) {
-        const data = await apiJson(`${API_BASE}/requests/create`, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        });
+      function createLocalDraftRequest({ wallet, fromAsset, toAsset, inputAmount, outputAmount, basisValue, feeAmount }) {
+        const draft = {
+          isLocalDraft: true,
+          localDraftId: `draft_${Date.now().toString(36)}`,
+          createdAt: new Date().toISOString(),
+          wallet,
+          fromAsset,
+          toAsset,
+          route: `${fromAsset} → ${toAsset}`,
+          inputAmount,
+          outputAmount,
+          basisValue,
+          feeAmount,
+          status: 'draft'
+        };
 
-        saveRequest(data.request);
-        return data.request;
+        saveRequest(draft);
+        return draft;
       }
 
       async function submitCurrentRequest() {
-        if (!currentRequest?.id) return null;
+        if (!currentRequest) return null;
+
+        if (currentRequest.isLocalDraft) {
+          const createData = await apiJson(`${API_BASE}/requests/create`, {
+            method: 'POST',
+            body: JSON.stringify({
+              wallet: currentRequest.wallet,
+              fromAsset: currentRequest.fromAsset,
+              toAsset: currentRequest.toAsset,
+              inputAmount: String(currentRequest.inputAmount),
+              outputAmount: String(currentRequest.outputAmount),
+              basisValue: Number(currentRequest.basisValue || 0),
+              basis: {
+                CIGO_USD_BASIS,
+                COSIGO_USD_BASIS,
+                USDT_USD_BASIS: 1
+              },
+              feeRate: INTERNAL_FEE_RATE,
+              feeAmount: String(currentRequest.feeAmount || '0')
+            }),
+          });
+
+          const createdRequest = createData.request;
+
+          const submittedData = await apiJson(
+            `${API_BASE}/requests/${encodeURIComponent(createdRequest.id)}/status`,
+            {
+              method: 'POST',
+              body: JSON.stringify({ status: 'submitted' }),
+            }
+          );
+
+          saveRequest(submittedData.request);
+          return submittedData.request;
+        }
+
+        if (!currentRequest.id) return null;
 
         const data = await apiJson(
           `${API_BASE}/requests/${encodeURIComponent(currentRequest.id)}/status`,
           {
             method: 'POST',
-            body: JSON.stringify({ status: 'Submitted and awaiting admin review' }),
+            body: JSON.stringify({ status: 'submitted' }),
           }
         );
 
@@ -1383,27 +1526,58 @@
       }
 
       function syncRequestButtons() {
-        if (!submitRequestBtn) return;
-        submitRequestBtn.disabled = !currentRequest || currentRequest.status !== 'Draft request created';
-      }
+        const hasRequest = !!currentRequest;
+        const canSend = hasRequest && currentRequest.status === 'draft';
+        const canRefresh = hasRequest && !!currentRequest.id;
+        const canCopy = hasRequest;
+        const canClear = hasRequest;
 
-      async function apiJson(url, options = {}) {
-        const response = await fetch(url, {
-          ...options,
-          headers: {
-            'Content-Type': 'application/json',
-            ...(options.headers || {}),
-          },
-        });
-
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(data.error || `Request failed (${response.status})`);
+        if (copyRequestBtn) {
+          copyRequestBtn.hidden = !canCopy;
+          copyRequestBtn.disabled = !canCopy;
         }
 
-        return data;
+        if (clearRequestBtn) {
+          clearRequestBtn.hidden = !canClear;
+          clearRequestBtn.disabled = !canClear;
+        }
+
+        if (submitRequestBtn) {
+          submitRequestBtn.hidden = !canSend;
+          submitRequestBtn.disabled = !canSend;
+        }
+
+        if (refreshRequestBtn) {
+          refreshRequestBtn.hidden = !canRefresh;
+          refreshRequestBtn.disabled = !canRefresh;
+        }
       }
+
+      async function refreshCurrentRequestFromServer() {
+        if (!currentRequest?.id) return null;
+
+        const data = await apiJson(
+          `${API_BASE}/requests/${encodeURIComponent(currentRequest.id)}`
+        );
+
+        saveRequest(data.request);
+        return data.request;
+      }
+
+      refreshRequestBtn?.addEventListener('click', async () => {
+        try {
+          const request = await refreshCurrentRequestFromServer();
+
+          if (request) {
+            setQuoteStatus(`Request refreshed: ${request.id} (${request.status})`);
+          } else {
+            setQuoteStatus('No server-backed request to refresh.');
+          }
+        } catch (err) {
+          console.error(err);
+          setQuoteStatus(`Refresh failed: ${err.message || err}`);
+        }
+      });
 
       function buildPancakeSwapUrl(from, to) {
         const base = 'https://pancakeswap.finance/swap?chain=bsc';
@@ -1606,19 +1780,13 @@
 
         if (manualQuote) {
           try {
-            const request = await createConversionRequest({
+            const request = createLocalDraftRequest({
               wallet: connectedAddress,
               fromAsset: from,
               toAsset: to,
               inputAmount: String(amount),
               outputAmount: String(manualQuote.output),
-              basisValue: Number(manualQuote.netUsdValue),
-              basis: {
-                CIGO_USD_BASIS,
-                COSIGO_USD_BASIS,
-                USDT_USD_BASIS: 1
-              },
-              feeRate: INTERNAL_FEE_RATE,
+              basisValue: String(manualQuote.netUsdValue),
               feeAmount: String(manualQuote.feeUsdValue)
             });
 
@@ -1627,13 +1795,13 @@
               (from === 'COSIGO' && to === 'CIGO')
             ) {
               setQuoteStatus(
-                `Direct internal conversion request created: ${request.id} | ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to}`
+                `Direct internal conversion request created: ${request.id || request.localDraftId} | ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to}`
               );
               return;
             }
 
             setQuoteStatus(
-              `Internal conversion request created: ${request.id} | ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to}`
+              `Internal conversion request created: ${request.id || request.localDraftId} | ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to}`
             );
             return;
           } catch (err) {
