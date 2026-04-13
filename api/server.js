@@ -9,6 +9,17 @@ const ADMIN_KEY = process.env.TRADE_ADMIN_KEY || '';
 
 const INDEX_FILE = path.join(DATA_DIR, 'index.json');
 
+const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
+const TROY_OUNCE_MG = 31103.4768;
+
+const DEFAULT_SETTINGS = {
+  ozUsdReference: 100,
+  digitalExitFeeRate: 0.015,
+  physicalRedemptionFeeRate: 0.25,
+  version: 1,
+  updatedAt: null
+};
+
 const VALID_ASSETS = new Set(['BNB', 'CIGO', 'USDT', 'COSIGO']);
 
 const INTERNAL_ROUTES = new Set([
@@ -164,6 +175,8 @@ async function ensureDataLayout() {
   } catch {
     await writeJsonAtomic(INDEX_FILE, {});
   }
+
+  await ensureSettingsFile();
 }
 
 async function loadIndex() {
@@ -173,6 +186,107 @@ async function loadIndex() {
   } catch {
     return {};
   }
+}
+
+async function ensureSettingsFile() {
+  try {
+    await fs.access(SETTINGS_FILE);
+  } catch {
+    const initial = {
+      ...DEFAULT_SETTINGS,
+      updatedAt: nowIso(),
+    };
+    await writeJsonAtomic(SETTINGS_FILE, initial);
+  }
+}
+
+async function loadSettings() {
+  try {
+    const raw = await fs.readFile(SETTINGS_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+
+    return {
+      ...DEFAULT_SETTINGS,
+      ...parsed,
+    };
+  } catch {
+    return {
+      ...DEFAULT_SETTINGS,
+      updatedAt: nowIso(),
+    };
+  }
+}
+
+function getCosigoUsdBasis(ozUsdReference) {
+  return Number(ozUsdReference) / TROY_OUNCE_MG;
+}
+
+function getUsdBasis(asset, settings) {
+  if (asset === 'USDT') return 1;
+  if (asset === 'CIGO') return 0.01;
+  if (asset === 'COSIGO') return getCosigoUsdBasis(settings.ozUsdReference);
+  return null;
+}
+
+function getPricingPolicy(fromAsset, toAsset, settings) {
+  if (toAsset === 'COSIGO' && fromAsset !== 'COSIGO') {
+    return { feeRate: 0, policy: 'onboarding' };
+  }
+
+  if (fromAsset === 'COSIGO' && toAsset !== 'COSIGO') {
+    return { feeRate: Number(settings.digitalExitFeeRate || 0), policy: 'digital_exit' };
+  }
+
+  return { feeRate: 0, policy: 'internal' };
+}
+
+function formatAmount(value, digits = 18) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) {
+    throw new Error('Invalid numeric value');
+  }
+
+  return num.toFixed(digits).replace(/\.?0+$/, '');
+}
+
+function quoteRoute(fromAsset, toAsset, inputAmount, settings) {
+  const inputNum = Number(inputAmount);
+  if (!Number.isFinite(inputNum) || inputNum <= 0) {
+    throw new Error('inputAmount must be greater than zero');
+  }
+
+  const fromUsd = getUsdBasis(fromAsset, settings);
+  const toUsd = getUsdBasis(toAsset, settings);
+
+  if (!fromUsd || !toUsd) {
+    throw new Error('Unable to quote this route');
+  }
+
+  const pricing = getPricingPolicy(fromAsset, toAsset, settings);
+  const grossUsdValue = inputNum * fromUsd;
+  const feeUsdValue = grossUsdValue * pricing.feeRate;
+  const netUsdValue = grossUsdValue - feeUsdValue;
+  const outputAmount = netUsdValue / toUsd;
+
+  return {
+    pricingPolicy: pricing.policy,
+    feeRate: pricing.feeRate,
+    grossUsdValue,
+    feeUsdValue,
+    netUsdValue,
+    outputAmount: formatAmount(outputAmount),
+    feeAmount: formatAmount(feeUsdValue),
+    basisSnapshot: {
+      ozUsdReference: Number(settings.ozUsdReference),
+      cosigoUsdBasis: getCosigoUsdBasis(settings.ozUsdReference),
+      cigoUsdBasis: 0.01,
+      usdtUsdBasis: 1,
+      digitalExitFeeRate: Number(settings.digitalExitFeeRate || 0),
+      physicalRedemptionFeeRate: Number(settings.physicalRedemptionFeeRate || 0),
+      version: Number(settings.version || 1),
+      updatedAt: settings.updatedAt || nowIso(),
+    }
+  };
 }
 
 function getRequestPath(record) {
@@ -309,15 +423,19 @@ const server = http.createServer(async (req, res) => {
       }
 
       const inputAmount = cleanPositiveAmount(body.inputAmount, 'inputAmount');
-      const outputAmount = cleanPositiveAmount(body.outputAmount, 'outputAmount');
-      const feeAmount = cleanNonNegativeAmount(body.feeAmount ?? '0', 'feeAmount');
-      const feeRate = cleanNumber(body.feeRate ?? 0, 'feeRate', 0);
-      const basisValue = cleanNumber(body.basisValue ?? 0, 'basisValue', 0);
+
+      const settings = await loadSettings();
+      const serverQuote = quoteRoute(fromAsset, toAsset, inputAmount, settings);
+
+      const outputAmount = serverQuote.outputAmount;
+      const feeAmount = serverQuote.feeAmount;
+      const feeRate = serverQuote.feeRate;
+      const basisValue = serverQuote.netUsdValue;
 
       const basis = {
-        CIGO_USD_BASIS: cleanNumber(body.basis?.CIGO_USD_BASIS, 'basis.CIGO_USD_BASIS', 0),
-        COSIGO_USD_BASIS: cleanNumber(body.basis?.COSIGO_USD_BASIS, 'basis.COSIGO_USD_BASIS', 0),
-        USDT_USD_BASIS: cleanNumber(body.basis?.USDT_USD_BASIS, 'basis.USDT_USD_BASIS', 0),
+        CIGO_USD_BASIS: serverQuote.basisSnapshot.cigoUsdBasis,
+        COSIGO_USD_BASIS: serverQuote.basisSnapshot.cosigoUsdBasis,
+        USDT_USD_BASIS: serverQuote.basisSnapshot.usdtUsdBasis,
       };
 
       const createdAt = nowIso();
@@ -338,6 +456,8 @@ const server = http.createServer(async (req, res) => {
         basis,
         feeRate,
         feeAmount,
+        pricingPolicy: serverQuote.pricingPolicy,
+        basisSnapshot: serverQuote.basisSnapshot,
         status: 'draft',
         settlement: null,
         history: [

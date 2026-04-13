@@ -230,14 +230,56 @@
                     const next = btn.getAttribute('data-next');
 
                     try {
+                        const payload = {
+                            status: next,
+                            note: `Admin changed status to ${next}`
+                        };
+
+                        if (next === 'reviewed') {
+                            const settlementAddress = window.prompt('Settlement address (full 0x address):', '');
+
+                            if (!settlementAddress || !settlementAddress.trim()) {
+                                setMsg('Reviewed update cancelled: settlement address is required.');
+                                return;
+                            }
+
+                            const settlementAmount = window.prompt(
+                                'Settlement amount (leave blank to use request input amount):',
+                                ''
+                            );
+
+                            const settlementNetwork = window.prompt(
+                                'Settlement network:',
+                                'BNB Smart Chain'
+                            );
+
+                            const settlementNote = window.prompt(
+                                'Settlement note (optional):',
+                                'Send exact amount only'
+                            );
+
+                            payload.settlementAddress = settlementAddress.trim();
+
+                            if (settlementAmount && settlementAmount.trim()) {
+                                payload.settlementAmount = settlementAmount.trim();
+                            }
+
+                            if (settlementNetwork && settlementNetwork.trim()) {
+                                payload.settlementNetwork = settlementNetwork.trim();
+                            }
+
+                            if (settlementNote && settlementNote.trim()) {
+                                payload.settlementNote = settlementNote.trim();
+                            }
+                        }
+
                         setMsg(`Updating ${id} to ${next}...`);
+
                         await apiJson(`/api/requests/${encodeURIComponent(id)}/status`, {
                             method: 'POST',
-                            body: JSON.stringify({
-                                status: next,
-                                note: `Admin changed status to ${next}`
-                            }),
+                            body: JSON.stringify(payload),
                         });
+
                         await loadQueue();
                         setMsg(`Updated ${id} to ${next}.`);
                     } catch (err) {

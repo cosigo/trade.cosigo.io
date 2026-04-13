@@ -1384,15 +1384,15 @@
       }
 
       function formatUsdAmount(value) {
-  const num = Number(value);
+        const num = Number(value);
 
-  if (!Number.isFinite(num)) return '$0.00';
+        if (!Number.isFinite(num)) return '$0.00';
 
-  return `$${num.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
-}
+        return `$${num.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`;
+      }
 
       function getAvailableBalance(asset) {
         if (asset === 'BNB') return currentBalances.BNB;
@@ -1800,16 +1800,44 @@
         }
 
         if (statusText === 'reviewed') {
+          const settlement = request.settlement || null;
+
+          if (!settlement || !settlement.address) {
+            setSettlementState({
+              title: 'Action required',
+              copy: `Your request for <strong>${escapeHtml(routeText)}</strong> has been reviewed, but the settlement details are not attached yet.`,
+              steps: [
+                'Do not send funds yet.',
+                'Refresh status again shortly.',
+                'Only proceed once the destination wallet and amount appear here.'
+              ],
+              note: `<strong>Important:</strong> this request is reviewed, but no settlement destination is available yet for reference <strong>${escapeHtml(request.id || request.localDraftId || '-')}</strong>.`,
+              tone: 'settlement-action'
+            });
+            return;
+          }
+
+          const settlementAsset = settlement.asset || fromAsset;
+          const settlementAmount = settlement.amount || inputAmount;
+          const settlementNetwork = settlement.network || 'BNB Smart Chain';
+          const settlementAddress = settlement.address || '';
+          const settlementNote = settlement.note || '';
+
           setSettlementState({
             title: 'Action required',
-            copy: `Your request for <strong>${escapeHtml(routeText)}</strong> has been reviewed. The next step is controlled settlement.`,
+            copy:
+              `Send <strong>${formatAssetAmount(settlementAmount, settlementAsset)} ${escapeHtml(settlementAsset)}</strong> ` +
+              `on <strong>${escapeHtml(settlementNetwork)}</strong> to the approved settlement address below.`,
             steps: [
-              `Prepare to send the ${fromAsset} side of this request exactly as reviewed.`,
-              'Use only the settlement address and amount provided by COSIGO operations.',
-              'Keep the transaction hash or payment proof ready for confirmation.',
-              `After receipt is confirmed, the ${toAsset} side can be completed and this request can move to finished.`
+              'Verify the wallet address carefully before sending.',
+              `Send the exact approved amount of ${settlementAsset}.`,
+              'Keep the transaction hash or payment proof.',
+              'Refresh status after sending so you can track completion.'
             ],
-            note: `<strong>Important:</strong> do not send funds to any random wallet shown elsewhere. Settlement should follow the approved route for reference <strong>${escapeHtml(request.id || request.localDraftId || '-')}</strong>.`,
+            note:
+              `<strong>Settlement address:</strong><br><code>${escapeHtml(settlementAddress)}</code>` +
+              (settlementNote ? `<br><br><strong>Note:</strong> ${escapeHtml(settlementNote)}` : '') +
+              `<br><br><strong>Reference:</strong> ${escapeHtml(request.id || request.localDraftId || '-')}`,
             tone: 'settlement-action'
           });
           return;
