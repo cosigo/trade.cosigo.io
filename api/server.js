@@ -16,6 +16,11 @@ const DEFAULT_SETTINGS = {
   ozUsdReference: 100,
   digitalExitFeeRate: 0.015,
   physicalRedemptionFeeRate: 0.25,
+
+  cigoUsdReference: 0.01,
+  cigoInboundHaircutRate: 0.10,
+  cigoOutboundPremiumRate: 0.05,
+
   version: 1,
   updatedAt: null
 };
@@ -221,6 +226,16 @@ function getCosigoUsdBasis(ozUsdReference) {
   return Number(ozUsdReference) / TROY_OUNCE_MG;
 }
 
+function getCigoInboundBasis(settings) {
+  return Number(settings.cigoUsdReference || 0.01) *
+    (1 - Number(settings.cigoInboundHaircutRate || 0));
+}
+
+function getCigoOutboundBasis(settings) {
+  return Number(settings.cigoUsdReference || 0.01) *
+    (1 + Number(settings.cigoOutboundPremiumRate || 0));
+}
+
 function getUsdBasis(asset, settings) {
   if (asset === 'USDT') return 1;
   if (asset === 'CIGO') return 0.01;
@@ -229,15 +244,26 @@ function getUsdBasis(asset, settings) {
 }
 
 function getPricingPolicy(fromAsset, toAsset, settings) {
-  if (toAsset === 'COSIGO' && fromAsset !== 'COSIGO') {
-    return { feeRate: 0, policy: 'onboarding' };
+  if (fromAsset === 'USDT' && (toAsset === 'COSIGO' || toAsset === 'CIGO')) {
+    return { type: 'free_onboarding', feeRate: 0 };
   }
 
-  if (fromAsset === 'COSIGO' && toAsset !== 'COSIGO') {
-    return { feeRate: Number(settings.digitalExitFeeRate || 0), policy: 'digital_exit' };
+  if ((fromAsset === 'COSIGO' || fromAsset === 'CIGO') && toAsset === 'USDT') {
+    return {
+      type: 'digital_exit_to_usdt',
+      feeRate: Number(settings.digitalExitFeeRate || 0)
+    };
   }
 
-  return { feeRate: 0, policy: 'internal' };
+  if (fromAsset === 'CIGO' && toAsset === 'COSIGO') {
+    return { type: 'protected_bridge_in', feeRate: 0 };
+  }
+
+  if (fromAsset === 'COSIGO' && toAsset === 'CIGO') {
+    return { type: 'protected_bridge_out', feeRate: 0 };
+  }
+
+  return { type: 'unsupported', feeRate: 0 };
 }
 
 function formatAmount(value, digits = 18) {
@@ -255,31 +281,73 @@ function quoteRoute(fromAsset, toAsset, inputAmount, settings) {
     throw new Error('inputAmount must be greater than zero');
   }
 
-  const fromUsd = getUsdBasis(fromAsset, settings);
-  const toUsd = getUsdBasis(toAsset, settings);
+  const pricing = getPricingPolicy(fromAsset, toAsset, settings);
+  const cosigoUsdBasis = getCosigoUsdBasis(settings.ozUsdReference);
+  const cigoUsdReference = Number(settings.cigoUsdReference || 0.01);
+  const cigoInboundBasis = getCigoInboundBasis(settings);
+  const cigoOutboundBasis = getCigoOutboundBasis(settings);
 
-  if (!fromUsd || !toUsd) {
-    throw new Error('Unable to quote this route');
+  let grossUsdValue = 0;
+  let feeUsdValue = 0;
+  let netUsdValue = 0;
+  let outputAmountNum = 0;
+
+  if (pricing.type === 'free_onboarding') {
+    if (toAsset === 'COSIGO') {
+      grossUsdValue = inputNum;
+      feeUsdValue = 0;
+      netUsdValue = grossUsdValue;
+      outputAmountNum = netUsdValue / cosigoUsdBasis;
+    } else if (toAsset === 'CIGO') {
+      grossUsdValue = inputNum;
+      feeUsdValue = 0;
+      netUsdValue = grossUsdValue;
+      outputAmountNum = netUsdValue / cigoUsdReference;
+    } else {
+      throw new Error('Unsupported onboarding route');
+    }
+  } else if (pricing.type === 'digital_exit_to_usdt') {
+    if (fromAsset === 'COSIGO') {
+      grossUsdValue = inputNum * cosigoUsdBasis;
+    } else if (fromAsset === 'CIGO') {
+      grossUsdValue = inputNum * cigoUsdReference;
+    } else {
+      throw new Error('Unsupported digital exit route');
+    }
+
+    feeUsdValue = grossUsdValue * pricing.feeRate;
+    netUsdValue = grossUsdValue - feeUsdValue;
+    outputAmountNum = netUsdValue;
+  } else if (pricing.type === 'protected_bridge_in') {
+    grossUsdValue = inputNum * cigoInboundBasis;
+    feeUsdValue = 0;
+    netUsdValue = grossUsdValue;
+    outputAmountNum = netUsdValue / cosigoUsdBasis;
+  } else if (pricing.type === 'protected_bridge_out') {
+    grossUsdValue = inputNum * cosigoUsdBasis;
+    feeUsdValue = 0;
+    netUsdValue = grossUsdValue;
+    outputAmountNum = netUsdValue / cigoOutboundBasis;
+  } else {
+    throw new Error('Unsupported route');
   }
 
-  const pricing = getPricingPolicy(fromAsset, toAsset, settings);
-  const grossUsdValue = inputNum * fromUsd;
-  const feeUsdValue = grossUsdValue * pricing.feeRate;
-  const netUsdValue = grossUsdValue - feeUsdValue;
-  const outputAmount = netUsdValue / toUsd;
-
   return {
-    pricingPolicy: pricing.policy,
+    pricingPolicy: pricing.type,
     feeRate: pricing.feeRate,
     grossUsdValue,
     feeUsdValue,
     netUsdValue,
-    outputAmount: formatAmount(outputAmount),
+    outputAmount: formatAmount(outputAmountNum),
     feeAmount: formatAmount(feeUsdValue),
     basisSnapshot: {
       ozUsdReference: Number(settings.ozUsdReference),
-      cosigoUsdBasis: getCosigoUsdBasis(settings.ozUsdReference),
-      cigoUsdBasis: 0.01,
+      cosigoUsdBasis,
+      cigoUsdReference,
+      cigoInboundHaircutRate: Number(settings.cigoInboundHaircutRate || 0),
+      cigoOutboundPremiumRate: Number(settings.cigoOutboundPremiumRate || 0),
+      cigoInboundBasis,
+      cigoOutboundBasis,
       usdtUsdBasis: 1,
       digitalExitFeeRate: Number(settings.digitalExitFeeRate || 0),
       physicalRedemptionFeeRate: Number(settings.physicalRedemptionFeeRate || 0),
@@ -391,6 +459,86 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'GET' && pathname === '/api/health') {
       sendJson(res, 200, { ok: true, service: 'trade-request-api' });
+      return;
+    }
+
+    if (req.method === 'GET' && pathname === '/api/settings/public') {
+      const settings = await loadSettings();
+
+      sendJson(res, 200, {
+        ok: true,
+        settings: {
+          ozUsdReference: Number(settings.ozUsdReference),
+          cigoUsdReference: Number(settings.cigoUsdReference || 0.01),
+          cigoInboundHaircutRate: Number(settings.cigoInboundHaircutRate || 0),
+          cigoOutboundPremiumRate: Number(settings.cigoOutboundPremiumRate || 0),
+          cigoInboundBasis:
+            Number(settings.cigoUsdReference || 0.01) *
+            (1 - Number(settings.cigoInboundHaircutRate || 0)),
+          cigoOutboundBasis:
+            Number(settings.cigoUsdReference || 0.01) *
+            (1 + Number(settings.cigoOutboundPremiumRate || 0)),
+          cosigoUsdBasis: getCosigoUsdBasis(settings.ozUsdReference),
+          usdtUsdBasis: 1,
+          digitalExitFeeRate: Number(settings.digitalExitFeeRate || 0),
+          version: Number(settings.version || 1),
+          updatedAt: settings.updatedAt || null,
+        },
+      });
+      return;
+    }
+
+    if (req.method === 'GET' && pathname === '/api/admin/settings') {
+      if (!isAdmin(req)) {
+        sendError(res, 403, 'Admin key required');
+        return;
+      }
+
+      const settings = await loadSettings();
+
+      sendJson(res, 200, {
+        ok: true,
+        settings: {
+          ozUsdReference: Number(settings.ozUsdReference),
+          digitalExitFeeRate: Number(settings.digitalExitFeeRate || 0),
+          physicalRedemptionFeeRate: Number(settings.physicalRedemptionFeeRate || 0),
+          cigoUsdReference: Number(settings.cigoUsdReference || 0.01),
+          cigoInboundHaircutRate: Number(settings.cigoInboundHaircutRate || 0),
+          cigoOutboundPremiumRate: Number(settings.cigoOutboundPremiumRate || 0),
+          version: Number(settings.version || 1),
+          updatedAt: settings.updatedAt || null,
+        },
+      });
+      return;
+    }
+
+    if (req.method === 'POST' && pathname === '/api/admin/settings') {
+      if (!isAdmin(req)) {
+        sendError(res, 403, 'Admin key required');
+        return;
+      }
+
+      const body = await parseJsonBody(req);
+      const current = await loadSettings();
+
+      const nextSettings = {
+        ...current,
+        ozUsdReference: cleanNumber(body.ozUsdReference, 'ozUsdReference', 0),
+        digitalExitFeeRate: cleanNumber(body.digitalExitFeeRate, 'digitalExitFeeRate', 0),
+        physicalRedemptionFeeRate: cleanNumber(body.physicalRedemptionFeeRate, 'physicalRedemptionFeeRate', 0),
+        cigoUsdReference: cleanNumber(body.cigoUsdReference, 'cigoUsdReference', 0),
+        cigoInboundHaircutRate: cleanNumber(body.cigoInboundHaircutRate, 'cigoInboundHaircutRate', 0),
+        cigoOutboundPremiumRate: cleanNumber(body.cigoOutboundPremiumRate, 'cigoOutboundPremiumRate', 0),
+        version: Number(current.version || 1) + 1,
+        updatedAt: nowIso(),
+      };
+
+      await writeJsonAtomic(SETTINGS_FILE, nextSettings);
+
+      sendJson(res, 200, {
+        ok: true,
+        settings: nextSettings
+      });
       return;
     }
 
@@ -596,3 +744,4 @@ ensureDataLayout()
     console.error('Failed to start trade-request-api', err);
     process.exit(1);
   });
+

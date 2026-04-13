@@ -70,6 +70,31 @@
             word-break: break-word;
         }
 
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .form-grid label {
+            display: grid;
+            gap: 6px;
+        }
+
+        .form-grid span {
+            color: #9cabbd;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: .08em;
+        }
+
+        @media (max-width: 780px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .status {
             display: inline-block;
             padding: 6px 10px;
@@ -128,6 +153,53 @@
             <div class="msg" id="msg">Ready.</div>
         </div>
 
+        <div class="card" id="pricingControls">
+            <h2>Pricing controls</h2>
+            <p>Adjust live pricing inputs without editing code.</p>
+
+            <div class="form-grid">
+                <label>
+                    <span>Reference ounce basis (USD)</span>
+                    <input id="settingsOzUsdReference" type="number" step="0.0001" min="0" />
+                </label>
+
+                <label>
+                    <span>Digital exit fee rate</span>
+                    <input id="settingsDigitalExitFeeRate" type="number" step="0.0001" min="0" />
+                </label>
+
+                <label>
+                    <span>Physical redemption fee rate</span>
+                    <input id="settingsPhysicalRedemptionFeeRate" type="number" step="0.0001" min="0" />
+                </label>
+
+                <label>
+                    <span>CIGO reference (USD)</span>
+                    <input id="settingsCigoUsdReference" type="number" step="0.0001" min="0" />
+                </label>
+
+                <label>
+                    <span>CIGO inbound haircut rate</span>
+                    <input id="settingsCigoInboundHaircutRate" type="number" step="0.0001" min="0" />
+                </label>
+
+                <label>
+                    <span>CIGO outbound premium rate</span>
+                    <input id="settingsCigoOutboundPremiumRate" type="number" step="0.0001" min="0" />
+                </label>
+            </div>
+
+            <div class="row" style="margin-top:12px;">
+                <div><strong>Version:</strong> <span id="settingsVersion">-</span></div>
+                <div><strong>Updated:</strong> <span id="settingsUpdatedAt">-</span></div>
+            </div>
+
+            <div class="row" style="margin-top:14px;">
+                <button type="button" id="loadSettingsBtn">Load settings</button>
+                <button type="button" id="saveSettingsBtn">Save settings</button>
+            </div>
+        </div>
+
         <div id="list"></div>
     </div>
 
@@ -137,6 +209,17 @@
         const loadBtn = document.getElementById('loadBtn');
         const listEl = document.getElementById('list');
         const msgEl = document.getElementById('msg');
+
+        const settingsOzUsdReferenceEl = document.getElementById('settingsOzUsdReference');
+        const settingsDigitalExitFeeRateEl = document.getElementById('settingsDigitalExitFeeRate');
+        const settingsPhysicalRedemptionFeeRateEl = document.getElementById('settingsPhysicalRedemptionFeeRate');
+        const settingsCigoUsdReferenceEl = document.getElementById('settingsCigoUsdReference');
+        const settingsCigoInboundHaircutRateEl = document.getElementById('settingsCigoInboundHaircutRate');
+        const settingsCigoOutboundPremiumRateEl = document.getElementById('settingsCigoOutboundPremiumRate');
+        const settingsVersionEl = document.getElementById('settingsVersion');
+        const settingsUpdatedAtEl = document.getElementById('settingsUpdatedAt');
+        const loadSettingsBtn = document.getElementById('loadSettingsBtn');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
 
         adminKeyEl.value = sessionStorage.getItem('trade.adminKey') || '';
 
@@ -175,6 +258,46 @@
             }
 
             return data;
+        }
+
+        async function loadAdminSettings() {
+            const data = await apiJson('/api/admin/settings');
+            const settings = data.settings || {};
+
+            if (settingsOzUsdReferenceEl) settingsOzUsdReferenceEl.value = settings.ozUsdReference ?? '';
+            if (settingsDigitalExitFeeRateEl) settingsDigitalExitFeeRateEl.value = settings.digitalExitFeeRate ?? '';
+            if (settingsPhysicalRedemptionFeeRateEl) settingsPhysicalRedemptionFeeRateEl.value = settings.physicalRedemptionFeeRate ?? '';
+            if (settingsCigoUsdReferenceEl) settingsCigoUsdReferenceEl.value = settings.cigoUsdReference ?? '';
+            if (settingsCigoInboundHaircutRateEl) settingsCigoInboundHaircutRateEl.value = settings.cigoInboundHaircutRate ?? '';
+            if (settingsCigoOutboundPremiumRateEl) settingsCigoOutboundPremiumRateEl.value = settings.cigoOutboundPremiumRate ?? '';
+
+            if (settingsVersionEl) settingsVersionEl.textContent = settings.version ?? '-';
+            if (settingsUpdatedAtEl) settingsUpdatedAtEl.textContent = settings.updatedAt || '-';
+
+            return settings;
+        }
+
+        async function saveAdminSettings() {
+            const payload = {
+                ozUsdReference: Number(settingsOzUsdReferenceEl?.value || 0),
+                digitalExitFeeRate: Number(settingsDigitalExitFeeRateEl?.value || 0),
+                physicalRedemptionFeeRate: Number(settingsPhysicalRedemptionFeeRateEl?.value || 0),
+                cigoUsdReference: Number(settingsCigoUsdReferenceEl?.value || 0),
+                cigoInboundHaircutRate: Number(settingsCigoInboundHaircutRateEl?.value || 0),
+                cigoOutboundPremiumRate: Number(settingsCigoOutboundPremiumRateEl?.value || 0),
+            };
+
+            const data = await apiJson('/api/admin/settings', {
+                method: 'POST',
+                body: JSON.stringify(payload),
+            });
+
+            const settings = data.settings || {};
+
+            if (settingsVersionEl) settingsVersionEl.textContent = settings.version ?? '-';
+            if (settingsUpdatedAtEl) settingsUpdatedAtEl.textContent = settings.updatedAt || '-';
+
+            return settings;
         }
 
         function renderRequests(items) {
@@ -303,7 +426,32 @@
             }
         }
 
+        loadSettingsBtn?.addEventListener('click', async () => {
+            try {
+                setMsg('Loading pricing settings...');
+                await loadAdminSettings();
+                setMsg('Pricing settings loaded.');
+            } catch (err) {
+                setMsg(`Load settings failed: ${err.message}`);
+            }
+        });
+
+        saveSettingsBtn?.addEventListener('click', async () => {
+            try {
+                setMsg('Saving pricing settings...');
+                await saveAdminSettings();
+                await loadAdminSettings();
+                setMsg('Pricing settings saved and reloaded.');
+            } catch (err) {
+                setMsg(`Save settings failed: ${err.message}`);
+            }
+        });
+
         loadBtn.addEventListener('click', loadQueue);
+        loadAdminSettings().catch((err) => {
+            setMsg(`Initial settings load failed: ${err.message}`);
+        });
+
     </script>
 </body>
 

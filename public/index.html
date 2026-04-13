@@ -902,6 +902,8 @@
             </div>
           </div>
 
+          <div class="token-note" id="pricingPolicyNote">Loading pricing policy...</div>
+
           <div class="swap-box">
             <div class="swap-row">
               <label for="fromToken">from</label>
@@ -1130,14 +1132,27 @@
       const settlementListEl = document.getElementById('settlementList');
       const settlementNoteEl = document.getElementById('settlementNote');
 
+      const pricingPolicyNoteEl = document.getElementById('pricingPolicyNote');
+
       const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
       const WBNB_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
 
-      const CIGO_USD_BASIS = 0.01;
-      const COSIGO_USD_BASIS = 0.0045;
-      const INTERNAL_FEE_RATE = 0;
       const MARKET_ROUTE_ENABLED = false;
+
+      const PRICING_STATE = {
+        ozUsdReference: 100,
+        cigoUsdReference: 0.01,
+        cigoInboundHaircutRate: 0.10,
+        cigoOutboundPremiumRate: 0.05,
+        cigoInboundBasis: 0.009,
+        cigoOutboundBasis: 0.0105,
+        cosigoUsdBasis: 100 / 31103.4768,
+        usdtUsdBasis: 1,
+        digitalExitFeeRate: 0.015,
+        version: 1,
+        updatedAt: null
+      };
 
       let currentRequest = null;
       let connectedAddress = null;
@@ -1394,6 +1409,101 @@
         })}`;
       }
 
+      function formatPercent(value) {
+        const num = Number(value) * 100;
+
+        if (!Number.isFinite(num)) return '0%';
+
+        return `${num.toLocaleString(undefined, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2
+        })}%`;
+      }
+
+      function getQuoteAdjustmentText(manualQuote) {
+        if (!manualQuote) return '';
+
+        if (manualQuote.policyLabel === 'protected bridge in') {
+          return `protected haircut applied (${formatPercent(PRICING_STATE.cigoInboundHaircutRate)})`;
+        }
+
+        if (manualQuote.policyLabel === 'protected bridge out') {
+          return `protected premium applied (${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)})`;
+        }
+
+        return `fee ${formatPercent(manualQuote.feeRate)}`;
+      }
+
+      function updatePricingPolicyNote() {
+        if (!pricingPolicyNoteEl) return;
+
+        pricingPolicyNoteEl.innerHTML =
+          `<strong>Current pricing policy:</strong><br>` +
+          `Reference ounce basis: <strong>${formatUsdAmount(PRICING_STATE.ozUsdReference)}</strong> per troy ounce.<br>` +
+          `USDT onboarding into <strong>CIGO</strong> or <strong>COSIGO</strong>: <strong>0%</strong>.<br>` +
+          `Digital exit from <strong>CIGO</strong> or <strong>COSIGO</strong> into <strong>USDT</strong>: <strong>${formatPercent(PRICING_STATE.digitalExitFeeRate)}</strong>.<br>` +
+          `CIGO → COSIGO uses a protected <strong>${formatPercent(PRICING_STATE.cigoInboundHaircutRate)}</strong> haircut.<br>` +
+          `COSIGO → CIGO uses a protected <strong>${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)}</strong> premium.`;
+      }
+      async function loadPricingState() {
+        try {
+          const data = await apiJson(`${API_BASE}/settings/public`);
+          const settings = data.settings || {};
+
+          PRICING_STATE.ozUsdReference = Number(settings.ozUsdReference || PRICING_STATE.ozUsdReference);
+          PRICING_STATE.cigoUsdReference = Number(settings.cigoUsdReference || PRICING_STATE.cigoUsdReference);
+          PRICING_STATE.cigoInboundHaircutRate = Number(settings.cigoInboundHaircutRate || PRICING_STATE.cigoInboundHaircutRate);
+          PRICING_STATE.cigoOutboundPremiumRate = Number(settings.cigoOutboundPremiumRate || PRICING_STATE.cigoOutboundPremiumRate);
+          PRICING_STATE.cigoInboundBasis = Number(settings.cigoInboundBasis || PRICING_STATE.cigoInboundBasis);
+          PRICING_STATE.cigoOutboundBasis = Number(settings.cigoOutboundBasis || PRICING_STATE.cigoOutboundBasis);
+          PRICING_STATE.cosigoUsdBasis = Number(settings.cosigoUsdBasis || PRICING_STATE.cosigoUsdBasis);
+          PRICING_STATE.usdtUsdBasis = Number(settings.usdtUsdBasis || PRICING_STATE.usdtUsdBasis);
+          PRICING_STATE.digitalExitFeeRate = Number(settings.digitalExitFeeRate || PRICING_STATE.digitalExitFeeRate);
+          PRICING_STATE.version = Number(settings.version || PRICING_STATE.version);
+          PRICING_STATE.updatedAt = settings.updatedAt || null;
+
+          updatePricingPolicyNote();
+        } catch (err) {
+          console.error('Failed to load pricing settings', err);
+          updatePricingPolicyNote();
+        }
+      }
+
+      function getRouteFeePolicy(from, to) {
+        if (from === 'USDT' && (to === 'COSIGO' || to === 'CIGO')) {
+          return {
+            feeRate: 0,
+            policyLabel: 'free onboarding'
+          };
+        }
+
+        if ((from === 'COSIGO' || from === 'CIGO') && to === 'USDT') {
+          return {
+            feeRate: PRICING_STATE.digitalExitFeeRate,
+            policyLabel: 'digital exit to USDT'
+          };
+        }
+
+        if (from === 'CIGO' && to === 'COSIGO') {
+          return {
+            feeRate: 0,
+            policyLabel: 'protected bridge in'
+          };
+        }
+
+        if (from === 'COSIGO' && to === 'CIGO') {
+          return {
+            feeRate: 0,
+            policyLabel: 'protected bridge out'
+          };
+        }
+
+        return {
+          feeRate: 0,
+          policyLabel: 'inactive'
+        };
+      }
+
       function getAvailableBalance(asset) {
         if (asset === 'BNB') return currentBalances.BNB;
         if (asset === 'CIGO') return currentBalances.CIGO;
@@ -1418,27 +1528,54 @@
       function getManualQuote(from, to, amount) {
         if (!Number.isFinite(amount) || amount <= 0) return null;
 
-        const usdMap = {
-          USDT: 1,
-          CIGO: CIGO_USD_BASIS,
-          COSIGO: COSIGO_USD_BASIS
-        };
+        const policy = getRouteFeePolicy(from, to);
 
-        const fromUsd = usdMap[from];
-        const toUsd = usdMap[to];
+        let grossUsdValue = 0;
+        let feeUsdValue = 0;
+        let netUsdValue = 0;
+        let output = 0;
 
-        if (!fromUsd || !toUsd) return null;
-
-        const grossUsdValue = amount * fromUsd;
-        const feeUsdValue = grossUsdValue * INTERNAL_FEE_RATE;
-        const netUsdValue = grossUsdValue - feeUsdValue;
-        const output = netUsdValue / toUsd;
+        if (from === 'USDT' && to === 'COSIGO') {
+          grossUsdValue = amount;
+          feeUsdValue = 0;
+          netUsdValue = grossUsdValue;
+          output = netUsdValue / PRICING_STATE.cosigoUsdBasis;
+        } else if (from === 'USDT' && to === 'CIGO') {
+          grossUsdValue = amount;
+          feeUsdValue = 0;
+          netUsdValue = grossUsdValue;
+          output = netUsdValue / PRICING_STATE.cigoUsdReference;
+        } else if (from === 'COSIGO' && to === 'USDT') {
+          grossUsdValue = amount * PRICING_STATE.cosigoUsdBasis;
+          feeUsdValue = grossUsdValue * policy.feeRate;
+          netUsdValue = grossUsdValue - feeUsdValue;
+          output = netUsdValue;
+        } else if (from === 'CIGO' && to === 'USDT') {
+          grossUsdValue = amount * PRICING_STATE.cigoUsdReference;
+          feeUsdValue = grossUsdValue * policy.feeRate;
+          netUsdValue = grossUsdValue - feeUsdValue;
+          output = netUsdValue;
+        } else if (from === 'CIGO' && to === 'COSIGO') {
+          grossUsdValue = amount * PRICING_STATE.cigoInboundBasis;
+          feeUsdValue = 0;
+          netUsdValue = grossUsdValue;
+          output = netUsdValue / PRICING_STATE.cosigoUsdBasis;
+        } else if (from === 'COSIGO' && to === 'CIGO') {
+          grossUsdValue = amount * PRICING_STATE.cosigoUsdBasis;
+          feeUsdValue = 0;
+          netUsdValue = grossUsdValue;
+          output = netUsdValue / PRICING_STATE.cigoOutboundBasis;
+        } else {
+          return null;
+        }
 
         return {
           grossUsdValue,
           feeUsdValue,
           netUsdValue,
-          output
+          output,
+          feeRate: policy.feeRate,
+          policyLabel: policy.policyLabel
         };
       }
 
@@ -1569,7 +1706,17 @@
         saveRequest(null);
       }
 
-      function createLocalDraftRequest({ wallet, fromAsset, toAsset, inputAmount, outputAmount, basisValue, feeAmount }) {
+      function createLocalDraftRequest({
+        wallet,
+        fromAsset,
+        toAsset,
+        inputAmount,
+        outputAmount,
+        basisValue,
+        feeAmount,
+        feeRate,
+        pricingPolicy
+      }) {
         const draft = {
           isLocalDraft: true,
           localDraftId: `draft_${Date.now().toString(36)}`,
@@ -1582,6 +1729,8 @@
           outputAmount,
           basisValue,
           feeAmount,
+          feeRate,
+          pricingPolicy,
           status: 'draft'
         };
 
@@ -1599,16 +1748,7 @@
               wallet: currentRequest.wallet,
               fromAsset: currentRequest.fromAsset,
               toAsset: currentRequest.toAsset,
-              inputAmount: String(currentRequest.inputAmount),
-              outputAmount: String(currentRequest.outputAmount),
-              basisValue: Number(currentRequest.basisValue || 0),
-              basis: {
-                CIGO_USD_BASIS,
-                COSIGO_USD_BASIS,
-                USDT_USD_BASIS: 1
-              },
-              feeRate: INTERNAL_FEE_RATE,
-              feeAmount: String(currentRequest.feeAmount || '0')
+              inputAmount: String(currentRequest.inputAmount)
             }),
           });
 
@@ -2013,18 +2153,10 @@
         const manualQuote = getManualQuote(from, to, amount);
 
         if (manualQuote) {
-          if (
-            (from === 'CIGO' && to === 'COSIGO') ||
-            (from === 'COSIGO' && to === 'CIGO')
-          ) {
-            setQuoteStatus(
-              `Direct internal conversion: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
-            );
-            return;
-          }
+          const adjustmentText = getQuoteAdjustmentText(manualQuote);
 
           setQuoteStatus(
-            `Internal quote: ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | value ≈ $${formatQuoteNumber(manualQuote.netUsdValue, 4)} | fee: $${formatQuoteNumber(manualQuote.feeUsdValue, 4)}`
+            `Quote (${manualQuote.policyLabel}): ${formatQuoteNumber(amount)} ${from} ≈ ${formatQuoteNumber(manualQuote.output)} ${to} | ${adjustmentText} | net value ≈ ${formatUsdAmount(manualQuote.netUsdValue)}`
           );
           return;
         }
@@ -2073,7 +2205,9 @@
               inputAmount: String(amount),
               outputAmount: String(manualQuote.output),
               basisValue: String(manualQuote.netUsdValue),
-              feeAmount: String(manualQuote.feeUsdValue)
+              feeAmount: String(manualQuote.feeUsdValue),
+              feeRate: manualQuote.feeRate,
+              pricingPolicy: manualQuote.policyLabel
             });
 
             if (
@@ -2140,6 +2274,7 @@
         // existing copy logic
       });
 
+      loadPricingState();
       loadSavedRequest();
 
       (async () => {
