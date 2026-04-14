@@ -806,7 +806,7 @@
             </div>
             <div class="stat">
               <div class="stat-label">network focus</div>
-              <div class="stat-value">BNB Smart Chain first</div>
+              <div class="stat-value">wallet rail = BSC wallet session</div>
             </div>
             <div class="stat">
               <div class="stat-label">current mode</div>
@@ -911,7 +911,6 @@
                 <option>CIGO</option>
                 <option>USDT</option>
                 <option>COSIGO</option>
-                <option>BNB</option>
               </select>
             </div>
 
@@ -955,7 +954,6 @@
                 <option>CIGO</option>
                 <option>USDT</option>
                 <option>COSIGO</option>
-                <option>BNB</option>
               </select>
             </div>
 
@@ -2161,13 +2159,6 @@
           return;
         }
 
-        if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
-          setQuoteStatus(
-            `BNB route detected: external market path only. ${rawAmount} ${from} → ${to}. Public routing is currently disabled while internal basis testing is active.`
-          );
-          return;
-        }
-
         setQuoteStatus('This route is not active in the current shell.');
       });
 
@@ -2229,13 +2220,6 @@
             setQuoteStatus(`Conversion request failed: ${err.message || err}`);
             return;
           }
-        }
-
-        if ((from === 'BNB' && to === 'CIGO') || (from === 'CIGO' && to === 'BNB')) {
-          setQuoteStatus(
-            `Optional public market route detected for ${rawAmount} ${from} → ${to}. Routing is intentionally disabled for now.`
-          );
-          return;
         }
 
         setQuoteStatus('This route is not active in the current shell.');
