@@ -226,6 +226,16 @@ function getCosigoUsdBasis(ozUsdReference) {
   return Number(ozUsdReference) / TROY_OUNCE_MG;
 }
 
+function getCigoSellBasis(settings) {
+  return Number(settings.cigoUsdReference || 0.01) *
+    (1 - Number(settings.cigoInboundHaircutRate || 0));
+}
+
+function getCigoBuyBasis(settings) {
+  return Number(settings.cigoUsdReference || 0.01) *
+    (1 + Number(settings.cigoOutboundPremiumRate || 0));
+}
+
 function getCigoInboundBasis(settings) {
   return Number(settings.cigoUsdReference || 0.01) *
     (1 - Number(settings.cigoInboundHaircutRate || 0));
@@ -244,23 +254,34 @@ function getUsdBasis(asset, settings) {
 }
 
 function getPricingPolicy(fromAsset, toAsset, settings) {
-  if (fromAsset === 'USDT' && (toAsset === 'COSIGO' || toAsset === 'CIGO')) {
-    return { type: 'free_onboarding', feeRate: 0 };
+  if (fromAsset === 'USDT' && toAsset === 'COSIGO') {
+    return { type: 'usdt_to_cosigo', feeRate: 0 };
   }
 
-  if ((fromAsset === 'COSIGO' || fromAsset === 'CIGO') && toAsset === 'USDT') {
+  if (fromAsset === 'COSIGO' && toAsset === 'USDT') {
     return {
-      type: 'digital_exit_to_usdt',
+      type: 'cosigo_to_usdt',
       feeRate: Number(settings.digitalExitFeeRate || 0)
     };
   }
 
+  if (fromAsset === 'USDT' && toAsset === 'CIGO') {
+    return { type: 'usdt_to_cigo', feeRate: 0 };
+  }
+
+  if (fromAsset === 'CIGO' && toAsset === 'USDT') {
+    return { type: 'cigo_to_usdt', feeRate: 0 };
+  }
+
   if (fromAsset === 'CIGO' && toAsset === 'COSIGO') {
-    return { type: 'protected_bridge_in', feeRate: 0 };
+    return { type: 'cigo_to_cosigo', feeRate: 0 };
   }
 
   if (fromAsset === 'COSIGO' && toAsset === 'CIGO') {
-    return { type: 'protected_bridge_out', feeRate: 0 };
+    return {
+      type: 'cosigo_to_cigo',
+      feeRate: Number(settings.digitalExitFeeRate || 0)
+    };
   }
 
   return { type: 'unsupported', feeRate: 0 };
@@ -282,54 +303,51 @@ function quoteRoute(fromAsset, toAsset, inputAmount, settings) {
   }
 
   const pricing = getPricingPolicy(fromAsset, toAsset, settings);
+  if (pricing.type === 'unsupported') {
+    throw new Error('Unsupported route');
+  }
+
   const cosigoUsdBasis = getCosigoUsdBasis(settings.ozUsdReference);
   const cigoUsdReference = Number(settings.cigoUsdReference || 0.01);
-  const cigoInboundBasis = getCigoInboundBasis(settings);
-  const cigoOutboundBasis = getCigoOutboundBasis(settings);
+  const cigoSellBasis = getCigoSellBasis(settings);
+  const cigoBuyBasis = getCigoBuyBasis(settings);
+  const cosigoExitFeeRate = Number(settings.digitalExitFeeRate || 0);
 
   let grossUsdValue = 0;
   let feeUsdValue = 0;
   let netUsdValue = 0;
   let outputAmountNum = 0;
 
-  if (pricing.type === 'free_onboarding') {
-    if (toAsset === 'COSIGO') {
-      grossUsdValue = inputNum;
-      feeUsdValue = 0;
-      netUsdValue = grossUsdValue;
-      outputAmountNum = netUsdValue / cosigoUsdBasis;
-    } else if (toAsset === 'CIGO') {
-      grossUsdValue = inputNum;
-      feeUsdValue = 0;
-      netUsdValue = grossUsdValue;
-      outputAmountNum = netUsdValue / cigoUsdReference;
-    } else {
-      throw new Error('Unsupported onboarding route');
-    }
-  } else if (pricing.type === 'digital_exit_to_usdt') {
-    if (fromAsset === 'COSIGO') {
-      grossUsdValue = inputNum * cosigoUsdBasis;
-    } else if (fromAsset === 'CIGO') {
-      grossUsdValue = inputNum * cigoUsdReference;
-    } else {
-      throw new Error('Unsupported digital exit route');
-    }
-
-    feeUsdValue = grossUsdValue * pricing.feeRate;
-    netUsdValue = grossUsdValue - feeUsdValue;
-    outputAmountNum = netUsdValue;
-  } else if (pricing.type === 'protected_bridge_in') {
-    grossUsdValue = inputNum * cigoInboundBasis;
+  if (pricing.type === 'usdt_to_cosigo') {
+    grossUsdValue = inputNum;
     feeUsdValue = 0;
     netUsdValue = grossUsdValue;
     outputAmountNum = netUsdValue / cosigoUsdBasis;
-  } else if (pricing.type === 'protected_bridge_out') {
+  } else if (pricing.type === 'cosigo_to_usdt') {
     grossUsdValue = inputNum * cosigoUsdBasis;
+    feeUsdValue = grossUsdValue * cosigoExitFeeRate;
+    netUsdValue = grossUsdValue - feeUsdValue;
+    outputAmountNum = netUsdValue;
+  } else if (pricing.type === 'usdt_to_cigo') {
+    grossUsdValue = inputNum;
     feeUsdValue = 0;
     netUsdValue = grossUsdValue;
-    outputAmountNum = netUsdValue / cigoOutboundBasis;
-  } else {
-    throw new Error('Unsupported route');
+    outputAmountNum = netUsdValue / cigoBuyBasis;
+  } else if (pricing.type === 'cigo_to_usdt') {
+    grossUsdValue = inputNum * cigoSellBasis;
+    feeUsdValue = 0;
+    netUsdValue = grossUsdValue;
+    outputAmountNum = netUsdValue;
+  } else if (pricing.type === 'cigo_to_cosigo') {
+    grossUsdValue = inputNum * cigoSellBasis;
+    feeUsdValue = 0;
+    netUsdValue = grossUsdValue;
+    outputAmountNum = netUsdValue / cosigoUsdBasis;
+  } else if (pricing.type === 'cosigo_to_cigo') {
+    grossUsdValue = inputNum * cosigoUsdBasis;
+    feeUsdValue = grossUsdValue * cosigoExitFeeRate;
+    netUsdValue = grossUsdValue - feeUsdValue;
+    outputAmountNum = netUsdValue / cigoBuyBasis;
   }
 
   return {
@@ -346,10 +364,10 @@ function quoteRoute(fromAsset, toAsset, inputAmount, settings) {
       cigoUsdReference,
       cigoInboundHaircutRate: Number(settings.cigoInboundHaircutRate || 0),
       cigoOutboundPremiumRate: Number(settings.cigoOutboundPremiumRate || 0),
-      cigoInboundBasis,
-      cigoOutboundBasis,
+      cigoSellBasis,
+      cigoBuyBasis,
       usdtUsdBasis: 1,
-      digitalExitFeeRate: Number(settings.digitalExitFeeRate || 0),
+      digitalExitFeeRate: cosigoExitFeeRate,
       physicalRedemptionFeeRate: Number(settings.physicalRedemptionFeeRate || 0),
       version: Number(settings.version || 1),
       updatedAt: settings.updatedAt || nowIso(),
@@ -472,12 +490,8 @@ const server = http.createServer(async (req, res) => {
           cigoUsdReference: Number(settings.cigoUsdReference || 0.01),
           cigoInboundHaircutRate: Number(settings.cigoInboundHaircutRate || 0),
           cigoOutboundPremiumRate: Number(settings.cigoOutboundPremiumRate || 0),
-          cigoInboundBasis:
-            Number(settings.cigoUsdReference || 0.01) *
-            (1 - Number(settings.cigoInboundHaircutRate || 0)),
-          cigoOutboundBasis:
-            Number(settings.cigoUsdReference || 0.01) *
-            (1 + Number(settings.cigoOutboundPremiumRate || 0)),
+          cigoSellBasis: getCigoSellBasis(settings),
+          cigoBuyBasis: getCigoBuyBasis(settings),
           cosigoUsdBasis: getCosigoUsdBasis(settings.ozUsdReference),
           usdtUsdBasis: 1,
           digitalExitFeeRate: Number(settings.digitalExitFeeRate || 0),

@@ -1143,8 +1143,8 @@
         cigoUsdReference: 0.01,
         cigoInboundHaircutRate: 0.10,
         cigoOutboundPremiumRate: 0.05,
-        cigoInboundBasis: 0.009,
-        cigoOutboundBasis: 0.0105,
+        cigoSellBasis: 0.009,
+        cigoBuyBasis: 0.0105,
         cosigoUsdBasis: 100 / 31103.4768,
         usdtUsdBasis: 1,
         digitalExitFeeRate: 0.015,
@@ -1421,12 +1421,28 @@
       function getQuoteAdjustmentText(manualQuote) {
         if (!manualQuote) return '';
 
-        if (manualQuote.policyLabel === 'protected bridge in') {
-          return `protected haircut applied (${formatPercent(PRICING_STATE.cigoInboundHaircutRate)})`;
+        if (manualQuote.policyLabel === 'usdt to cosigo') {
+          return 'COSIGO reference basis applied';
         }
 
-        if (manualQuote.policyLabel === 'protected bridge out') {
-          return `protected premium applied (${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)})`;
+        if (manualQuote.policyLabel === 'cosigo to usdt') {
+          return `COSIGO exit fee applied (${formatPercent(PRICING_STATE.digitalExitFeeRate)})`;
+        }
+
+        if (manualQuote.policyLabel === 'usdt to cigo') {
+          return `CIGO buy basis premium applied (${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)})`;
+        }
+
+        if (manualQuote.policyLabel === 'cigo to usdt') {
+          return `CIGO sell basis discount applied (${formatPercent(PRICING_STATE.cigoInboundHaircutRate)})`;
+        }
+
+        if (manualQuote.policyLabel === 'cigo to cosigo') {
+          return `CIGO sell basis discount applied (${formatPercent(PRICING_STATE.cigoInboundHaircutRate)})`;
+        }
+
+        if (manualQuote.policyLabel === 'cosigo to cigo') {
+          return `COSIGO exit fee and CIGO buy basis premium applied`;
         }
 
         return `fee ${formatPercent(manualQuote.feeRate)}`;
@@ -1435,13 +1451,17 @@
       function updatePricingPolicyNote() {
         if (!pricingPolicyNoteEl) return;
 
+        const updatedText = PRICING_STATE.updatedAt
+          ? `Pricing version ${PRICING_STATE.version} · updated ${PRICING_STATE.updatedAt}`
+          : `Pricing version ${PRICING_STATE.version}`;
+
         pricingPolicyNoteEl.innerHTML =
           `<strong>Current pricing policy:</strong><br>` +
           `Reference ounce basis: <strong>${formatUsdAmount(PRICING_STATE.ozUsdReference)}</strong> per troy ounce.<br>` +
-          `USDT onboarding into <strong>CIGO</strong> or <strong>COSIGO</strong>: <strong>0%</strong>.<br>` +
-          `Digital exit from <strong>CIGO</strong> or <strong>COSIGO</strong> into <strong>USDT</strong>: <strong>${formatPercent(PRICING_STATE.digitalExitFeeRate)}</strong>.<br>` +
-          `CIGO → COSIGO uses a protected <strong>${formatPercent(PRICING_STATE.cigoInboundHaircutRate)}</strong> haircut.<br>` +
-          `COSIGO → CIGO uses a protected <strong>${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)}</strong> premium.`;
+          `COSIGO digital exit fee: <strong>${formatPercent(PRICING_STATE.digitalExitFeeRate)}</strong>.<br>` +
+          `CIGO sell basis discount: <strong>${formatPercent(PRICING_STATE.cigoInboundHaircutRate)}</strong>.<br>` +
+          `CIGO buy basis premium: <strong>${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)}</strong>.<br>` +
+          `<span style="color:#9cabbd;">${updatedText}</span>`;
       }
       async function loadPricingState() {
         try {
@@ -1452,8 +1472,8 @@
           PRICING_STATE.cigoUsdReference = Number(settings.cigoUsdReference || PRICING_STATE.cigoUsdReference);
           PRICING_STATE.cigoInboundHaircutRate = Number(settings.cigoInboundHaircutRate || PRICING_STATE.cigoInboundHaircutRate);
           PRICING_STATE.cigoOutboundPremiumRate = Number(settings.cigoOutboundPremiumRate || PRICING_STATE.cigoOutboundPremiumRate);
-          PRICING_STATE.cigoInboundBasis = Number(settings.cigoInboundBasis || PRICING_STATE.cigoInboundBasis);
-          PRICING_STATE.cigoOutboundBasis = Number(settings.cigoOutboundBasis || PRICING_STATE.cigoOutboundBasis);
+          PRICING_STATE.cigoSellBasis = Number(settings.cigoSellBasis || PRICING_STATE.cigoSellBasis);
+          PRICING_STATE.cigoBuyBasis = Number(settings.cigoBuyBasis || PRICING_STATE.cigoBuyBasis);
           PRICING_STATE.cosigoUsdBasis = Number(settings.cosigoUsdBasis || PRICING_STATE.cosigoUsdBasis);
           PRICING_STATE.usdtUsdBasis = Number(settings.usdtUsdBasis || PRICING_STATE.usdtUsdBasis);
           PRICING_STATE.digitalExitFeeRate = Number(settings.digitalExitFeeRate || PRICING_STATE.digitalExitFeeRate);
@@ -1468,31 +1488,45 @@
       }
 
       function getRouteFeePolicy(from, to) {
-        if (from === 'USDT' && (to === 'COSIGO' || to === 'CIGO')) {
+        if (from === 'USDT' && to === 'COSIGO') {
           return {
             feeRate: 0,
-            policyLabel: 'free onboarding'
+            policyLabel: 'usdt to cosigo'
           };
         }
 
-        if ((from === 'COSIGO' || from === 'CIGO') && to === 'USDT') {
+        if (from === 'COSIGO' && to === 'USDT') {
           return {
             feeRate: PRICING_STATE.digitalExitFeeRate,
-            policyLabel: 'digital exit to USDT'
+            policyLabel: 'cosigo to usdt'
+          };
+        }
+
+        if (from === 'USDT' && to === 'CIGO') {
+          return {
+            feeRate: 0,
+            policyLabel: 'usdt to cigo'
+          };
+        }
+
+        if (from === 'CIGO' && to === 'USDT') {
+          return {
+            feeRate: 0,
+            policyLabel: 'cigo to usdt'
           };
         }
 
         if (from === 'CIGO' && to === 'COSIGO') {
           return {
             feeRate: 0,
-            policyLabel: 'protected bridge in'
+            policyLabel: 'cigo to cosigo'
           };
         }
 
         if (from === 'COSIGO' && to === 'CIGO') {
           return {
-            feeRate: 0,
-            policyLabel: 'protected bridge out'
+            feeRate: PRICING_STATE.digitalExitFeeRate,
+            policyLabel: 'cosigo to cigo'
           };
         }
 
@@ -1538,31 +1572,31 @@
           feeUsdValue = 0;
           netUsdValue = grossUsdValue;
           output = netUsdValue / PRICING_STATE.cosigoUsdBasis;
+        } else if (from === 'COSIGO' && to === 'USDT') {
+          grossUsdValue = amount * PRICING_STATE.cosigoUsdBasis;
+          feeUsdValue = grossUsdValue * PRICING_STATE.digitalExitFeeRate;
+          netUsdValue = grossUsdValue - feeUsdValue;
+          output = netUsdValue;
         } else if (from === 'USDT' && to === 'CIGO') {
           grossUsdValue = amount;
           feeUsdValue = 0;
           netUsdValue = grossUsdValue;
-          output = netUsdValue / PRICING_STATE.cigoUsdReference;
-        } else if (from === 'COSIGO' && to === 'USDT') {
-          grossUsdValue = amount * PRICING_STATE.cosigoUsdBasis;
-          feeUsdValue = grossUsdValue * policy.feeRate;
-          netUsdValue = grossUsdValue - feeUsdValue;
-          output = netUsdValue;
+          output = netUsdValue / PRICING_STATE.cigoBuyBasis;
         } else if (from === 'CIGO' && to === 'USDT') {
-          grossUsdValue = amount * PRICING_STATE.cigoUsdReference;
-          feeUsdValue = grossUsdValue * policy.feeRate;
-          netUsdValue = grossUsdValue - feeUsdValue;
+          grossUsdValue = amount * PRICING_STATE.cigoSellBasis;
+          feeUsdValue = 0;
+          netUsdValue = grossUsdValue;
           output = netUsdValue;
         } else if (from === 'CIGO' && to === 'COSIGO') {
-          grossUsdValue = amount * PRICING_STATE.cigoInboundBasis;
+          grossUsdValue = amount * PRICING_STATE.cigoSellBasis;
           feeUsdValue = 0;
           netUsdValue = grossUsdValue;
           output = netUsdValue / PRICING_STATE.cosigoUsdBasis;
         } else if (from === 'COSIGO' && to === 'CIGO') {
           grossUsdValue = amount * PRICING_STATE.cosigoUsdBasis;
-          feeUsdValue = 0;
-          netUsdValue = grossUsdValue;
-          output = netUsdValue / PRICING_STATE.cigoOutboundBasis;
+          feeUsdValue = grossUsdValue * PRICING_STATE.digitalExitFeeRate;
+          netUsdValue = grossUsdValue - feeUsdValue;
+          output = netUsdValue / PRICING_STATE.cigoBuyBasis;
         } else {
           return null;
         }
