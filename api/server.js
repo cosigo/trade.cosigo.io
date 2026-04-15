@@ -350,7 +350,12 @@ function quoteRoute(fromAsset, toAsset, inputAmount, settings) {
     outputAmountNum = netUsdValue / cigoBuyBasis;
   }
 
-  const outputDigits = toAsset === 'COSIGO' ? 0 : 6;
+  let outputDigits = 6;
+  if (toAsset === 'COSIGO') {
+    outputDigits = 0;
+  } else if (toAsset === 'CIGO') {
+    outputDigits = 1;
+  }
 
   return {
     pricingPolicy: pricing.type,
