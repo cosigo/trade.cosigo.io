@@ -350,14 +350,16 @@ function quoteRoute(fromAsset, toAsset, inputAmount, settings) {
     outputAmountNum = netUsdValue / cigoBuyBasis;
   }
 
+  const outputDigits = toAsset === 'COSIGO' ? 0 : 6;
+
   return {
     pricingPolicy: pricing.type,
     feeRate: pricing.feeRate,
     grossUsdValue,
     feeUsdValue,
     netUsdValue,
-    outputAmount: formatAmount(outputAmountNum),
-    feeAmount: formatAmount(feeUsdValue),
+    outputAmount: formatAmount(outputAmountNum, outputDigits),
+    feeAmount: formatAmount(feeUsdValue, 6),
     basisSnapshot: {
       ozUsdReference: Number(settings.ozUsdReference),
       cosigoUsdBasis,
