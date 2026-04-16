@@ -21,6 +21,9 @@ const DEFAULT_SETTINGS = {
   cigoInboundHaircutRate: 0.10,
   cigoOutboundPremiumRate: 0.05,
 
+  inventoryCigo: 210000,
+  depthFactor: 0.25,
+
   version: 1,
   updatedAt: null
 };
@@ -502,6 +505,8 @@ const server = http.createServer(async (req, res) => {
           cosigoUsdBasis: getCosigoUsdBasis(settings.ozUsdReference),
           usdtUsdBasis: 1,
           digitalExitFeeRate: Number(settings.digitalExitFeeRate || 0),
+          inventoryCigo: Number(settings.inventoryCigo || 0),
+          depthFactor: Number(settings.depthFactor || 0),
           version: Number(settings.version || 1),
           updatedAt: settings.updatedAt || null,
         },
@@ -526,6 +531,8 @@ const server = http.createServer(async (req, res) => {
           cigoUsdReference: Number(settings.cigoUsdReference || 0.01),
           cigoInboundHaircutRate: Number(settings.cigoInboundHaircutRate || 0),
           cigoOutboundPremiumRate: Number(settings.cigoOutboundPremiumRate || 0),
+          inventoryCigo: Number(settings.inventoryCigo || 0),
+          depthFactor: Number(settings.depthFactor || 0),
           version: Number(settings.version || 1),
           updatedAt: settings.updatedAt || null,
         },
@@ -550,6 +557,8 @@ const server = http.createServer(async (req, res) => {
         cigoUsdReference: cleanNumber(body.cigoUsdReference, 'cigoUsdReference', 0),
         cigoInboundHaircutRate: cleanNumber(body.cigoInboundHaircutRate, 'cigoInboundHaircutRate', 0),
         cigoOutboundPremiumRate: cleanNumber(body.cigoOutboundPremiumRate, 'cigoOutboundPremiumRate', 0),
+        inventoryCigo: cleanNumber(body.inventoryCigo, 'inventoryCigo', 0),
+        depthFactor: cleanNumber(body.depthFactor, 'depthFactor', 0),
         version: Number(current.version || 1) + 1,
         updatedAt: nowIso(),
       };
