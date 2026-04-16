@@ -90,6 +90,19 @@
             letter-spacing: .08em;
         }
 
+        .ticker-shell {
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .ticker-frame {
+            display: block;
+            width: 100%;
+            height: 72px;
+            border: 0;
+            background: transparent;
+        }
+
         @media (max-width: 780px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -153,6 +166,30 @@
             </div>
             <div class="msg" id="msg">Ready.</div>
         </div>
+
+        <section class="section wrap" aria-labelledby="spot-ref-title" style="padding-top:0;">
+            <div class="card" style="margin-top:14px;">
+                <div class="hd">
+                    <div class="title" id="spot-ref-title">Live silver and currency reference</div>
+                    <div class="hint">
+                        → this ticker is 3rd party and COSIGO&trade; is not responsible for any error it may present.
+                        Only COSIGO and CIGO are accurately displayed. Your inputs below.
+                    </div>
+                </div>
+
+                <div class="ticker-shell" style="margin-top:16px;">
+                    <iframe src="/assets/silver-ticker.html" loading="lazy" title="Live silver and currency ticker"
+                        class="ticker-frame">
+                    </iframe>
+                </div>
+
+                <div style="padding-top:12px;">
+                    <p class="value-live-note">
+                        Market quotation is shown above. COSIGO / CIGO / USDT can be exchanged below.
+                    </p>
+                </div>
+            </div>
+        </section>
 
         <div class="card" id="pricingControls">
             <h2>Pricing controls</h2>

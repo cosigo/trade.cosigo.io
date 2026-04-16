@@ -610,6 +610,20 @@
       font-size: 14px;
     }
 
+    .ticker-shell {
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    .ticker-frame {
+      display: block;
+      width: 100%;
+      height: 72px;
+      border: 0;
+      background: transparent;
+    }
+
+
     .wallet-summary {
       margin-top: 18px;
       padding: 16px;
@@ -887,6 +901,30 @@
             trade experience under your own naming, wording, and flow.
           </div>
         </aside>
+      </div>
+    </section>
+
+    <section class="section wrap" aria-labelledby="spot-ref-title" style="padding-top:0;">
+      <div class="card" style="margin-top:14px;">
+        <div class="hd">
+          <div class="title" id="spot-ref-title">Live silver and currency reference</div>
+          <div class="hint">
+            → this ticker is 3rd party and COSIGO&trade; is not responsible for any error it may present.
+            Only COSIGO and CIGO are accurately displayed. Your inputs below.
+          </div>
+        </div>
+
+        <div class="ticker-shell" style="margin-top:16px;">
+          <iframe src="/assets/silver-ticker.html" loading="lazy" title="Live silver and currency ticker"
+            class="ticker-frame">
+          </iframe>
+        </div>
+
+        <div style="padding-top:12px;">
+          <p class="value-live-note">
+            Market quotation is shown above. COSIGO / CIGO / USDT can be exchanged below.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -1447,27 +1485,27 @@
         });
       }
 
-function formatAssetAmount(value, asset) {
-  const num = Number(value);
-  if (!Number.isFinite(num)) return String(value ?? '');
+      function formatAssetAmount(value, asset) {
+        const num = Number(value);
+        if (!Number.isFinite(num)) return String(value ?? '');
 
-  let maxDigits = 6;
+        let maxDigits = 6;
 
-  if (asset === 'COSIGO') {
-    maxDigits = 0;
-  } else if (asset === 'CIGO') {
-    maxDigits = 1;
-  } else if (asset === 'USDT') {
-    maxDigits = 2;
-  } else if (asset === 'BNB') {
-    maxDigits = 4;
-  }
+        if (asset === 'COSIGO') {
+          maxDigits = 0;
+        } else if (asset === 'CIGO') {
+          maxDigits = 1;
+        } else if (asset === 'USDT') {
+          maxDigits = 2;
+        } else if (asset === 'BNB') {
+          maxDigits = 4;
+        }
 
-  return num.toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: maxDigits,
-  });
-}
+        return num.toLocaleString(undefined, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: maxDigits,
+        });
+      }
 
       function formatUsdAmount(value) {
         const num = Number(value);
@@ -1786,22 +1824,22 @@ function formatAssetAmount(value, asset) {
         if (requestPanelEl) requestPanelEl.hidden = false;
       }
 
-  function formatAssetAmount(value, asset) {
-    const num = Number(value);
-    if (!Number.isFinite(num)) return String(value ?? '');
+      function formatAssetAmount(value, asset) {
+        const num = Number(value);
+        if (!Number.isFinite(num)) return String(value ?? '');
 
-    let maxDigits = 6;
-    if (asset === 'COSIGO') {
-      maxDigits = 0;
-    } else if (asset === 'CIGO') {
-      maxDigits = 1;
-    }
+        let maxDigits = 6;
+        if (asset === 'COSIGO') {
+          maxDigits = 0;
+        } else if (asset === 'CIGO') {
+          maxDigits = 1;
+        }
 
-    return num.toLocaleString(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: maxDigits,
-    });
-  }
+        return num.toLocaleString(undefined, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: maxDigits,
+        });
+      }
 
       function saveRequest(request) {
         currentRequest = request || null;
@@ -2278,7 +2316,7 @@ function formatAssetAmount(value, asset) {
           const adjustmentText = getQuoteAdjustmentText(manualQuote);
 
           setQuoteStatus(
-  `Quote (${manualQuote.policyLabel}): ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to} | ${adjustmentText} | net value ≈ ${formatUsdAmount(manualQuote.netUsdValue)}`
+            `Quote (${manualQuote.policyLabel}): ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to} | ${adjustmentText} | net value ≈ ${formatUsdAmount(manualQuote.netUsdValue)}`
           );
           return;
         }
@@ -2330,14 +2368,14 @@ function formatAssetAmount(value, asset) {
               (from === 'COSIGO' && to === 'CIGO')
             ) {
               setQuoteStatus(
-  `Direct internal conversion request created: ${request.id || request.localDraftId} | ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to}`
-);
+                `Direct internal conversion request created: ${request.id || request.localDraftId} | ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to}`
+              );
               return;
             }
 
             setQuoteStatus(
-  `Internal conversion request created: ${request.id || request.localDraftId} | ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to}`
-);
+              `Internal conversion request created: ${request.id || request.localDraftId} | ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to}`
+            );
             return;
           } catch (err) {
             console.error(err);
