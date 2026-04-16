@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>trade.cosigo.io admin</title>
-    
+
     <style>
         body {
             margin: 0;
@@ -188,6 +188,17 @@
                     <span>CIGO outbound premium rate</span>
                     <input id="settingsCigoOutboundPremiumRate" type="number" step="0.0001" min="0" />
                 </label>
+
+                <label>
+                    <span>Quoted inventory (CIGO)</span>
+                    <input id="settingsInventoryCigo" type="number" step="0.1" min="0" />
+                </label>
+
+                <label>
+                    <span>Depth factor</span>
+                    <input id="settingsDepthFactor" type="number" step="0.0001" min="0" />
+                </label>
+
             </div>
 
             <div class="row" style="margin-top:12px;">
@@ -221,6 +232,9 @@
         const settingsUpdatedAtEl = document.getElementById('settingsUpdatedAt');
         const loadSettingsBtn = document.getElementById('loadSettingsBtn');
         const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+        const settingsInventoryCigoEl = document.getElementById('settingsInventoryCigo');
+        const settingsDepthFactorEl = document.getElementById('settingsDepthFactor');
 
         adminKeyEl.value = sessionStorage.getItem('trade.adminKey') || '';
 
@@ -275,6 +289,9 @@
             if (settingsVersionEl) settingsVersionEl.textContent = settings.version ?? '-';
             if (settingsUpdatedAtEl) settingsUpdatedAtEl.textContent = settings.updatedAt || '-';
 
+            if (settingsInventoryCigoEl) settingsInventoryCigoEl.value = settings.inventoryCigo ?? '';
+            if (settingsDepthFactorEl) settingsDepthFactorEl.value = settings.depthFactor ?? '';
+
             return settings;
         }
 
@@ -286,6 +303,8 @@
                 cigoUsdReference: Number(settingsCigoUsdReferenceEl?.value || 0),
                 cigoInboundHaircutRate: Number(settingsCigoInboundHaircutRateEl?.value || 0),
                 cigoOutboundPremiumRate: Number(settingsCigoOutboundPremiumRateEl?.value || 0),
+                inventoryCigo: Number(settingsInventoryCigoEl?.value || 0),
+                depthFactor: Number(settingsDepthFactorEl?.value || 0),
             };
 
             const data = await apiJson('/api/admin/settings', {
