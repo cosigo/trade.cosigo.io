@@ -1571,12 +1571,14 @@
           : `Pricing version ${PRICING_STATE.version}`;
 
         pricingPolicyNoteEl.innerHTML =
-          `<strong>Current pricing policy:</strong><br>` +
-          `Reference ounce basis: <strong>${formatUsdAmount(PRICING_STATE.ozUsdReference)}</strong> per troy ounce.<br>` +
-          `COSIGO digital exit fee: <strong>${formatPercent(PRICING_STATE.digitalExitFeeRate)}</strong>.<br>` +
-          `CIGO sell basis discount: <strong>${formatPercent(PRICING_STATE.cigoInboundHaircutRate)}</strong>.<br>` +
-          `CIGO buy basis premium: <strong>${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)}</strong>.<br>` +
-          `<span style="color:#9cabbd;">${updatedText}</span>`;
+  `<strong>Current pricing policy:</strong><br>` +
+  `Reference ounce basis: <strong>${formatUsdAmount(PRICING_STATE.ozUsdReference)}</strong> per troy ounce.<br>` +
+  `COSIGO digital exit fee: <strong>${formatPercent(PRICING_STATE.digitalExitFeeRate)}</strong>.<br>` +
+  `COSIGO physical redemption fee: <strong>${formatPercent(PRICING_STATE.physicalRedemptionFeeRate)}</strong>.<br>` +
+  `CIGO sell basis discount: <strong>${formatPercent(PRICING_STATE.cigoInboundHaircutRate)}</strong>.<br>` +
+  `CIGO buy basis premium: <strong>${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)}</strong>.<br>` +
+  `<span style="color:#9cabbd;">${updatedText}</span><br>` +
+  `<a href="https://redeem.cosigo.io/" target="_blank" rel="noopener">open physical redemption page</a>`;
       }
       async function loadPricingState() {
         try {
@@ -1592,6 +1594,7 @@
           PRICING_STATE.cosigoUsdBasis = Number(settings.cosigoUsdBasis || PRICING_STATE.cosigoUsdBasis);
           PRICING_STATE.usdtUsdBasis = Number(settings.usdtUsdBasis || PRICING_STATE.usdtUsdBasis);
           PRICING_STATE.digitalExitFeeRate = Number(settings.digitalExitFeeRate || PRICING_STATE.digitalExitFeeRate);
+          PRICING_STATE.physicalRedemptionFeeRate = Number(settings.physicalRedemptionFeeRate || PRICING_STATE.physicalRedemptionFeeRate);
           PRICING_STATE.version = Number(settings.version || PRICING_STATE.version);
           PRICING_STATE.updatedAt = settings.updatedAt || null;
 
