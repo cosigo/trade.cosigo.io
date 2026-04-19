@@ -295,6 +295,10 @@
       background: rgba(255, 184, 77, 0.06);
     }
 
+    .btn-step {
+      font-variant-numeric: tabular-nums;
+    }
+
     .status-grid {
       display: grid;
       gap: 12px;
@@ -850,36 +854,36 @@
           <div class="eyebrow">
             <span>official trade interface</span>
           </div>
-          <h1>trade CIGO.<br>exit stable.<br>move into COSIGO.</h1>
+
+          <h1>trade CIGO.<br>exit to USDT.<br>move into COSIGO.</h1>
+
           <p class="lead">
-            This is the controlled entry interface for the COSIGO system.
-            <strong>CIGO handles speculative market movement.</strong>
-            USDT is the stable rail. COSIGO remains the silver-reference destination.
+            Official request-based trade interface for <strong>CIGO, USDT, and COSIGO</strong>.
+            Start with USDT for the simplest entry path.
           </p>
 
           <div class="notice">
-            This is the controlled trade interface for internal request-based conversion within the COSIGO system. The
-            goal is to keep the user path inside the COSIGO system
-            instead of depending on random search results, generic token lists, or confusing third-party DEX flows.
+            <strong>New here?</strong> The easiest onboarding path is <strong>USDT → CIGO</strong> or
+            <strong>USDT → COSIGO</strong>. Create your request first. Do not send funds until your request is reviewed.
           </div>
 
           <div class="cta-row">
-            <a class="btn btn-primary" href="https://market.cosigo.io/" target="_blank" rel="noopener">open CIGO market
-              page</a>
-            <a class="btn btn-secondary" href="#swap">open trade shell</a>
-            <a class="btn btn-secondary" href="https://coins.cosigo.io/" target="_blank" rel="noopener">official store /
-              COSIGO</a>
+            <button class="btn btn-primary btn-step" type="button" id="addCigoTopBtn">1) Add CIGO to MetaMask</button>
+            <a class="btn btn-secondary btn-step" href="#swap">2) Start trade request</a>
+            <a class="btn btn-secondary" href="https://market.cosigo.io/" target="_blank" rel="noopener">CIGO market</a>
+            <a class="btn btn-secondary" href="https://coins.cosigo.io/" target="_blank" rel="noopener">official COSIGO
+              store</a>
           </div>
         </div>
 
         <aside class="card">
           <div class="status-grid">
             <div class="stat">
-              <div class="stat-label">status</div>
-              <div class="stat-value">manual request flow live</div>
+              <div class="stat-label">current mode</div>
+              <div class="stat-value">request and review</div>
             </div>
             <div class="stat">
-              <div class="stat-label">speculative rail</div>
+              <div class="stat-label">market rail</div>
               <div class="stat-value">CIGO</div>
             </div>
             <div class="stat">
@@ -890,22 +894,123 @@
               <div class="stat-label">reference layer</div>
               <div class="stat-value">COSIGO</div>
             </div>
-            <div class="stat">
-              <div class="stat-label">network focus</div>
-              <div class="stat-value">wallet rail = BSC wallet session</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">current mode</div>
-              <div class="stat-value">user submission with admin review</div>
-            </div>
           </div>
 
           <div class="token-note">
-            This page is intentionally separate from generic public DEX discovery. It is the beginning of a self-hosted
-            trade experience under your own naming, wording, and flow.
+            One request at a time. Wait for review before sending funds.
           </div>
         </aside>
       </div>
+    </section>
+    
+    <section class="section wrap" id="swap">
+      <h2>trade shell</h2>
+
+      <article class="swap-shell">
+        <h3>start your request</h3>
+        <p>
+          Connect your wallet, choose your route, get a quote, and submit your request for review.
+        </p>
+
+        <div class="wallet-summary" id="walletSummary">
+          <div class="wallet-summary-head">wallet status</div>
+          <div class="wallet-summary-grid">
+            <div class="wallet-cell">
+              <span class="wallet-label">address</span>
+              <span class="wallet-value" id="walletAddress">Not connected</span>
+            </div>
+            <div class="wallet-cell">
+              <span class="wallet-label">BNB</span>
+              <span class="wallet-value" id="walletBNB">0.0000</span>
+            </div>
+            <div class="wallet-cell">
+              <span class="wallet-label">CIGO</span>
+              <span class="wallet-value" id="walletCIGO">0.00</span>
+            </div>
+            <div class="wallet-cell">
+              <span class="wallet-label">USDT</span>
+              <span class="wallet-value" id="walletUSDT">0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="token-note" id="pricingPolicyNote">Loading pricing policy...</div>
+
+        <div class="swap-box">
+          <div class="swap-row">
+            <label for="fromToken">from</label>
+            <select id="fromToken" class="swap-select">
+              <option>CIGO</option>
+              <option>USDT</option>
+              <option>COSIGO</option>
+            </select>
+          </div>
+
+          <div class="swap-row">
+            <label for="toToken">to</label>
+            <select id="toToken" class="swap-select">
+              <option>CIGO</option>
+              <option>USDT</option>
+              <option>COSIGO</option>
+            </select>
+          </div>
+
+          <div class="swap-row">
+            <label for="amountIn">amount</label>
+            <input id="amountIn" class="swap-input" type="text" placeholder="0.00">
+          </div>
+
+          <div class="swap-row">
+            <label>trade status</label>
+            <input id="quoteStatusField" class="swap-input" type="text" value="No quote yet" readonly>
+          </div>
+
+          <div class="cta-row">
+            <button class="btn btn-primary btn-step" type="button" id="connectBtn">3) Connect wallet</button>
+            <button class="btn btn-secondary btn-step" type="button" id="quoteBtn">4) Get quote</button>
+            <button class="btn btn-secondary btn-step" type="button" id="swapBtn">5) Request swap</button>
+          </div>
+
+          <div class="swap-note" id="swapStatus">
+            Start with a quote. Submit your request only after reviewing the route and amount. Do not send funds until
+            your request is reviewed.
+          </div>
+
+          <div class="request-panel" id="requestPanel">
+            <div class="request-head">conversion request</div>
+            <div class="request-card" id="requestCard">
+              <div class="request-empty" id="requestEmpty">No conversion request created yet.</div>
+
+              <div class="request-body" id="requestBody" hidden>
+                <div class="request-row"><strong>reference</strong><span id="requestId">-</span></div>
+                <div class="request-row"><strong>route</strong><span id="requestRoute">-</span></div>
+                <div class="request-row"><strong>input</strong><span id="requestInput">-</span></div>
+                <div class="request-row"><strong>output</strong><span id="requestOutput">-</span></div>
+                <div class="request-row"><strong>estimated value</strong><span id="requestValue">-</span></div>
+                <div class="request-row"><strong>status</strong><span id="requestStatus">draft</span></div>
+
+                <div class="settlement-box" id="settlementBox" hidden>
+                  <div class="settlement-head">next step</div>
+                  <div class="settlement-title" id="settlementTitle">No action yet</div>
+                  <div class="settlement-copy" id="settlementCopy">
+                    Create a request first to see the next step.
+                  </div>
+                  <ol class="settlement-list" id="settlementList" hidden></ol>
+                  <div class="settlement-note" id="settlementNote" hidden></div>
+                </div>
+
+                <div class="cta-row">
+                  <button class="btn btn-secondary" type="button" id="copyRequestBtn" hidden>Copy request</button>
+                  <button class="btn btn-secondary" type="button" id="clearRequestBtn" hidden>Clear request</button>
+                  <button class="btn btn-secondary btn-step" id="submitRequestBtn" type="button" hidden>6) Send
+                    request</button>
+                  <button class="btn btn-secondary" type="button" id="refreshRequestBtn" hidden>Refresh status</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
     </section>
 
     <section class="section wrap" aria-labelledby="spot-ref-title" style="padding-top:0;">
@@ -920,8 +1025,7 @@
 
         <div class="ticker-shell" style="margin-top:16px;">
           <iframe src="/assets/silver-ticker.html" loading="lazy" title="Live silver and currency ticker"
-            class="ticker-frame">
-          </iframe>
+            class="ticker-frame"></iframe>
         </div>
 
         <div style="padding-top:12px;">
@@ -955,7 +1059,7 @@
           <div class="path-num">02</div>
           <h3>exit to USDT</h3>
           <p>
-            For people who want a more stable landing point and less exposure to BNB-denominated volatility.
+            For people who want a more stable landing point and less exposure to volatility.
           </p>
           <div class="mini-actions">
             <a class="btn btn-secondary" href="#swap">start conversion request</a>
@@ -980,215 +1084,104 @@
       </div>
     </section>
 
-    <section class="section wrap" id="swap">
-      <h2>trade shell</h2>
-      <div class="swap-grid">
-        <article class="swap-shell">
-          <h3>exchange interface</h3>
-          <p>
-            Wallet connection, live balances, manual internal quoting, and local draft creation are active.
-            Requests are written to the server when they are sent for review through the controlled trade workflow.
-          </p>
+    <section class="section wrap" id="verify">
+      <div class="panel">
+        <h3>before you begin</h3>
+        <div class="link-list" style="margin-top:18px;">
+          <div class="link-item">
+            Use the correct wallet and network for the asset you are working with.
+          </div>
+          <div class="link-item">
+            The easiest onboarding path is <strong>USDT → CIGO</strong> or <strong>USDT → COSIGO</strong>.
+          </div>
+          <div class="link-item">
+            Create your request first. Do not send funds until your request is reviewed.
+          </div>
+          <div class="link-item">
+            Save your transaction hash after sending funds.
+          </div>
+          <div class="link-item">
+            Wallet balance may update before wallet activity history does.
+          </div>
+        </div>
 
-          <div class="wallet-summary" id="walletSummary">
-            <div class="wallet-summary-head">wallet status</div>
-            <div class="wallet-summary-grid">
-              <div class="wallet-cell">
-                <span class="wallet-label">address</span>
-                <span class="wallet-value" id="walletAddress">Not connected</span>
-              </div>
-              <div class="wallet-cell">
-                <span class="wallet-label">BNB</span>
-                <span class="wallet-value" id="walletBNB">0.0000</span>
-              </div>
-              <div class="wallet-cell">
-                <span class="wallet-label">CIGO</span>
-                <span class="wallet-value" id="walletCIGO">0.00</span>
-              </div>
-              <div class="wallet-cell">
-                <span class="wallet-label">USDT</span>
-                <span class="wallet-value" id="walletUSDT">0.00</span>
-              </div>
+        <h3 style="margin-top:22px;">how requests work</h3>
+        <div class="link-list" style="margin-top:18px;">
+          <div class="link-item">
+            <strong>step 1</strong>
+            connect your wallet on BNB Chain for CIGO market rail and / or Ethereum for COSIGO reference layer
+          </div>
+          <div class="link-item">
+            <strong>step 2</strong>
+            choose the asset you want to move from and the asset you want to move into
+          </div>
+          <div class="link-item">
+            <strong>step 3</strong>
+            enter the amount you want to convert
+          </div>
+          <div class="link-item">
+            <strong>step 4</strong>
+            click <em>Get quote</em> to preview the result
+          </div>
+          <div class="link-item">
+            <strong>step 5</strong>
+            click <em>Request swap</em> to create your request
+          </div>
+          <div class="link-item">
+            <strong>step 6</strong>
+            click <em>Send request</em> to submit your request for review
+          </div>
+          <div class="link-item">
+            <strong>step 7</strong>
+            wait for review and follow the next step shown in your request card
+          </div>
+        </div>
+
+        <div class="token-note" style="margin-top:18px;">
+          <strong>status guide:</strong><br>
+          Not yet submitted = request is still on this device only.<br>
+          Pending review = request was sent and is waiting for approval.<br>
+          Action required = check the request for the next step.<br>
+          Completed = the request lifecycle is finished.
+        </div>
+
+        <h3 style="margin-top:22px;">verify token details</h3>
+        <div class="link-list" style="margin-top:18px;">
+          <div class="link-item">
+            <strong>CIGO contract</strong>
+            <div class="contract-wrap">
+              <code id="cigoContract">0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560</code>
+              <button class="copy-btn" type="button"
+                data-copy="0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560">Copy</button>
             </div>
           </div>
 
-          <div class="token-note" id="pricingPolicyNote">Loading pricing policy...</div>
-
-          <div class="swap-box">
-            <div class="swap-row">
-              <label for="fromToken">from</label>
-              <select id="fromToken" class="swap-select">
-                <option>CIGO</option>
-                <option>USDT</option>
-                <option>COSIGO</option>
-              </select>
-            </div>
-
-            <div class="request-panel" id="requestPanel">
-              <div class="request-head">conversion request</div>
-              <div class="request-card" id="requestCard">
-                <div class="request-empty" id="requestEmpty">No conversion request created yet.</div>
-
-                <div class="request-body" id="requestBody" hidden>
-                  <div class="request-row"><strong>reference</strong><span id="requestId">-</span></div>
-                  <div class="request-row"><strong>route</strong><span id="requestRoute">-</span></div>
-                  <div class="request-row"><strong>input</strong><span id="requestInput">-</span></div>
-                  <div class="request-row"><strong>output</strong><span id="requestOutput">-</span></div>
-                  <div class="request-row"><strong>estimated value</strong><span id="requestValue">-</span></div>
-                  <div class="request-row"><strong>status</strong><span id="requestStatus">draft</span></div>
-
-                  <div class="settlement-box" id="settlementBox" hidden>
-                    <div class="settlement-head">next step</div>
-                    <div class="settlement-title" id="settlementTitle">No action yet</div>
-                    <div class="settlement-copy" id="settlementCopy">
-                      Create a request first to see the next step.
-                    </div>
-                    <ol class="settlement-list" id="settlementList" hidden></ol>
-                    <div class="settlement-note" id="settlementNote" hidden></div>
-                  </div>
-
-                  <div class="cta-row">
-                    <button class="btn btn-secondary" type="button" id="copyRequestBtn" hidden>Copy request</button>
-                    <button class="btn btn-secondary" type="button" id="clearRequestBtn" hidden>Clear request</button>
-                    <button class="btn btn-secondary" id="submitRequestBtn" type="button" hidden>Send request</button>
-                    <button class="btn btn-secondary" type="button" id="refreshRequestBtn" hidden>Refresh
-                      status</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="swap-row">
-              <label for="toToken">to</label>
-              <select id="toToken" class="swap-select">
-                <option>CIGO</option>
-                <option>USDT</option>
-                <option>COSIGO</option>
-              </select>
-            </div>
-
-            <div class="swap-row">
-              <label for="amountIn">amount</label>
-              <input id="amountIn" class="swap-input" type="text" placeholder="0.00">
-            </div>
-
-            <div class="swap-row">
-              <label>trade status</label>
-              <input id="quoteStatusField" class="swap-input" type="text" value="No quote yet" readonly>
-            </div>
-
-            <div class="cta-row">
-              <button class="btn btn-primary" type="button" id="connectBtn">Connect wallet</button>
-              <button class="btn btn-secondary" type="button" id="quoteBtn">Get quote</button>
-              <button class="btn btn-secondary" type="button" id="swapBtn">Request swap</button>
-            </div>
-
-            <div class="swap-note" id="swapStatus">
-              Get a quote first, then create and submit your request. After review, check back here for the next step or
-              final status.
-            </div>
-          </div>
-        </article>
-
-        <aside class="panel" id="verify">
-          <h3>How this works</h3>
-          <p>
-            This interface uses a request flow. Your request is created first, then submitted,
-            then reviewed and completed through the controlled trade process.
-          </p>
-
-          <div class="link-list" style="margin-top:18px;">
-            <div class="link-item">
-              <strong>step 1</strong>
-              connect your wallet on BNB Chain for CIGO market rail and / or Ethereum for COSIGO reference layer
-            </div>
-
-            <div class="link-item">
-              <strong>step 2</strong>
-              choose the asset you want to move from and the asset you want to move into
-            </div>
-
-            <div class="link-item">
-              <strong>step 3</strong>
-              enter the amount you want to convert
-            </div>
-
-            <div class="link-item">
-              <strong>step 4</strong>
-              click <em>Get quote</em> to preview the result
-            </div>
-
-            <div class="link-item">
-              <strong>step 5</strong>
-              click <em>Request swap</em> to create your request
-            </div>
-
-            <div class="link-item">
-              <strong>step 6</strong>
-              review the request card and confirm the route, amount, and status
-            </div>
-
-            <div class="link-item">
-              <strong>step 7</strong>
-              click <em>Send request</em> to send your request for review
-            </div>
-
-            <div class="link-item">
-              <strong>step 8</strong>
-              wait for review and completion, then reload later to check final status
-            </div>
+          <div class="link-item">
+            <strong>BscScan</strong>
+            <a href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560" target="_blank"
+              rel="noopener">view CIGO on BscScan</a>
           </div>
 
-          <div class="token-note" style="margin-top:18px;">
-            <strong>status guide:</strong><br>
-            Not yet submitted = request is still on this device only.<br>
-            Pending review = request was sent and is waiting for approval.<br>
-            Action required = check the request for the next step.<br>
-            Completed = the request lifecycle is finished.
+          <div class="link-item">
+            <strong>market page</strong>
+            <a href="https://market.cosigo.io/" target="_blank" rel="noopener">market.cosigo.io</a>
           </div>
 
-          <h3 style="margin-top:22px;">verify before action</h3>
-          <p>
-            Always verify the asset, route, and destination before submitting a request.
-          </p>
-
-          <div class="link-list" style="margin-top:18px;">
-            <div class="link-item">
-              <strong>CIGO contract</strong>
-              <div class="contract-wrap">
-                <code id="cigoContract">0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560</code>
-                <button class="copy-btn" type="button"
-                  data-copy="0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560">Copy</button>
-              </div>
-            </div>
-
-            <div class="link-item">
-              <strong>BscScan</strong>
-              <a href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560" target="_blank"
-                rel="noopener">view CIGO on BscScan</a>
-            </div>
-
-            <div class="link-item">
-              <strong>market page</strong>
-              <a href="https://market.cosigo.io/" target="_blank" rel="noopener">market.cosigo.io</a>
-            </div>
-
-            <div class="link-item">
-              <strong>official COSIGO</strong>
-              <a href="https://token.cosigo.io/" target="_blank" rel="noopener">token.cosigo.io</a>
-            </div>
-
-            <div class="link-item">
-              <strong>official acquisition window</strong>
-              <a href="https://coins.cosigo.io/" target="_blank" rel="noopener">coins.cosigo.io</a>
-            </div>
+          <div class="link-item">
+            <strong>official COSIGO</strong>
+            <a href="https://token.cosigo.io/" target="_blank" rel="noopener">token.cosigo.io</a>
           </div>
 
-          <div class="token-note">
-            Public market traffic can arrive through CIGO. Stable exits can move through USDT. Reference settlement
-            moves into COSIGO.
+          <div class="link-item">
+            <strong>official acquisition window</strong>
+            <a href="https://coins.cosigo.io/" target="_blank" rel="noopener">coins.cosigo.io</a>
           </div>
-        </aside>
+        </div>
+
+        <div class="token-note">
+          Public market traffic can arrive through CIGO. Stable exits can move through USDT. Reference settlement moves
+          into COSIGO.
+        </div>
       </div>
     </section>
   </main>
@@ -1209,6 +1202,7 @@
       const swapBtn = document.getElementById('swapBtn');
       const buyCigoBtn = document.getElementById('buyCigoBtn');
       const copyButtons = document.querySelectorAll('[data-copy]');
+      const addCigoTopBtn = document.getElementById('addCigoTopBtn');
 
       const walletAddressEl = document.getElementById('walletAddress');
       const walletBNBEl = document.getElementById('walletBNB');
@@ -1258,6 +1252,7 @@
         cosigoUsdBasis: 100 / 31103.4768,
         usdtUsdBasis: 1,
         digitalExitFeeRate: 0.015,
+        physicalRedemptionFeeRate: 0.25,
         version: 1,
         updatedAt: null
       };
@@ -1397,6 +1392,37 @@
         return parseInt(result, 16) / 1e18;
       }
 
+      async function addCigoToMetaMask() {
+        if (!window.ethereum) {
+          setAppStatus('MetaMask not found');
+          return;
+        }
+
+        try {
+          const wasAdded = await window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: CIGO_ADDRESS,
+                symbol: 'CIGO',
+                decimals: 18,
+                image: 'https://trade.cosigo.io/shared/assets/icons/cigo_256.png'
+              }
+            }
+          });
+
+          if (wasAdded) {
+            setAppStatus('CIGO added to MetaMask.');
+          } else {
+            setAppStatus('CIGO was not added.');
+          }
+        } catch (err) {
+          console.error(err);
+          setAppStatus(`Could not add CIGO: ${err.message || err}`);
+        }
+      }
+
       async function getCigoBalance(address) {
         return getTokenBalance(address, CIGO_ADDRESS);
       }
@@ -1412,19 +1438,9 @@
 
         if (!buyBtn || !swapBtn || !quoteBtn) return;
 
-        if (cigo > 0) {
-          buyBtn.textContent = 'buy more CIGO (market)';
-          quoteBtn.textContent = usdt > 0 ? 'Compare exit paths' : 'Quote exit';
-          swapBtn.textContent = 'Request swap';
-        } else if (usdt > 0) {
-          buyBtn.textContent = 'buy CIGO with USDT';
-          quoteBtn.textContent = 'Quote entry';
-          swapBtn.textContent = 'Request swap';
-        } else {
-          buyBtn.textContent = 'buy CIGO (market)';
-          quoteBtn.textContent = 'Get quote';
-          swapBtn.textContent = 'Request swap';
-        }
+        buyBtn.textContent = 'buy CIGO';
+        quoteBtn.textContent = '4) Get quote';
+        swapBtn.textContent = '5) Request swap';
       }
 
       function updateWalletSummary(address, bnb, cigo, usdt) {
@@ -1571,14 +1587,14 @@
           : `Pricing version ${PRICING_STATE.version}`;
 
         pricingPolicyNoteEl.innerHTML =
-  `<strong>Current pricing policy:</strong><br>` +
-  `Reference ounce basis: <strong>${formatUsdAmount(PRICING_STATE.ozUsdReference)}</strong> per troy ounce.<br>` +
-  `COSIGO digital exit fee: <strong>${formatPercent(PRICING_STATE.digitalExitFeeRate)}</strong>.<br>` +
-  `COSIGO physical redemption fee: <strong>${formatPercent(PRICING_STATE.physicalRedemptionFeeRate)}</strong>.<br>` +
-  `CIGO sell basis discount: <strong>${formatPercent(PRICING_STATE.cigoInboundHaircutRate)}</strong>.<br>` +
-  `CIGO buy basis premium: <strong>${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)}</strong>.<br>` +
-  `<span style="color:#9cabbd;">${updatedText}</span><br>` +
-  `<a href="https://redeem.cosigo.io/" target="_blank" rel="noopener">open physical redemption page</a>`;
+          `<strong>Current pricing policy:</strong><br>` +
+          `Reference ounce basis: <strong>${formatUsdAmount(PRICING_STATE.ozUsdReference)}</strong> per troy ounce.<br>` +
+          `COSIGO digital exit fee: <strong>${formatPercent(PRICING_STATE.digitalExitFeeRate)}</strong>.<br>` +
+          `COSIGO physical silver redemption fee: <strong>${formatPercent(PRICING_STATE.physicalRedemptionFeeRate)}</strong>.<br>` +
+          `CIGO sell basis discount: <strong>${formatPercent(PRICING_STATE.cigoInboundHaircutRate)}</strong>.<br>` +
+          `CIGO buy basis premium: <strong>${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)}</strong>.<br>` +
+          `<span style="color:#9cabbd;">${updatedText}</span><br>` +
+          `<a href="https://redeem.cosigo.io/" target="_blank" rel="noopener">open physical redemption page</a>`;
       }
       async function loadPricingState() {
         try {
@@ -1831,22 +1847,9 @@
         if (requestPanelEl) requestPanelEl.hidden = false;
       }
 
-      function formatAssetAmount(value, asset) {
-        const num = Number(value);
-        if (!Number.isFinite(num)) return String(value ?? '');
-
-        let maxDigits = 6;
-        if (asset === 'COSIGO') {
-          maxDigits = 0;
-        } else if (asset === 'CIGO') {
-          maxDigits = 1;
-        }
-
-        return num.toLocaleString(undefined, {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: maxDigits,
-        });
-      }
+      setTimeout(() => {
+        autoRefreshCurrentRequest();
+      }, 500);
 
       function saveRequest(request) {
         currentRequest = request || null;
@@ -1867,10 +1870,27 @@
 
         renderRequest(currentRequest);
         syncRequestButtons();
+        startRequestAutoRefresh();
       }
 
       function clearRequest() {
         saveRequest(null);
+      }
+
+      function revealRequestPanel() {
+        if (!requestPanelEl) return;
+
+        requestPanelEl.hidden = false;
+        requestPanelEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+
+        setTimeout(() => {
+          if (submitRequestBtn && !submitRequestBtn.hidden && !submitRequestBtn.disabled) {
+            submitRequestBtn.focus();
+          }
+        }, 250);
       }
 
       function createLocalDraftRequest({
@@ -1999,6 +2019,42 @@
           console.error(err);
           setQuoteStatus(`Refresh failed: ${err.message || err}`);
         }
+
+        let requestAutoRefreshTimer = null;
+
+        function isServerTrackedOpenRequest(request) {
+          return !!request?.id && (
+            request.status === 'submitted' ||
+            request.status === 'reviewed'
+          );
+        }
+
+        async function autoRefreshCurrentRequest() {
+          if (!isServerTrackedOpenRequest(currentRequest)) return;
+
+          try {
+            await refreshCurrentRequestFromServer();
+          } catch (err) {
+            console.warn('Auto refresh failed', err);
+          }
+        }
+
+        function stopRequestAutoRefresh() {
+          if (requestAutoRefreshTimer) {
+            clearInterval(requestAutoRefreshTimer);
+            requestAutoRefreshTimer = null;
+          }
+        }
+
+        function startRequestAutoRefresh() {
+          stopRequestAutoRefresh();
+
+          if (!isServerTrackedOpenRequest(currentRequest)) return;
+
+          requestAutoRefreshTimer = setInterval(() => {
+            autoRefreshCurrentRequest();
+          }, 15000);
+        }
       });
 
       // ADD below getConnectedWalletText()
@@ -2097,7 +2153,7 @@
             copy: `Your request for <strong>${escapeHtml(routeText)}</strong> has been sent and is now pending review.`,
             steps: [
               'No payment action is required yet.',
-              'Use Refresh status to check for the next step.',
+              'Status refreshes automatically while this page is open. You can also use Refresh status.',
               'Wait until the status changes to Action required.'
             ],
             note: '<strong>Pending review:</strong> settlement instructions will appear here after approval.',
@@ -2299,6 +2355,10 @@
         });
       }
 
+      addCigoTopBtn?.addEventListener('click', async () => {
+        await addCigoToMetaMask();
+      });
+
       quoteBtn?.addEventListener('click', () => {
         const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
 
@@ -2369,6 +2429,8 @@
               feeRate: manualQuote.feeRate,
               pricingPolicy: manualQuote.policyLabel
             });
+
+            revealRequestPanel();
 
             if (
               (from === 'CIGO' && to === 'COSIGO') ||
@@ -2443,6 +2505,20 @@
         } catch (err) {
           console.error(err);
         }
+
+        window.addEventListener('focus', () => {
+          autoRefreshCurrentRequest();
+        });
+
+        window.addEventListener('pageshow', () => {
+          autoRefreshCurrentRequest();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            autoRefreshCurrentRequest();
+          }
+        });
       })();
     });
   </script>
