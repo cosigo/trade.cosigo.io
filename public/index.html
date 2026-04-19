@@ -870,6 +870,9 @@
           <div class="cta-row">
             <button class="btn btn-primary btn-step" type="button" id="addCigoTopBtn">1) Add CIGO to MetaMask</button>
             <a class="btn btn-secondary btn-step" href="#swap">2) Start trade request</a>
+            <a class="btn btn-secondary" href="https://quote.cosigo.io/" target="_blank" rel="noopener">
+              see how CIGO acquisition or exit affects price
+            </a>
             <a class="btn btn-secondary" href="https://market.cosigo.io/" target="_blank" rel="noopener">CIGO market</a>
             <a class="btn btn-secondary" href="https://coins.cosigo.io/" target="_blank" rel="noopener">official COSIGO
               store</a>
@@ -902,7 +905,7 @@
         </aside>
       </div>
     </section>
-    
+
     <section class="section wrap" id="swap">
       <h2>trade shell</h2>
 
@@ -935,6 +938,9 @@
         </div>
 
         <div class="token-note" id="pricingPolicyNote">Loading pricing policy...</div>
+        <div class="token-note" id="walletLimitNote">
+          24-hour USDT wallet cap will appear after wallet connection.
+        </div>
 
         <div class="swap-box">
           <div class="swap-row">
@@ -1228,6 +1234,10 @@
       const submitRequestBtn = document.getElementById('submitRequestBtn');
       const refreshRequestBtn = document.getElementById('refreshRequestBtn');
 
+      const CONNECT_BTN_DEFAULT = '3) Connect wallet';
+      const CONNECT_BTN_READY = '3) Wallet ready';
+      const CONNECT_BTN_WRONG_NETWORK = '3) Wrong network';
+
       const settlementBoxEl = document.getElementById('settlementBox');
       const settlementTitleEl = document.getElementById('settlementTitle');
       const settlementCopyEl = document.getElementById('settlementCopy');
@@ -1235,6 +1245,7 @@
       const settlementNoteEl = document.getElementById('settlementNote');
 
       const pricingPolicyNoteEl = document.getElementById('pricingPolicyNote');
+      const walletLimitNoteEl = document.getElementById('walletLimitNote');
 
       const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
       const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
@@ -1259,6 +1270,12 @@
 
       let currentRequest = null;
       let connectedAddress = null;
+      let walletSessionStarted = false;
+      let walletLimitState = {
+        usdtDailyWalletCap: 0,
+        usedLast24h: 0,
+        remaining24h: 0
+      };
       let currentBalances = {
         BNB: 0,
         CIGO: 0,
@@ -1272,6 +1289,72 @@
 
       function setQuoteStatus(message) {
         if (quoteStatusField) quoteStatusField.value = message;
+      }
+
+      function updateWalletLimitNote() {
+        if (!walletLimitNoteEl) return;
+
+        if (!connectedAddress) {
+          walletLimitNoteEl.textContent = '24-hour USDT wallet cap will appear after wallet connection.';
+          return;
+        }
+
+        if (!walletLimitState.usdtDailyWalletCap) {
+          walletLimitNoteEl.textContent = 'No 24-hour USDT wallet cap is currently set.';
+          return;
+        }
+
+        walletLimitNoteEl.innerHTML =
+          `<strong>24-hour USDT wallet cap:</strong> ` +
+          `${formatAssetAmount(walletLimitState.usedLast24h, 'USDT')} used / ` +
+          `${formatAssetAmount(walletLimitState.usdtDailyWalletCap, 'USDT')} total · ` +
+          `<strong>${formatAssetAmount(walletLimitState.remaining24h, 'USDT')} remaining</strong>`;
+      }
+
+      async function loadWalletLimitState(wallet) {
+        if (!wallet) {
+          walletLimitState = {
+            usdtDailyWalletCap: 0,
+            usedLast24h: 0,
+            remaining24h: 0
+          };
+          updateWalletLimitNote();
+          return;
+        }
+
+        try {
+          const data = await apiJson(`${API_BASE}/limits/wallet/${encodeURIComponent(wallet)}`);
+          walletLimitState = {
+            usdtDailyWalletCap: Number(data.usdtDailyWalletCap || 0),
+            usedLast24h: Number(data.usedLast24h || 0),
+            remaining24h: Number(data.remaining24h || 0)
+          };
+        } catch (err) {
+          console.error('Failed to load wallet limits', err);
+          walletLimitState = {
+            usdtDailyWalletCap: 0,
+            usedLast24h: 0,
+            remaining24h: 0
+          };
+        }
+
+        updateWalletLimitNote();
+      }
+
+      async function assertUsdtWalletCap(fromAsset, amount) {
+        if (String(fromAsset).toUpperCase() !== 'USDT') return;
+        if (!connectedAddress) return;
+
+        await loadWalletLimitState(connectedAddress);
+
+        if (
+          walletLimitState.usdtDailyWalletCap > 0 &&
+          Number(amount) > walletLimitState.remaining24h + 1e-9
+        ) {
+          throw new Error(
+            `24-hour USDT cap exceeded. Remaining allowance: ${formatAssetAmount(walletLimitState.remaining24h, 'USDT')} USDT.`
+          );
+        }
       }
 
       function getRequestStatusText(status) {
@@ -1339,6 +1422,10 @@
       }
 
       if (requestPanelEl) requestPanelEl.hidden = true;
+      clearWalletSummary();
+      updateRouteGuidance(0, 0);
+      setAppStatus('Click Connect wallet to begin.');
+      updateWalletLimitNote();
 
       async function ensureBSC() {
         const { ethereum } = window;
@@ -1473,14 +1560,22 @@
           USDT: 0
         };
 
+        walletLimitState = {
+          usdtDailyWalletCap: 0,
+          usedLast24h: 0,
+          remaining24h: 0
+        };
+
         if (walletAddressEl) walletAddressEl.textContent = 'Not connected';
         if (walletBNBEl) walletBNBEl.textContent = '0.0000';
         if (walletCIGOEl) walletCIGOEl.textContent = '0.00';
         if (walletUSDTEl) walletUSDTEl.textContent = '0.00';
 
         if (connectBtn) {
-          connectBtn.textContent = 'Connect wallet';
+          connectBtn.textContent = CONNECT_BTN_DEFAULT;
         }
+
+        updateWalletLimitNote();
       }
 
       function getSelectedRoute() {
@@ -1851,6 +1946,42 @@
         autoRefreshCurrentRequest();
       }, 500);
 
+      let requestAutoRefreshTimer = null;
+
+      function isServerTrackedOpenRequest(request) {
+        return !!request?.id && (
+          request.status === 'submitted' ||
+          request.status === 'reviewed'
+        );
+      }
+
+      async function autoRefreshCurrentRequest() {
+        if (!isServerTrackedOpenRequest(currentRequest)) return;
+
+        try {
+          await refreshCurrentRequestFromServer();
+        } catch (err) {
+          console.warn('Auto refresh failed', err);
+        }
+      }
+
+      function stopRequestAutoRefresh() {
+        if (requestAutoRefreshTimer) {
+          clearInterval(requestAutoRefreshTimer);
+          requestAutoRefreshTimer = null;
+        }
+      }
+
+      function startRequestAutoRefresh() {
+        stopRequestAutoRefresh();
+
+        if (!isServerTrackedOpenRequest(currentRequest)) return;
+
+        requestAutoRefreshTimer = setInterval(() => {
+          autoRefreshCurrentRequest();
+        }, 15000);
+      }
+
       function saveRequest(request) {
         currentRequest = request || null;
 
@@ -2019,43 +2150,7 @@
           console.error(err);
           setQuoteStatus(`Refresh failed: ${err.message || err}`);
         }
-
-        let requestAutoRefreshTimer = null;
-
-        function isServerTrackedOpenRequest(request) {
-          return !!request?.id && (
-            request.status === 'submitted' ||
-            request.status === 'reviewed'
-          );
-        }
-
-        async function autoRefreshCurrentRequest() {
-          if (!isServerTrackedOpenRequest(currentRequest)) return;
-
-          try {
-            await refreshCurrentRequestFromServer();
-          } catch (err) {
-            console.warn('Auto refresh failed', err);
-          }
-        }
-
-        function stopRequestAutoRefresh() {
-          if (requestAutoRefreshTimer) {
-            clearInterval(requestAutoRefreshTimer);
-            requestAutoRefreshTimer = null;
-          }
-        }
-
-        function startRequestAutoRefresh() {
-          stopRequestAutoRefresh();
-
-          if (!isServerTrackedOpenRequest(currentRequest)) return;
-
-          requestAutoRefreshTimer = setInterval(() => {
-            autoRefreshCurrentRequest();
-          }, 15000);
-        }
-      });
+        });
 
       // ADD below getConnectedWalletText()
 
@@ -2255,7 +2350,7 @@
           setAppStatus('Wrong network. Switch to BNB Chain.');
 
           if (connectBtn) {
-            connectBtn.textContent = 'Wrong network';
+            connectBtn.textContent = CONNECT_BTN_WRONG_NETWORK;
           }
 
           return;
@@ -2269,7 +2364,7 @@
         updateWalletSummary(address, bnb, cigo, usdt);
 
         if (connectBtn) {
-          connectBtn.textContent = 'Wallet connected';
+          connectBtn.textContent = CONNECT_BTN_READY;
         }
 
         setAppStatus(
@@ -2277,6 +2372,7 @@
         );
 
         setQuoteStatus('Ready for quote');
+        await loadWalletLimitState(address);
       }
 
       buyCigoBtn?.addEventListener('click', (e) => {
@@ -2293,6 +2389,8 @@
         }
 
         try {
+          walletSessionStarted = true;
+
           const accounts = await window.ethereum.request({
             method: 'eth_requestAccounts'
           });
@@ -2300,6 +2398,9 @@
           await ensureBSC();
           await refreshWalletState(accounts[0]);
         } catch (err) {
+          walletSessionStarted = false;
+          clearWalletSummary();
+          updateRouteGuidance(0, 0);
           console.error(err);
           setAppStatus(`Connection failed: ${err.message || err}`);
         }
@@ -2308,7 +2409,15 @@
       if (window.ethereum) {
         window.ethereum.on('accountsChanged', async (accounts) => {
           try {
+            if (!walletSessionStarted) {
+              clearWalletSummary();
+              updateRouteGuidance(0, 0);
+              setAppStatus('Click Connect wallet to begin.');
+              return;
+            }
+
             if (!accounts || !accounts.length) {
+              walletSessionStarted = false;
               clearWalletSummary();
               updateRouteGuidance(0, 0);
               setAppStatus('Wallet disconnected');
@@ -2324,29 +2433,24 @@
 
         window.ethereum.on('chainChanged', async () => {
           try {
+            if (!walletSessionStarted) {
+              clearWalletSummary();
+              updateRouteGuidance(0, 0);
+              setAppStatus('Click Connect wallet to begin.');
+              return;
+            }
+
             const accounts = await window.ethereum.request({ method: 'eth_accounts' });
 
             if (!accounts || !accounts.length) {
+              walletSessionStarted = false;
               clearWalletSummary();
               updateRouteGuidance(0, 0);
               setAppStatus('Wallet disconnected');
               return;
             }
 
-            const onBSC = await isBSC();
-
-            if (!onBSC) {
-              clearWalletSummary();
-              updateRouteGuidance(0, 0);
-              setAppStatus('Wrong network. Switch to BNB Chain.');
-
-              if (connectBtn) {
-                connectBtn.textContent = 'Wrong network';
-              }
-
-              return;
-            }
-
+            await ensureBSC();
             await refreshWalletState(accounts[0]);
           } catch (err) {
             console.error(err);
@@ -2418,6 +2522,8 @@
 
         if (manualQuote) {
           try {
+            await assertUsdtWalletCap(from, amount);
+
             const request = createLocalDraftRequest({
               wallet: connectedAddress,
               fromAsset: from,
@@ -2487,39 +2593,21 @@
 
       copyButtons.forEach((button) => {
         // existing copy logic
+        });
+
+      window.addEventListener('focus', () => {
+        autoRefreshCurrentRequest().catch(console.error);
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          autoRefreshCurrentRequest().catch(console.error);
+        }
       });
 
       loadPricingState();
       loadSavedRequest();
 
-      (async () => {
-        if (!window.ethereum) return;
-
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-
-          if (accounts && accounts.length) {
-            await ensureBSC();
-            await refreshWalletState(accounts[0]);
-          }
-        } catch (err) {
-          console.error(err);
-        }
-
-        window.addEventListener('focus', () => {
-          autoRefreshCurrentRequest();
-        });
-
-        window.addEventListener('pageshow', () => {
-          autoRefreshCurrentRequest();
-        });
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') {
-            autoRefreshCurrentRequest();
-          }
-        });
-      })();
     });
   </script>
 </body>
