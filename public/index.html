@@ -342,6 +342,70 @@
       text-transform: uppercase;
     }
 
+    .side-card-head h2 {
+      margin: 0.35rem 0 0.5rem;
+      font-size: 1.2rem;
+      line-height: 1.2;
+    }
+
+    .side-card-copy {
+      margin: 0 0 1rem;
+      color: var(--muted, #b8c0cc);
+      font-size: 0.95rem;
+    }
+
+    .side-steps {
+      margin: 0 0 1rem 1.1rem;
+      padding: 0;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .side-steps li {
+      padding-left: 0.15rem;
+    }
+
+    .side-steps li strong {
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    .side-steps li span {
+      display: block;
+      font-size: 0.92rem;
+      color: var(--muted, #b8c0cc);
+      line-height: 1.4;
+    }
+
+    .token-meta-box {
+      margin-top: 0.9rem;
+      padding: 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .token-meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .token-meta-row span {
+      color: var(--muted, #b8c0cc);
+    }
+
+    .token-meta-row strong {
+      text-align: right;
+    }
+
+    #cigoContractTop {
+      word-break: break-all;
+      font-size: 0.88rem;
+    }
+
     .paths {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -868,7 +932,8 @@
           </div>
 
           <div class="cta-row">
-            <button class="btn btn-primary btn-step" type="button" id="addCigoTopBtn">1) Add CIGO to MetaMask</button>
+            <button class="btn btn-primary btn-step" type="button" id="addCigoTopBtn">1) Add CIGO to MetaMask
+              (PC)</button>
             <a class="btn btn-secondary btn-step" href="#swap">2) Start trade request</a>
             <a class="btn btn-secondary" href="https://quote.cosigo.io/" target="_blank" rel="noopener">
               see how CIGO acquisition or exit affects price
@@ -880,27 +945,62 @@
         </div>
 
         <aside class="card">
-          <div class="status-grid">
-            <div class="stat">
-              <div class="stat-label">current mode</div>
-              <div class="stat-value">request and review</div>
+          <div class="side-card-head">
+            <div class="eyebrow">
+              <span>custom token setup</span>
             </div>
-            <div class="stat">
-              <div class="stat-label">market rail</div>
-              <div class="stat-value">CIGO</div>
+            <h2>show CIGO in your wallet</h2>
+            <p class="side-card-copy">
+              If CIGO does not appear automatically, add it as a custom token on BNB Smart Chain.
+            </p>
+          </div>
+
+          <ol class="side-steps">
+            <li>
+              <strong>Open your wallet on BNB Smart Chain</strong>
+              <span>Use BNB Smart Chain before importing the token.</span>
+            </li>
+            <li>
+              <strong>Choose Import token or Custom token</strong>
+              <span>Wallet wording may vary depending on app or browser wallet.</span>
+            </li>
+            <li>
+              <strong>Paste the CIGO contract address</strong>
+              <span><code id="cigoContractTop">0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560</code></span>
+            </li>
+            <li>
+              <strong>Confirm token details and save</strong>
+              <span>Symbol: CIGO · Decimals: 18</span>
+            </li>
+          </ol>
+
+          <div class="token-meta-box">
+            <div class="token-meta-row">
+              <span>network</span>
+              <strong>BNB Smart Chain</strong>
             </div>
-            <div class="stat">
-              <div class="stat-label">stable rail</div>
-              <div class="stat-value">USDT</div>
+            <div class="token-meta-row">
+              <span>token</span>
+              <strong>CIGO</strong>
             </div>
-            <div class="stat">
-              <div class="stat-label">reference layer</div>
-              <div class="stat-value">COSIGO</div>
+            <div class="token-meta-row">
+              <span>symbol</span>
+              <strong>CIGO</strong>
+            </div>
+            <div class="token-meta-row">
+              <span>decimals</span>
+              <strong>18</strong>
             </div>
           </div>
 
+          <div class="cta-row">
+            <button class="btn btn-secondary" type="button" id="copyCigoContractTopBtn">
+              copy contract
+            </button>
+          </div>
+
           <div class="token-note">
-            One request at a time. Wait for review before sending funds.
+            Desktop wallets may support the add button. Mobile users should be ready to use custom token import.
           </div>
         </aside>
       </div>
@@ -1202,195 +1302,188 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const status = document.getElementById('swapStatus');
-      const connectBtn = document.getElementById('connectBtn');
-      const quoteBtn = document.getElementById('quoteBtn');
-      const swapBtn = document.getElementById('swapBtn');
-      const buyCigoBtn = document.getElementById('buyCigoBtn');
-      const copyButtons = document.querySelectorAll('[data-copy]');
-      const addCigoTopBtn = document.getElementById('addCigoTopBtn');
+      const els = {
+        status: document.getElementById('swapStatus'),
+        connectBtn: document.getElementById('connectBtn'),
+        quoteBtn: document.getElementById('quoteBtn'),
+        swapBtn: document.getElementById('swapBtn'),
+        buyCigoBtn: document.getElementById('buyCigoBtn'),
+        addCigoTopBtn: document.getElementById('addCigoTopBtn'),
 
-      const walletAddressEl = document.getElementById('walletAddress');
-      const walletBNBEl = document.getElementById('walletBNB');
-      const walletCIGOEl = document.getElementById('walletCIGO');
-      const walletUSDTEl = document.getElementById('walletUSDT');
+        walletAddress: document.getElementById('walletAddress'),
+        walletBNB: document.getElementById('walletBNB'),
+        walletCIGO: document.getElementById('walletCIGO'),
+        walletUSDT: document.getElementById('walletUSDT'),
 
-      const fromTokenEl = document.getElementById('fromToken');
-      const toTokenEl = document.getElementById('toToken');
-      const amountInEl = document.getElementById('amountIn');
-      const quoteStatusField = document.getElementById('quoteStatusField');
+        fromToken: document.getElementById('fromToken'),
+        toToken: document.getElementById('toToken'),
+        amountIn: document.getElementById('amountIn'),
+        quoteStatusField: document.getElementById('quoteStatusField'),
 
-      const requestPanelEl = document.getElementById('requestPanel');
-      const requestEmptyEl = document.getElementById('requestEmpty');
-      const requestBodyEl = document.getElementById('requestBody');
-      const requestIdEl = document.getElementById('requestId');
-      const requestRouteEl = document.getElementById('requestRoute');
-      const requestInputEl = document.getElementById('requestInput');
-      const requestOutputEl = document.getElementById('requestOutput');
-      const requestValueEl = document.getElementById('requestValue');
-      const requestStatusEl = document.getElementById('requestStatus');
-      const copyRequestBtn = document.getElementById('copyRequestBtn');
-      const clearRequestBtn = document.getElementById('clearRequestBtn');
-      const submitRequestBtn = document.getElementById('submitRequestBtn');
-      const refreshRequestBtn = document.getElementById('refreshRequestBtn');
+        requestPanel: document.getElementById('requestPanel'),
+        requestEmpty: document.getElementById('requestEmpty'),
+        requestBody: document.getElementById('requestBody'),
+        requestId: document.getElementById('requestId'),
+        requestRoute: document.getElementById('requestRoute'),
+        requestInput: document.getElementById('requestInput'),
+        requestOutput: document.getElementById('requestOutput'),
+        requestValue: document.getElementById('requestValue'),
+        requestStatus: document.getElementById('requestStatus'),
+        copyRequestBtn: document.getElementById('copyRequestBtn'),
+        clearRequestBtn: document.getElementById('clearRequestBtn'),
+        submitRequestBtn: document.getElementById('submitRequestBtn'),
+        refreshRequestBtn: document.getElementById('refreshRequestBtn'),
 
-      const CONNECT_BTN_DEFAULT = '3) Connect wallet';
-      const CONNECT_BTN_READY = '3) Wallet ready';
-      const CONNECT_BTN_WRONG_NETWORK = '3) Wrong network';
+        settlementBox: document.getElementById('settlementBox'),
+        settlementTitle: document.getElementById('settlementTitle'),
+        settlementCopy: document.getElementById('settlementCopy'),
+        settlementList: document.getElementById('settlementList'),
+        settlementNote: document.getElementById('settlementNote'),
 
-      const settlementBoxEl = document.getElementById('settlementBox');
-      const settlementTitleEl = document.getElementById('settlementTitle');
-      const settlementCopyEl = document.getElementById('settlementCopy');
-      const settlementListEl = document.getElementById('settlementList');
-      const settlementNoteEl = document.getElementById('settlementNote');
+        pricingPolicyNote: document.getElementById('pricingPolicyNote'),
+        walletLimitNote: document.getElementById('walletLimitNote'),
 
-      const pricingPolicyNoteEl = document.getElementById('pricingPolicyNote');
-      const walletLimitNoteEl = document.getElementById('walletLimitNote');
+        copyCigoContractTopBtn: document.getElementById('copyCigoContractTopBtn'),
+        cigoContractTop: document.getElementById('cigoContractTop'),
 
-      const CIGO_ADDRESS = '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
-      const USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
-      const WBNB_ADDRESS = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
-
-      const MARKET_ROUTE_ENABLED = false;
-
-      const PRICING_STATE = {
-        ozUsdReference: 100,
-        cigoUsdReference: 0.01,
-        cigoInboundHaircutRate: 0.10,
-        cigoOutboundPremiumRate: 0.05,
-        cigoSellBasis: 0.009,
-        cigoBuyBasis: 0.0105,
-        cosigoUsdBasis: 100 / 31103.4768,
-        usdtUsdBasis: 1,
-        digitalExitFeeRate: 0.015,
-        physicalRedemptionFeeRate: 0.25,
-        version: 1,
-        updatedAt: null
+        copyButtons: document.querySelectorAll('[data-copy]')
       };
 
-      let currentRequest = null;
-      let connectedAddress = null;
-      let walletSessionStarted = false;
-      let walletLimitState = {
-        usdtDailyWalletCap: 0,
-        usedLast24h: 0,
-        remaining24h: 0
+      const CONFIG = {
+        API_BASE: '/api',
+        STORAGE_KEY_CURRENT_REQUEST: 'trade.cosigo.currentRequest',
+        BSC_CHAIN_ID: '0x38',
+        REQUEST_REFRESH_MS: 15000,
+        COPY_RESET_MS: 1400,
+        CONNECT_BTN_DEFAULT: '3) Connect wallet',
+        CONNECT_BTN_READY: '3) Wallet ready',
+        CONNECT_BTN_WRONG_NETWORK: '3) Wrong network',
+        MARKET_ROUTE_ENABLED: false
       };
-      let currentBalances = {
-        BNB: 0,
-        CIGO: 0,
-        USDT: 0
+
+      const ADDRESSES = {
+        CIGO: '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560',
+        USDT: '0x55d398326f99059fF775485246999027B3197955'
       };
-      const API_BASE = '/api';
+
+      const REQUEST_STATUS_TEXT = {
+        draft: 'Not yet submitted',
+        submitted: 'Pending review',
+        reviewed: 'Action required',
+        completed: 'Completed'
+      };
+
+      const REQUEST_STATUS_CLASS = {
+        draft: 'request-status-draft',
+        submitted: 'request-status-submitted',
+        reviewed: 'request-status-reviewed',
+        completed: 'request-status-completed'
+      };
+
+      const state = {
+        currentRequest: null,
+        connectedAddress: null,
+        walletSessionStarted: false,
+        walletLimit: {
+          usdtDailyWalletCap: 0,
+          usedLast24h: 0,
+          remaining24h: 0
+        },
+        balances: {
+          BNB: 0,
+          CIGO: 0,
+          USDT: 0
+        },
+        pricing: {
+          ozUsdReference: 100,
+          cigoUsdReference: 0.01,
+          cigoInboundHaircutRate: 0.10,
+          cigoOutboundPremiumRate: 0.05,
+          cigoSellBasis: 0.009,
+          cigoBuyBasis: 0.0105,
+          cosigoUsdBasis: 100 / 31103.4768,
+          usdtUsdBasis: 1,
+          digitalExitFeeRate: 0.015,
+          physicalRedemptionFeeRate: 0.25,
+          version: 1,
+          updatedAt: null
+        },
+        requestAutoRefreshTimer: null
+      };
 
       function setAppStatus(message) {
-        if (status) status.textContent = message;
+        if (els.status) els.status.textContent = message;
       }
 
       function setQuoteStatus(message) {
-        if (quoteStatusField) quoteStatusField.value = message;
+        if (els.quoteStatusField) els.quoteStatusField.value = message;
       }
 
-      function updateWalletLimitNote() {
-        if (!walletLimitNoteEl) return;
-
-        if (!connectedAddress) {
-          walletLimitNoteEl.textContent = '24-hour USDT wallet cap will appear after wallet connection.';
-          return;
-        }
-
-        if (!walletLimitState.usdtDailyWalletCap) {
-          walletLimitNoteEl.textContent = 'No 24-hour USDT wallet cap is currently set.';
-          return;
-        }
-
-        walletLimitNoteEl.innerHTML =
-          `<strong>24-hour USDT wallet cap:</strong> ` +
-          `${formatAssetAmount(walletLimitState.usedLast24h, 'USDT')} used / ` +
-          `${formatAssetAmount(walletLimitState.usdtDailyWalletCap, 'USDT')} total · ` +
-          `<strong>${formatAssetAmount(walletLimitState.remaining24h, 'USDT')} remaining</strong>`;
+      function numberOr(value, fallback) {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : fallback;
       }
 
-      async function loadWalletLimitState(wallet) {
-        if (!wallet) {
-          walletLimitState = {
-            usdtDailyWalletCap: 0,
-            usedLast24h: 0,
-            remaining24h: 0
-          };
-          updateWalletLimitNote();
-          return;
-        }
-
-        try {
-          const data = await apiJson(`${API_BASE}/limits/wallet/${encodeURIComponent(wallet)}`);
-          walletLimitState = {
-            usdtDailyWalletCap: Number(data.usdtDailyWalletCap || 0),
-            usedLast24h: Number(data.usedLast24h || 0),
-            remaining24h: Number(data.remaining24h || 0)
-          };
-        } catch (err) {
-          console.error('Failed to load wallet limits', err);
-          walletLimitState = {
-            usdtDailyWalletCap: 0,
-            usedLast24h: 0,
-            remaining24h: 0
-          };
-        }
-
-        updateWalletLimitNote();
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
       }
 
-      async function assertUsdtWalletCap(fromAsset, amount) {
-        if (String(fromAsset).toUpperCase() !== 'USDT') return;
-        if (!connectedAddress) return;
+      function formatAssetAmount(value, asset) {
+        const num = Number(value);
+        if (!Number.isFinite(num)) return String(value ?? '');
 
-        await loadWalletLimitState(connectedAddress);
+        let maxDigits = 6;
+        if (asset === 'COSIGO') maxDigits = 0;
+        if (asset === 'CIGO') maxDigits = 1;
+        if (asset === 'USDT') maxDigits = 2;
+        if (asset === 'BNB') maxDigits = 4;
 
-        if (
-          walletLimitState.usdtDailyWalletCap > 0 &&
-          Number(amount) > walletLimitState.remaining24h + 1e-9
-        ) {
-          throw new Error(
-            `24-hour USDT cap exceeded. Remaining allowance: ${formatAssetAmount(walletLimitState.remaining24h, 'USDT')} USDT.`
-          );
-        }
+        return num.toLocaleString(undefined, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: maxDigits
+        });
+      }
+
+      function formatUsdAmount(value) {
+        const num = Number(value);
+        if (!Number.isFinite(num)) return '$0.00';
+
+        return `$${num.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`;
+      }
+
+      function formatPercent(value) {
+        const num = Number(value) * 100;
+        if (!Number.isFinite(num)) return '0%';
+
+        return `${num.toLocaleString(undefined, {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2
+        })}%`;
       }
 
       function getRequestStatusText(status) {
-        if (status === 'draft') return 'Not yet submitted';
-        if (status === 'submitted') return 'Pending review';
-        if (status === 'reviewed') return 'Action required';
-        if (status === 'completed') return 'Completed';
-        return status || '-';
+        return REQUEST_STATUS_TEXT[status] || status || '-';
       }
 
       function applyRequestStatusStyle(status) {
-        if (!requestStatusEl) return;
+        if (!els.requestStatus) return;
 
-        requestStatusEl.className = '';
-
+        els.requestStatus.className = '';
         if (!status) return;
 
-        requestStatusEl.classList.add('request-status-pill');
+        els.requestStatus.classList.add('request-status-pill');
 
-        if (status === 'draft') {
-          requestStatusEl.classList.add('request-status-draft');
-          return;
-        }
-
-        if (status === 'submitted') {
-          requestStatusEl.classList.add('request-status-submitted');
-          return;
-        }
-
-        if (status === 'reviewed') {
-          requestStatusEl.classList.add('request-status-reviewed');
-          return;
-        }
-
-        if (status === 'completed') {
-          requestStatusEl.classList.add('request-status-completed');
+        const cls = REQUEST_STATUS_CLASS[status];
+        if (cls) {
+          els.requestStatus.classList.add(cls);
         }
       }
 
@@ -1413,7 +1506,7 @@
         let ok = false;
         try {
           ok = document.execCommand('copy');
-        } catch (err) {
+        } catch {
           ok = false;
         }
 
@@ -1421,62 +1514,204 @@
         return ok;
       }
 
-      if (requestPanelEl) requestPanelEl.hidden = true;
-      clearWalletSummary();
-      updateRouteGuidance(0, 0);
-      setAppStatus('Click Connect wallet to begin.');
-      updateWalletLimitNote();
+      function bindCopyButton(button, getValue, idleText = 'copy', successText = 'copied') {
+        if (!button) return;
+
+        button.addEventListener('click', async () => {
+          const value = getValue();
+          if (!value) return;
+
+          const ok = await copyText(value);
+          button.textContent = ok ? successText : 'copy failed';
+
+          setTimeout(() => {
+            button.textContent = idleText;
+          }, CONFIG.COPY_RESET_MS);
+        });
+      }
+
+      function updateRouteGuidance() {
+        if (els.buyCigoBtn) els.buyCigoBtn.textContent = 'buy CIGO';
+        if (els.quoteBtn) els.quoteBtn.textContent = '4) Get quote';
+        if (els.swapBtn) els.swapBtn.textContent = '5) Request swap';
+      }
+
+      function updateWalletSummary(address, bnb, cigo, usdt) {
+        state.connectedAddress = address;
+        state.balances = {
+          BNB: numberOr(bnb, 0),
+          CIGO: numberOr(cigo, 0),
+          USDT: numberOr(usdt, 0)
+        };
+
+        if (els.walletAddress) {
+          els.walletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+        }
+        if (els.walletBNB) {
+          els.walletBNB.textContent = state.balances.BNB.toFixed(4);
+        }
+        if (els.walletCIGO) {
+          els.walletCIGO.textContent = state.balances.CIGO.toFixed(2);
+        }
+        if (els.walletUSDT) {
+          els.walletUSDT.textContent = state.balances.USDT.toFixed(2);
+        }
+      }
+
+      function clearWalletSummary() {
+        state.connectedAddress = null;
+        state.balances = {
+          BNB: 0,
+          CIGO: 0,
+          USDT: 0
+        };
+        state.walletLimit = {
+          usdtDailyWalletCap: 0,
+          usedLast24h: 0,
+          remaining24h: 0
+        };
+
+        if (els.walletAddress) els.walletAddress.textContent = 'Not connected';
+        if (els.walletBNB) els.walletBNB.textContent = '0.0000';
+        if (els.walletCIGO) els.walletCIGO.textContent = '0.00';
+        if (els.walletUSDT) els.walletUSDT.textContent = '0.00';
+        if (els.connectBtn) els.connectBtn.textContent = CONFIG.CONNECT_BTN_DEFAULT;
+
+        updateWalletLimitNote();
+      }
+
+      function updateWalletLimitNote() {
+        if (!els.walletLimitNote) return;
+
+        if (!state.connectedAddress) {
+          els.walletLimitNote.textContent = '24-hour USDT wallet cap will appear after wallet connection.';
+          return;
+        }
+
+        if (!state.walletLimit.usdtDailyWalletCap) {
+          els.walletLimitNote.textContent = 'No 24-hour USDT wallet cap is currently set.';
+          return;
+        }
+
+        els.walletLimitNote.innerHTML =
+          `<strong>24-hour USDT wallet cap:</strong> ` +
+          `${formatAssetAmount(state.walletLimit.usedLast24h, 'USDT')} used / ` +
+          `${formatAssetAmount(state.walletLimit.usdtDailyWalletCap, 'USDT')} total · ` +
+          `<strong>${formatAssetAmount(state.walletLimit.remaining24h, 'USDT')} remaining</strong>`;
+      }
+
+      async function loadWalletLimitState(wallet) {
+        if (!wallet) {
+          state.walletLimit = {
+            usdtDailyWalletCap: 0,
+            usedLast24h: 0,
+            remaining24h: 0
+          };
+          updateWalletLimitNote();
+          return;
+        }
+
+        try {
+          const data = await apiJson(`${CONFIG.API_BASE}/limits/wallet/${encodeURIComponent(wallet)}`);
+          state.walletLimit = {
+            usdtDailyWalletCap: numberOr(data.usdtDailyWalletCap, 0),
+            usedLast24h: numberOr(data.usedLast24h, 0),
+            remaining24h: numberOr(data.remaining24h, 0)
+          };
+        } catch (err) {
+          console.error('Failed to load wallet limits', err);
+          state.walletLimit = {
+            usdtDailyWalletCap: 0,
+            usedLast24h: 0,
+            remaining24h: 0
+          };
+        }
+
+        updateWalletLimitNote();
+      }
+
+      async function assertUsdtWalletCap(fromAsset, amount) {
+        if (String(fromAsset).toUpperCase() !== 'USDT') return;
+        if (!state.connectedAddress) return;
+
+        await loadWalletLimitState(state.connectedAddress);
+
+        if (
+          state.walletLimit.usdtDailyWalletCap > 0 &&
+          Number(amount) > state.walletLimit.remaining24h + 1e-9
+        ) {
+          throw new Error(
+            `24-hour USDT cap exceeded. Remaining allowance: ${formatAssetAmount(state.walletLimit.remaining24h, 'USDT')} USDT.`
+          );
+        }
+      }
 
       async function ensureBSC() {
         const { ethereum } = window;
         if (!ethereum) throw new Error('MetaMask not found');
 
         const chainId = await ethereum.request({ method: 'eth_chainId' });
+        if (chainId === CONFIG.BSC_CHAIN_ID) return;
 
-        if (chainId !== '0x38') {
-          try {
-            await ethereum.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: '0x38' }]
-            });
-          } catch (err) {
-            alert('Switch to BNB Chain manually');
-            throw err;
-          }
+        try {
+          await ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: CONFIG.BSC_CHAIN_ID }]
+          });
+        } catch (err) {
+          alert('Switch to BNB Chain manually');
+          throw err;
         }
       }
 
       async function isBSC() {
         if (!window.ethereum) return false;
         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-        return chainId === '0x38';
+        return chainId === CONFIG.BSC_CHAIN_ID;
+      }
+
+      function fromBaseUnitHexToNumber(hexValue, decimals = 18, fractionDigits = 6) {
+        try {
+          const raw = BigInt(hexValue || '0x0');
+          const base = 10n ** BigInt(decimals);
+          const whole = raw / base;
+          const fraction = raw % base;
+
+          let fractionText = fraction.toString().padStart(decimals, '0');
+          fractionText = fractionText.slice(0, fractionDigits).replace(/0+$/, '');
+
+          return Number(fractionText ? `${whole}.${fractionText}` : whole.toString());
+        } catch {
+          return 0;
+        }
       }
 
       async function getBNBBalance(address) {
-        const balance = await window.ethereum.request({
+        const hex = await window.ethereum.request({
           method: 'eth_getBalance',
           params: [address, 'latest']
         });
 
-        return parseInt(balance, 16) / 1e18;
+        return fromBaseUnitHexToNumber(hex, 18, 6);
       }
 
       async function getTokenBalance(address, tokenAddress) {
-        const data =
-          '0x70a08231' + address.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+        const data = '0x70a08231' + address.toLowerCase().replace(/^0x/, '').padStart(64, '0');
 
-        const result = await window.ethereum.request({
+        const hex = await window.ethereum.request({
           method: 'eth_call',
-          params: [
-            {
-              to: tokenAddress,
-              data
-            },
-            'latest'
-          ]
+          params: [{ to: tokenAddress, data }, 'latest']
         });
 
-        return parseInt(result, 16) / 1e18;
+        return fromBaseUnitHexToNumber(hex, 18, 6);
+      }
+
+      async function getCigoBalance(address) {
+        return getTokenBalance(address, ADDRESSES.CIGO);
+      }
+
+      async function getUsdtBalance(address) {
+        return getTokenBalance(address, ADDRESSES.USDT);
       }
 
       async function addCigoToMetaMask() {
@@ -1491,7 +1726,7 @@
             params: {
               type: 'ERC20',
               options: {
-                address: CIGO_ADDRESS,
+                address: ADDRESSES.CIGO,
                 symbol: 'CIGO',
                 decimals: 18,
                 image: 'https://trade.cosigo.io/shared/assets/icons/cigo_256.png'
@@ -1499,296 +1734,123 @@
             }
           });
 
-          if (wasAdded) {
-            setAppStatus('CIGO added to MetaMask.');
-          } else {
-            setAppStatus('CIGO was not added.');
-          }
+          setAppStatus(wasAdded ? 'CIGO added to MetaMask.' : 'CIGO was not added.');
         } catch (err) {
           console.error(err);
           setAppStatus(`Could not add CIGO: ${err.message || err}`);
         }
       }
 
-      async function getCigoBalance(address) {
-        return getTokenBalance(address, CIGO_ADDRESS);
-      }
-
-      async function getUsdtBalance(address) {
-        return getTokenBalance(address, USDT_ADDRESS);
-      }
-
-      function updateRouteGuidance(cigo, usdt) {
-        const buyBtn = document.getElementById('buyCigoBtn');
-        const swapBtn = document.getElementById('swapBtn');
-        const quoteBtn = document.getElementById('quoteBtn');
-
-        if (!buyBtn || !swapBtn || !quoteBtn) return;
-
-        buyBtn.textContent = 'buy CIGO';
-        quoteBtn.textContent = '4) Get quote';
-        swapBtn.textContent = '5) Request swap';
-      }
-
-      function updateWalletSummary(address, bnb, cigo, usdt) {
-        connectedAddress = address;
-        currentBalances = {
-          BNB: Number(bnb) || 0,
-          CIGO: Number(cigo) || 0,
-          USDT: Number(usdt) || 0
-        };
-
-        if (walletAddressEl) {
-          walletAddressEl.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
-        }
-        if (walletBNBEl) {
-          walletBNBEl.textContent = currentBalances.BNB.toFixed(4);
-        }
-        if (walletCIGOEl) {
-          walletCIGOEl.textContent = currentBalances.CIGO.toFixed(2);
-        }
-        if (walletUSDTEl) {
-          walletUSDTEl.textContent = currentBalances.USDT.toFixed(2);
-        }
-      }
-
-      function clearWalletSummary() {
-        connectedAddress = null;
-        currentBalances = {
-          BNB: 0,
-          CIGO: 0,
-          USDT: 0
-        };
-
-        walletLimitState = {
-          usdtDailyWalletCap: 0,
-          usedLast24h: 0,
-          remaining24h: 0
-        };
-
-        if (walletAddressEl) walletAddressEl.textContent = 'Not connected';
-        if (walletBNBEl) walletBNBEl.textContent = '0.0000';
-        if (walletCIGOEl) walletCIGOEl.textContent = '0.00';
-        if (walletUSDTEl) walletUSDTEl.textContent = '0.00';
-
-        if (connectBtn) {
-          connectBtn.textContent = CONNECT_BTN_DEFAULT;
-        }
-
-        updateWalletLimitNote();
-      }
-
       function getSelectedRoute() {
-        const from = fromTokenEl?.value || '';
-        const to = toTokenEl?.value || '';
-        const rawAmount = amountInEl?.value || '';
-        const amount = Number(rawAmount);
+        const from = els.fromToken?.value || '';
+        const to = els.toToken?.value || '';
+        const amount = Number(els.amountIn?.value || '');
 
         return {
           from,
           to,
-          rawAmount,
           amount,
           isValidAmount: Number.isFinite(amount) && amount > 0
         };
       }
 
-      function formatQuoteNumber(value, digits = 6) {
-        return Number(value).toLocaleString(undefined, {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: digits
-        });
+      function updatePricingPolicyNote() {
+        if (!els.pricingPolicyNote) return;
+
+        const pricing = state.pricing;
+        const updatedText = pricing.updatedAt
+          ? `Pricing version ${pricing.version} · updated ${pricing.updatedAt}`
+          : `Pricing version ${pricing.version}`;
+
+        els.pricingPolicyNote.innerHTML =
+          `<strong>Current pricing policy:</strong><br>` +
+          `Reference ounce basis: <strong>${formatUsdAmount(pricing.ozUsdReference)}</strong> per troy ounce.<br>` +
+          `COSIGO digital exit fee: <strong>${formatPercent(pricing.digitalExitFeeRate)}</strong>.<br>` +
+          `COSIGO physical silver redemption fee: <strong>${formatPercent(pricing.physicalRedemptionFeeRate)}</strong>.<br>` +
+          `CIGO sell basis discount: <strong>${formatPercent(pricing.cigoInboundHaircutRate)}</strong>.<br>` +
+          `CIGO buy basis premium: <strong>${formatPercent(pricing.cigoOutboundPremiumRate)}</strong>.<br>` +
+          `<span style="color:#9cabbd;">${updatedText}</span><br>` +
+          `<a href="https://redeem.cosigo.io/" target="_blank" rel="noopener">open physical redemption page</a>`;
       }
 
-      function formatAssetAmount(value, asset) {
-        const num = Number(value);
-        if (!Number.isFinite(num)) return String(value ?? '');
+      async function loadPricingState() {
+        try {
+          const data = await apiJson(`${CONFIG.API_BASE}/settings/public`);
+          const settings = data.settings || {};
+          const pricing = state.pricing;
 
-        let maxDigits = 6;
-
-        if (asset === 'COSIGO') {
-          maxDigits = 0;
-        } else if (asset === 'CIGO') {
-          maxDigits = 1;
-        } else if (asset === 'USDT') {
-          maxDigits = 2;
-        } else if (asset === 'BNB') {
-          maxDigits = 4;
+          pricing.ozUsdReference = numberOr(settings.ozUsdReference, pricing.ozUsdReference);
+          pricing.cigoUsdReference = numberOr(settings.cigoUsdReference, pricing.cigoUsdReference);
+          pricing.cigoInboundHaircutRate = numberOr(settings.cigoInboundHaircutRate, pricing.cigoInboundHaircutRate);
+          pricing.cigoOutboundPremiumRate = numberOr(settings.cigoOutboundPremiumRate, pricing.cigoOutboundPremiumRate);
+          pricing.cigoSellBasis = numberOr(settings.cigoSellBasis, pricing.cigoSellBasis);
+          pricing.cigoBuyBasis = numberOr(settings.cigoBuyBasis, pricing.cigoBuyBasis);
+          pricing.cosigoUsdBasis = numberOr(settings.cosigoUsdBasis, pricing.cosigoUsdBasis);
+          pricing.usdtUsdBasis = numberOr(settings.usdtUsdBasis, pricing.usdtUsdBasis);
+          pricing.digitalExitFeeRate = numberOr(settings.digitalExitFeeRate, pricing.digitalExitFeeRate);
+          pricing.physicalRedemptionFeeRate = numberOr(settings.physicalRedemptionFeeRate, pricing.physicalRedemptionFeeRate);
+          pricing.version = numberOr(settings.version, pricing.version);
+          pricing.updatedAt = settings.updatedAt || null;
+        } catch (err) {
+          console.error('Failed to load pricing settings', err);
         }
 
-        return num.toLocaleString(undefined, {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: maxDigits,
-        });
+        updatePricingPolicyNote();
       }
 
-      function formatUsdAmount(value) {
-        const num = Number(value);
+      function getRouteFeePolicy(from, to) {
+        const pricing = state.pricing;
 
-        if (!Number.isFinite(num)) return '$0.00';
+        if (from === 'USDT' && to === 'COSIGO') {
+          return { feeRate: 0, policyLabel: 'usdt to cosigo' };
+        }
+        if (from === 'COSIGO' && to === 'USDT') {
+          return { feeRate: pricing.digitalExitFeeRate, policyLabel: 'cosigo to usdt' };
+        }
+        if (from === 'USDT' && to === 'CIGO') {
+          return { feeRate: 0, policyLabel: 'usdt to cigo' };
+        }
+        if (from === 'CIGO' && to === 'USDT') {
+          return { feeRate: 0, policyLabel: 'cigo to usdt' };
+        }
+        if (from === 'CIGO' && to === 'COSIGO') {
+          return { feeRate: 0, policyLabel: 'cigo to cosigo' };
+        }
+        if (from === 'COSIGO' && to === 'CIGO') {
+          return { feeRate: pricing.digitalExitFeeRate, policyLabel: 'cosigo to cigo' };
+        }
 
-        return `$${num.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        })}`;
-      }
-
-      function formatPercent(value) {
-        const num = Number(value) * 100;
-
-        if (!Number.isFinite(num)) return '0%';
-
-        return `${num.toLocaleString(undefined, {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 2
-        })}%`;
+        return { feeRate: 0, policyLabel: 'inactive' };
       }
 
       function getQuoteAdjustmentText(manualQuote) {
         if (!manualQuote) return '';
 
+        const pricing = state.pricing;
+
         if (manualQuote.policyLabel === 'usdt to cosigo') {
           return 'COSIGO reference basis applied';
         }
-
         if (manualQuote.policyLabel === 'cosigo to usdt') {
-          return `COSIGO exit fee applied (${formatPercent(PRICING_STATE.digitalExitFeeRate)})`;
+          return `COSIGO exit fee applied (${formatPercent(pricing.digitalExitFeeRate)})`;
         }
-
         if (manualQuote.policyLabel === 'usdt to cigo') {
-          return `CIGO buy basis premium applied (${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)})`;
+          return `CIGO buy basis premium applied (${formatPercent(pricing.cigoOutboundPremiumRate)})`;
         }
-
-        if (manualQuote.policyLabel === 'cigo to usdt') {
-          return `CIGO sell basis discount applied (${formatPercent(PRICING_STATE.cigoInboundHaircutRate)})`;
+        if (manualQuote.policyLabel === 'cigo to usdt' || manualQuote.policyLabel === 'cigo to cosigo') {
+          return `CIGO sell basis discount applied (${formatPercent(pricing.cigoInboundHaircutRate)})`;
         }
-
-        if (manualQuote.policyLabel === 'cigo to cosigo') {
-          return `CIGO sell basis discount applied (${formatPercent(PRICING_STATE.cigoInboundHaircutRate)})`;
-        }
-
         if (manualQuote.policyLabel === 'cosigo to cigo') {
-          return `COSIGO exit fee and CIGO buy basis premium applied`;
+          return 'COSIGO exit fee and CIGO buy basis premium applied';
         }
 
         return `fee ${formatPercent(manualQuote.feeRate)}`;
       }
 
-      function updatePricingPolicyNote() {
-        if (!pricingPolicyNoteEl) return;
-
-        const updatedText = PRICING_STATE.updatedAt
-          ? `Pricing version ${PRICING_STATE.version} · updated ${PRICING_STATE.updatedAt}`
-          : `Pricing version ${PRICING_STATE.version}`;
-
-        pricingPolicyNoteEl.innerHTML =
-          `<strong>Current pricing policy:</strong><br>` +
-          `Reference ounce basis: <strong>${formatUsdAmount(PRICING_STATE.ozUsdReference)}</strong> per troy ounce.<br>` +
-          `COSIGO digital exit fee: <strong>${formatPercent(PRICING_STATE.digitalExitFeeRate)}</strong>.<br>` +
-          `COSIGO physical silver redemption fee: <strong>${formatPercent(PRICING_STATE.physicalRedemptionFeeRate)}</strong>.<br>` +
-          `CIGO sell basis discount: <strong>${formatPercent(PRICING_STATE.cigoInboundHaircutRate)}</strong>.<br>` +
-          `CIGO buy basis premium: <strong>${formatPercent(PRICING_STATE.cigoOutboundPremiumRate)}</strong>.<br>` +
-          `<span style="color:#9cabbd;">${updatedText}</span><br>` +
-          `<a href="https://redeem.cosigo.io/" target="_blank" rel="noopener">open physical redemption page</a>`;
-      }
-      async function loadPricingState() {
-        try {
-          const data = await apiJson(`${API_BASE}/settings/public`);
-          const settings = data.settings || {};
-
-          PRICING_STATE.ozUsdReference = Number(settings.ozUsdReference || PRICING_STATE.ozUsdReference);
-          PRICING_STATE.cigoUsdReference = Number(settings.cigoUsdReference || PRICING_STATE.cigoUsdReference);
-          PRICING_STATE.cigoInboundHaircutRate = Number(settings.cigoInboundHaircutRate || PRICING_STATE.cigoInboundHaircutRate);
-          PRICING_STATE.cigoOutboundPremiumRate = Number(settings.cigoOutboundPremiumRate || PRICING_STATE.cigoOutboundPremiumRate);
-          PRICING_STATE.cigoSellBasis = Number(settings.cigoSellBasis || PRICING_STATE.cigoSellBasis);
-          PRICING_STATE.cigoBuyBasis = Number(settings.cigoBuyBasis || PRICING_STATE.cigoBuyBasis);
-          PRICING_STATE.cosigoUsdBasis = Number(settings.cosigoUsdBasis || PRICING_STATE.cosigoUsdBasis);
-          PRICING_STATE.usdtUsdBasis = Number(settings.usdtUsdBasis || PRICING_STATE.usdtUsdBasis);
-          PRICING_STATE.digitalExitFeeRate = Number(settings.digitalExitFeeRate || PRICING_STATE.digitalExitFeeRate);
-          PRICING_STATE.physicalRedemptionFeeRate = Number(settings.physicalRedemptionFeeRate || PRICING_STATE.physicalRedemptionFeeRate);
-          PRICING_STATE.version = Number(settings.version || PRICING_STATE.version);
-          PRICING_STATE.updatedAt = settings.updatedAt || null;
-
-          updatePricingPolicyNote();
-        } catch (err) {
-          console.error('Failed to load pricing settings', err);
-          updatePricingPolicyNote();
-        }
-      }
-
-      function getRouteFeePolicy(from, to) {
-        if (from === 'USDT' && to === 'COSIGO') {
-          return {
-            feeRate: 0,
-            policyLabel: 'usdt to cosigo'
-          };
-        }
-
-        if (from === 'COSIGO' && to === 'USDT') {
-          return {
-            feeRate: PRICING_STATE.digitalExitFeeRate,
-            policyLabel: 'cosigo to usdt'
-          };
-        }
-
-        if (from === 'USDT' && to === 'CIGO') {
-          return {
-            feeRate: 0,
-            policyLabel: 'usdt to cigo'
-          };
-        }
-
-        if (from === 'CIGO' && to === 'USDT') {
-          return {
-            feeRate: 0,
-            policyLabel: 'cigo to usdt'
-          };
-        }
-
-        if (from === 'CIGO' && to === 'COSIGO') {
-          return {
-            feeRate: 0,
-            policyLabel: 'cigo to cosigo'
-          };
-        }
-
-        if (from === 'COSIGO' && to === 'CIGO') {
-          return {
-            feeRate: PRICING_STATE.digitalExitFeeRate,
-            policyLabel: 'cosigo to cigo'
-          };
-        }
-
-        return {
-          feeRate: 0,
-          policyLabel: 'inactive'
-        };
-      }
-
-      function getAvailableBalance(asset) {
-        if (asset === 'BNB') return currentBalances.BNB;
-        if (asset === 'CIGO') return currentBalances.CIGO;
-        if (asset === 'USDT') return currentBalances.USDT;
-        return null;
-      }
-
-      function getBalanceCheck(asset, amount) {
-        const available = getAvailableBalance(asset);
-
-        if (available == null) {
-          return { ok: true, available: null, checked: false };
-        }
-
-        return {
-          ok: Number(amount) <= Number(available) + 1e-12,
-          available,
-          checked: true
-        };
-      }
-
       function getManualQuote(from, to, amount) {
         if (!Number.isFinite(amount) || amount <= 0) return null;
 
+        const pricing = state.pricing;
         const policy = getRouteFeePolicy(from, to);
 
         let grossUsdValue = 0;
@@ -1798,34 +1860,30 @@
 
         if (from === 'USDT' && to === 'COSIGO') {
           grossUsdValue = amount;
-          feeUsdValue = 0;
           netUsdValue = grossUsdValue;
-          output = netUsdValue / PRICING_STATE.cosigoUsdBasis;
+          output = netUsdValue / pricing.cosigoUsdBasis;
         } else if (from === 'COSIGO' && to === 'USDT') {
-          grossUsdValue = amount * PRICING_STATE.cosigoUsdBasis;
-          feeUsdValue = grossUsdValue * PRICING_STATE.digitalExitFeeRate;
+          grossUsdValue = amount * pricing.cosigoUsdBasis;
+          feeUsdValue = grossUsdValue * pricing.digitalExitFeeRate;
           netUsdValue = grossUsdValue - feeUsdValue;
           output = netUsdValue;
         } else if (from === 'USDT' && to === 'CIGO') {
           grossUsdValue = amount;
-          feeUsdValue = 0;
           netUsdValue = grossUsdValue;
-          output = netUsdValue / PRICING_STATE.cigoBuyBasis;
+          output = netUsdValue / pricing.cigoBuyBasis;
         } else if (from === 'CIGO' && to === 'USDT') {
-          grossUsdValue = amount * PRICING_STATE.cigoSellBasis;
-          feeUsdValue = 0;
+          grossUsdValue = amount * pricing.cigoSellBasis;
           netUsdValue = grossUsdValue;
           output = netUsdValue;
         } else if (from === 'CIGO' && to === 'COSIGO') {
-          grossUsdValue = amount * PRICING_STATE.cigoSellBasis;
-          feeUsdValue = 0;
+          grossUsdValue = amount * pricing.cigoSellBasis;
           netUsdValue = grossUsdValue;
-          output = netUsdValue / PRICING_STATE.cosigoUsdBasis;
+          output = netUsdValue / pricing.cosigoUsdBasis;
         } else if (from === 'COSIGO' && to === 'CIGO') {
-          grossUsdValue = amount * PRICING_STATE.cosigoUsdBasis;
-          feeUsdValue = grossUsdValue * PRICING_STATE.digitalExitFeeRate;
+          grossUsdValue = amount * pricing.cosigoUsdBasis;
+          feeUsdValue = grossUsdValue * pricing.digitalExitFeeRate;
           netUsdValue = grossUsdValue - feeUsdValue;
-          output = netUsdValue / PRICING_STATE.cigoBuyBasis;
+          output = netUsdValue / pricing.cigoBuyBasis;
         } else {
           return null;
         }
@@ -1845,8 +1903,8 @@
           ...options,
           headers: {
             'Content-Type': 'application/json',
-            ...(options.headers || {}),
-          },
+            ...(options.headers || {})
+          }
         });
 
         const data = await response.json().catch(() => ({}));
@@ -1858,364 +1916,57 @@
         return data;
       }
 
-      async function loadSavedRequest() {
-        try {
-          const raw = localStorage.getItem('trade.cosigo.currentRequest');
-
-          if (!raw) {
-            saveRequest(null);
-            return;
-          }
-
-          const saved = JSON.parse(raw);
-
-          if (saved?.isLocalDraft) {
-            saveRequest(saved);
-            return;
-          }
-
-          if (!saved?.id) {
-            saveRequest(null);
-            return;
-          }
-
-          const data = await apiJson(`${API_BASE}/requests/${encodeURIComponent(saved.id)}`);
-          saveRequest(data.request);
-        } catch (err) {
-          console.warn('Could not reload saved request', err);
-          saveRequest(null);
-        }
-      }
-
-      function generateRequestId() {
-        return 'req_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
-      }
-
-      function getConnectedWalletText() {
-        return walletAddressEl?.textContent || 'Not connected';
-      }
-
-      function renderRequest(request) {
-        if (!request || (!request.id && !request.isLocalDraft && !request.localDraftId)) {
-          currentRequest = null;
-
-          if (requestEmptyEl) requestEmptyEl.hidden = false;
-          if (requestBodyEl) requestBodyEl.hidden = true;
-
-          if (requestIdEl) requestIdEl.textContent = '-';
-          if (requestRouteEl) requestRouteEl.textContent = '-';
-          if (requestInputEl) requestInputEl.textContent = '-';
-          if (requestOutputEl) requestOutputEl.textContent = '-';
-          if (requestValueEl) requestValueEl.textContent = '-';
-          if (requestStatusEl) requestStatusEl.textContent = getRequestStatusText('draft');
-          applyRequestStatusStyle('');
-
-          renderSettlementBox(null);
-
-          if (requestPanelEl) requestPanelEl.hidden = true;
-          return;
-        }
-
-        currentRequest = request;
-
-        const fromAsset = request.fromAsset || request.from || '-';
-        const toAsset = request.toAsset || request.to || '-';
-        const inputAmount = request.inputAmount || '-';
-        const outputAmount = request.outputAmount || '-';
-        const basisValue = request.basisValue ?? request.valueUsd ?? 0;
-        const statusText = request.status || 'draft';
-        const displayId = request.id || request.localDraftId || '-';
-
-        if (requestEmptyEl) requestEmptyEl.hidden = true;
-        if (requestBodyEl) requestBodyEl.hidden = false;
-
-        if (requestIdEl) requestIdEl.textContent = displayId;
-        if (requestRouteEl) requestRouteEl.textContent = `${fromAsset} → ${toAsset}`;
-        if (requestInputEl) requestInputEl.textContent = `${formatAssetAmount(inputAmount, fromAsset)} ${fromAsset}`;
-        if (requestOutputEl) requestOutputEl.textContent = `${formatAssetAmount(outputAmount, toAsset)} ${toAsset}`;
-        if (requestValueEl) requestValueEl.textContent = formatUsdAmount(basisValue);
-        if (requestStatusEl) requestStatusEl.textContent = getRequestStatusText(statusText);
-        applyRequestStatusStyle(statusText);
-
-        renderSettlementBox(request);
-
-        if (requestPanelEl) requestPanelEl.hidden = false;
-      }
-
-      setTimeout(() => {
-        autoRefreshCurrentRequest();
-      }, 500);
-
-      let requestAutoRefreshTimer = null;
-
-      function isServerTrackedOpenRequest(request) {
-        return !!request?.id && (
-          request.status === 'submitted' ||
-          request.status === 'reviewed'
-        );
-      }
-
-      async function autoRefreshCurrentRequest() {
-        if (!isServerTrackedOpenRequest(currentRequest)) return;
-
-        try {
-          await refreshCurrentRequestFromServer();
-        } catch (err) {
-          console.warn('Auto refresh failed', err);
-        }
-      }
-
-      function stopRequestAutoRefresh() {
-        if (requestAutoRefreshTimer) {
-          clearInterval(requestAutoRefreshTimer);
-          requestAutoRefreshTimer = null;
-        }
-      }
-
-      function startRequestAutoRefresh() {
-        stopRequestAutoRefresh();
-
-        if (!isServerTrackedOpenRequest(currentRequest)) return;
-
-        requestAutoRefreshTimer = setInterval(() => {
-          autoRefreshCurrentRequest();
-        }, 15000);
-      }
-
-      function saveRequest(request) {
-        currentRequest = request || null;
-
-        if (currentRequest?.isLocalDraft) {
-          localStorage.setItem(
-            'trade.cosigo.currentRequest',
-            JSON.stringify(currentRequest)
-          );
-        } else if (currentRequest?.id) {
-          localStorage.setItem(
-            'trade.cosigo.currentRequest',
-            JSON.stringify({ id: currentRequest.id })
-          );
-        } else {
-          localStorage.removeItem('trade.cosigo.currentRequest');
-        }
-
-        renderRequest(currentRequest);
-        syncRequestButtons();
-        startRequestAutoRefresh();
-      }
-
-      function clearRequest() {
-        saveRequest(null);
-      }
-
-      function revealRequestPanel() {
-        if (!requestPanelEl) return;
-
-        requestPanelEl.hidden = false;
-        requestPanelEl.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-
-        setTimeout(() => {
-          if (submitRequestBtn && !submitRequestBtn.hidden && !submitRequestBtn.disabled) {
-            submitRequestBtn.focus();
-          }
-        }, 250);
-      }
-
-      function createLocalDraftRequest({
-        wallet,
-        fromAsset,
-        toAsset,
-        inputAmount,
-        outputAmount,
-        basisValue,
-        feeAmount,
-        feeRate,
-        pricingPolicy
-      }) {
-        const draft = {
-          isLocalDraft: true,
-          localDraftId: `draft_${Date.now().toString(36)}`,
-          createdAt: new Date().toISOString(),
-          wallet,
-          fromAsset,
-          toAsset,
-          route: `${fromAsset} → ${toAsset}`,
-          inputAmount,
-          outputAmount,
-          basisValue,
-          feeAmount,
-          feeRate,
-          pricingPolicy,
-          status: 'draft'
-        };
-
-        saveRequest(draft);
-        return draft;
-      }
-
-      async function submitCurrentRequest() {
-        if (!currentRequest) return null;
-
-        if (currentRequest.isLocalDraft) {
-          const createData = await apiJson(`${API_BASE}/requests/create`, {
-            method: 'POST',
-            body: JSON.stringify({
-              wallet: currentRequest.wallet,
-              fromAsset: currentRequest.fromAsset,
-              toAsset: currentRequest.toAsset,
-              inputAmount: String(currentRequest.inputAmount)
-            }),
-          });
-
-          const createdRequest = createData.request;
-
-          const submittedData = await apiJson(
-            `${API_BASE}/requests/${encodeURIComponent(createdRequest.id)}/status`,
-            {
-              method: 'POST',
-              body: JSON.stringify({ status: 'submitted' }),
-            }
-          );
-
-          saveRequest(submittedData.request);
-          return submittedData.request;
-        }
-
-        if (!currentRequest.id) return null;
-
-        const data = await apiJson(
-          `${API_BASE}/requests/${encodeURIComponent(currentRequest.id)}/status`,
-          {
-            method: 'POST',
-            body: JSON.stringify({ status: 'submitted' }),
-          }
-        );
-
-        saveRequest(data.request);
-        return data.request;
-      }
-
-      function syncRequestButtons() {
-        const hasRequest = !!currentRequest;
-        const canSend = hasRequest && currentRequest.status === 'draft';
-        const canRefresh = hasRequest && !!currentRequest.id;
-        const canCopy = hasRequest;
-        const canClear = hasRequest;
-
-        if (copyRequestBtn) {
-          copyRequestBtn.hidden = !canCopy;
-          copyRequestBtn.disabled = !canCopy;
-        }
-
-        if (clearRequestBtn) {
-          clearRequestBtn.hidden = !canClear;
-          clearRequestBtn.disabled = !canClear;
-        }
-
-        if (submitRequestBtn) {
-          submitRequestBtn.hidden = !canSend;
-          submitRequestBtn.disabled = !canSend;
-        }
-
-        if (refreshRequestBtn) {
-          refreshRequestBtn.hidden = !canRefresh;
-          refreshRequestBtn.disabled = !canRefresh;
-        }
-      }
-
-      async function refreshCurrentRequestFromServer() {
-        if (!currentRequest?.id) return null;
-
-        const data = await apiJson(
-          `${API_BASE}/requests/${encodeURIComponent(currentRequest.id)}`
-        );
-
-        saveRequest(data.request);
-        return data.request;
-      }
-
-      refreshRequestBtn?.addEventListener('click', async () => {
-        try {
-          const request = await refreshCurrentRequestFromServer();
-
-          if (request) {
-            setQuoteStatus(`Request refreshed: ${request.id} (${request.status})`);
-          } else {
-            setQuoteStatus('No server-backed request to refresh.');
-          }
-        } catch (err) {
-          console.error(err);
-          setQuoteStatus(`Refresh failed: ${err.message || err}`);
-        }
-        });
-
-      // ADD below getConnectedWalletText()
-
-      function escapeHtml(value) {
-        return String(value ?? '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#39;');
-      }
-
       function setSettlementState({ title, copy, steps = [], note = '', tone = '' }) {
-        if (!settlementBoxEl) return;
+        if (!els.settlementBox) return;
 
-        settlementBoxEl.hidden = false;
-        settlementBoxEl.className = 'settlement-box';
+        els.settlementBox.hidden = false;
+        els.settlementBox.className = 'settlement-box';
 
         if (tone) {
-          settlementBoxEl.classList.add(tone);
+          els.settlementBox.classList.add(tone);
         }
 
-        if (settlementTitleEl) {
-          settlementTitleEl.textContent = title || 'Next step';
+        if (els.settlementTitle) {
+          els.settlementTitle.textContent = title || 'Next step';
         }
 
-        if (settlementCopyEl) {
-          settlementCopyEl.innerHTML = copy || '';
+        if (els.settlementCopy) {
+          els.settlementCopy.innerHTML = copy || '';
         }
 
-        if (settlementListEl) {
+        if (els.settlementList) {
           if (steps.length) {
-            settlementListEl.hidden = false;
-            settlementListEl.innerHTML = steps
-              .map((step) => `<li>${escapeHtml(step)}</li>`)
-              .join('');
+            els.settlementList.hidden = false;
+            els.settlementList.innerHTML = steps.map((step) => `<li>${escapeHtml(step)}</li>`).join('');
           } else {
-            settlementListEl.hidden = true;
-            settlementListEl.innerHTML = '';
+            els.settlementList.hidden = true;
+            els.settlementList.innerHTML = '';
           }
         }
 
-        if (settlementNoteEl) {
+        if (els.settlementNote) {
           if (note) {
-            settlementNoteEl.hidden = false;
-            settlementNoteEl.innerHTML = note;
+            els.settlementNote.hidden = false;
+            els.settlementNote.innerHTML = note;
           } else {
-            settlementNoteEl.hidden = true;
-            settlementNoteEl.innerHTML = '';
+            els.settlementNote.hidden = true;
+            els.settlementNote.innerHTML = '';
           }
         }
       }
 
       function renderSettlementBox(request) {
-        if (!settlementBoxEl) return;
+        if (!els.settlementBox) return;
 
         if (!request || (!request.id && !request.isLocalDraft && !request.localDraftId)) {
-          settlementBoxEl.hidden = true;
-          if (settlementListEl) {
-            settlementListEl.hidden = true;
-            settlementListEl.innerHTML = '';
+          els.settlementBox.hidden = true;
+          if (els.settlementList) {
+            els.settlementList.hidden = true;
+            els.settlementList.innerHTML = '';
           }
-          if (settlementNoteEl) {
-            settlementNoteEl.hidden = true;
-            settlementNoteEl.innerHTML = '';
+          if (els.settlementNote) {
+            els.settlementNote.hidden = true;
+            els.settlementNote.innerHTML = '';
           }
           return;
         }
@@ -2236,8 +1987,7 @@
               'Click Send request.',
               'Return later to refresh status if needed.'
             ],
-            note: '<strong>Not yet submitted:</strong> this request is still local and has not entered the review queue.',
-            tone: ''
+            note: '<strong>Not yet submitted:</strong> this request is still local and has not entered the review queue.'
           });
           return;
         }
@@ -2283,9 +2033,7 @@
 
           setSettlementState({
             title: 'Action required',
-            copy:
-              `Send <strong>${formatAssetAmount(settlementAmount, settlementAsset)} ${escapeHtml(settlementAsset)}</strong> ` +
-              `on <strong>${escapeHtml(settlementNetwork)}</strong> to the approved settlement address below.`,
+            copy: `Send <strong>${formatAssetAmount(settlementAmount, settlementAsset)} ${escapeHtml(settlementAsset)}</strong> on <strong>${escapeHtml(settlementNetwork)}</strong> to the approved settlement address below.`,
             steps: [
               'Verify the wallet address carefully before sending.',
               `Send the exact approved amount of ${settlementAsset}.`,
@@ -2323,22 +2071,251 @@
         });
       }
 
-      function buildPancakeSwapUrl(from, to) {
-        const base = 'https://pancakeswap.finance/swap?chain=bsc';
+      function renderRequest(request) {
+        if (!request || (!request.id && !request.isLocalDraft && !request.localDraftId)) {
+          state.currentRequest = null;
 
-        const tokenMap = {
-          BNB: 'BNB',
-          WBNB: WBNB_ADDRESS,
-          CIGO: CIGO_ADDRESS,
-          USDT: USDT_ADDRESS
+          if (els.requestEmpty) els.requestEmpty.hidden = false;
+          if (els.requestBody) els.requestBody.hidden = true;
+          if (els.requestId) els.requestId.textContent = '-';
+          if (els.requestRoute) els.requestRoute.textContent = '-';
+          if (els.requestInput) els.requestInput.textContent = '-';
+          if (els.requestOutput) els.requestOutput.textContent = '-';
+          if (els.requestValue) els.requestValue.textContent = '-';
+          if (els.requestStatus) els.requestStatus.textContent = getRequestStatusText('draft');
+
+          applyRequestStatusStyle('');
+          renderSettlementBox(null);
+
+          if (els.requestPanel) els.requestPanel.hidden = true;
+          return;
+        }
+
+        state.currentRequest = request;
+
+        const fromAsset = request.fromAsset || request.from || '-';
+        const toAsset = request.toAsset || request.to || '-';
+        const inputAmount = request.inputAmount || '-';
+        const outputAmount = request.outputAmount || '-';
+        const basisValue = request.basisValue ?? request.valueUsd ?? 0;
+        const statusText = request.status || 'draft';
+        const displayId = request.id || request.localDraftId || '-';
+
+        if (els.requestEmpty) els.requestEmpty.hidden = true;
+        if (els.requestBody) els.requestBody.hidden = false;
+        if (els.requestId) els.requestId.textContent = displayId;
+        if (els.requestRoute) els.requestRoute.textContent = `${fromAsset} → ${toAsset}`;
+        if (els.requestInput) els.requestInput.textContent = `${formatAssetAmount(inputAmount, fromAsset)} ${fromAsset}`;
+        if (els.requestOutput) els.requestOutput.textContent = `${formatAssetAmount(outputAmount, toAsset)} ${toAsset}`;
+        if (els.requestValue) els.requestValue.textContent = formatUsdAmount(basisValue);
+        if (els.requestStatus) els.requestStatus.textContent = getRequestStatusText(statusText);
+
+        applyRequestStatusStyle(statusText);
+        renderSettlementBox(request);
+
+        if (els.requestPanel) els.requestPanel.hidden = false;
+      }
+
+      function isServerTrackedOpenRequest(request) {
+        return !!request?.id && (request.status === 'submitted' || request.status === 'reviewed');
+      }
+
+      async function autoRefreshCurrentRequest() {
+        if (!isServerTrackedOpenRequest(state.currentRequest)) return;
+
+        try {
+          await refreshCurrentRequestFromServer();
+        } catch (err) {
+          console.warn('Auto refresh failed', err);
+        }
+      }
+
+      function stopRequestAutoRefresh() {
+        if (state.requestAutoRefreshTimer) {
+          clearInterval(state.requestAutoRefreshTimer);
+          state.requestAutoRefreshTimer = null;
+        }
+      }
+
+      function startRequestAutoRefresh() {
+        stopRequestAutoRefresh();
+
+        if (!isServerTrackedOpenRequest(state.currentRequest)) return;
+
+        state.requestAutoRefreshTimer = setInterval(() => {
+          autoRefreshCurrentRequest();
+        }, CONFIG.REQUEST_REFRESH_MS);
+      }
+
+      function syncRequestButtons() {
+        const hasRequest = !!state.currentRequest;
+        const canSend = hasRequest && state.currentRequest.status === 'draft';
+        const canRefresh = hasRequest && !!state.currentRequest.id;
+        const canCopy = hasRequest;
+        const canClear = hasRequest;
+
+        if (els.copyRequestBtn) {
+          els.copyRequestBtn.hidden = !canCopy;
+          els.copyRequestBtn.disabled = !canCopy;
+        }
+        if (els.clearRequestBtn) {
+          els.clearRequestBtn.hidden = !canClear;
+          els.clearRequestBtn.disabled = !canClear;
+        }
+        if (els.submitRequestBtn) {
+          els.submitRequestBtn.hidden = !canSend;
+          els.submitRequestBtn.disabled = !canSend;
+        }
+        if (els.refreshRequestBtn) {
+          els.refreshRequestBtn.hidden = !canRefresh;
+          els.refreshRequestBtn.disabled = !canRefresh;
+        }
+      }
+
+      function saveRequest(request) {
+        state.currentRequest = request || null;
+
+        if (state.currentRequest?.isLocalDraft) {
+          localStorage.setItem(CONFIG.STORAGE_KEY_CURRENT_REQUEST, JSON.stringify(state.currentRequest));
+        } else if (state.currentRequest?.id) {
+          localStorage.setItem(CONFIG.STORAGE_KEY_CURRENT_REQUEST, JSON.stringify({ id: state.currentRequest.id }));
+        } else {
+          localStorage.removeItem(CONFIG.STORAGE_KEY_CURRENT_REQUEST);
+        }
+
+        renderRequest(state.currentRequest);
+        syncRequestButtons();
+        startRequestAutoRefresh();
+      }
+
+      function clearRequest() {
+        saveRequest(null);
+      }
+
+      function revealRequestPanel() {
+        if (!els.requestPanel) return;
+
+        els.requestPanel.hidden = false;
+        els.requestPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        setTimeout(() => {
+          if (els.submitRequestBtn && !els.submitRequestBtn.hidden && !els.submitRequestBtn.disabled) {
+            els.submitRequestBtn.focus();
+          }
+        }, 250);
+      }
+
+      function createLocalDraftRequest({
+        wallet,
+        fromAsset,
+        toAsset,
+        inputAmount,
+        outputAmount,
+        basisValue,
+        feeAmount,
+        feeRate,
+        pricingPolicy
+      }) {
+        const draft = {
+          isLocalDraft: true,
+          localDraftId: `draft_${Date.now().toString(36)}`,
+          createdAt: new Date().toISOString(),
+          wallet,
+          fromAsset,
+          toAsset,
+          route: `${fromAsset} → ${toAsset}`,
+          inputAmount,
+          outputAmount,
+          basisValue,
+          feeAmount,
+          feeRate,
+          pricingPolicy,
+          status: 'draft'
         };
 
-        const inputCurrency = tokenMap[from];
-        const outputCurrency = tokenMap[to];
+        saveRequest(draft);
+        return draft;
+      }
 
-        if (!inputCurrency || !outputCurrency) return null;
+      async function submitCurrentRequest() {
+        if (!state.currentRequest) return null;
 
-        return `${base}&inputCurrency=${encodeURIComponent(inputCurrency)}&outputCurrency=${encodeURIComponent(outputCurrency)}`;
+        if (state.currentRequest.isLocalDraft) {
+          const createData = await apiJson(`${CONFIG.API_BASE}/requests/create`, {
+            method: 'POST',
+            body: JSON.stringify({
+              wallet: state.currentRequest.wallet,
+              fromAsset: state.currentRequest.fromAsset,
+              toAsset: state.currentRequest.toAsset,
+              inputAmount: String(state.currentRequest.inputAmount)
+            })
+          });
+
+          const createdRequest = createData.request;
+          const submittedData = await apiJson(
+            `${CONFIG.API_BASE}/requests/${encodeURIComponent(createdRequest.id)}/status`,
+            {
+              method: 'POST',
+              body: JSON.stringify({ status: 'submitted' })
+            }
+          );
+
+          saveRequest(submittedData.request);
+          return submittedData.request;
+        }
+
+        if (!state.currentRequest.id) return null;
+
+        const data = await apiJson(
+          `${CONFIG.API_BASE}/requests/${encodeURIComponent(state.currentRequest.id)}/status`,
+          {
+            method: 'POST',
+            body: JSON.stringify({ status: 'submitted' })
+          }
+        );
+
+        saveRequest(data.request);
+        return data.request;
+      }
+
+      async function refreshCurrentRequestFromServer() {
+        if (!state.currentRequest?.id) return null;
+
+        const data = await apiJson(
+          `${CONFIG.API_BASE}/requests/${encodeURIComponent(state.currentRequest.id)}`
+        );
+
+        saveRequest(data.request);
+        return data.request;
+      }
+
+      async function loadSavedRequest() {
+        try {
+          const raw = localStorage.getItem(CONFIG.STORAGE_KEY_CURRENT_REQUEST);
+
+          if (!raw) {
+            saveRequest(null);
+            return;
+          }
+
+          const saved = JSON.parse(raw);
+
+          if (saved?.isLocalDraft) {
+            saveRequest(saved);
+            return;
+          }
+
+          if (!saved?.id) {
+            saveRequest(null);
+            return;
+          }
+
+          const data = await apiJson(`${CONFIG.API_BASE}/requests/${encodeURIComponent(saved.id)}`);
+          saveRequest(data.request);
+        } catch (err) {
+          console.warn('Could not reload saved request', err);
+          saveRequest(null);
+        }
       }
 
       async function refreshWalletState(address) {
@@ -2346,13 +2323,12 @@
 
         if (!onBSC) {
           clearWalletSummary();
-          updateRouteGuidance(0, 0);
+          updateRouteGuidance();
           setAppStatus('Wrong network. Switch to BNB Chain.');
 
-          if (connectBtn) {
-            connectBtn.textContent = CONNECT_BTN_WRONG_NETWORK;
+          if (els.connectBtn) {
+            els.connectBtn.textContent = CONFIG.CONNECT_BTN_WRONG_NETWORK;
           }
-
           return;
         }
 
@@ -2360,66 +2336,78 @@
         const cigo = await getCigoBalance(address);
         const usdt = await getUsdtBalance(address);
 
-        updateRouteGuidance(cigo, usdt);
+        updateRouteGuidance();
         updateWalletSummary(address, bnb, cigo, usdt);
 
-        if (connectBtn) {
-          connectBtn.textContent = CONNECT_BTN_READY;
+        if (els.connectBtn) {
+          els.connectBtn.textContent = CONFIG.CONNECT_BTN_READY;
         }
 
         setAppStatus(
           `Connected: ${address.slice(0, 6)}...${address.slice(-4)} | BNB: ${bnb.toFixed(4)} | CIGO: ${cigo.toFixed(2)} | USDT: ${usdt.toFixed(2)}`
         );
-
         setQuoteStatus('Ready for quote');
         await loadWalletLimitState(address);
       }
 
-      buyCigoBtn?.addEventListener('click', (e) => {
-        if (!MARKET_ROUTE_ENABLED) return;
-        e.preventDefault();
-        const url = 'https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560';
-        window.open(url, '_blank');
-      });
+      if (els.refreshRequestBtn) {
+        els.refreshRequestBtn.addEventListener('click', async () => {
+          try {
+            const request = await refreshCurrentRequestFromServer();
+            setQuoteStatus(request ? `Request refreshed: ${request.id} (${request.status})` : 'No server-backed request to refresh.');
+          } catch (err) {
+            console.error(err);
+            setQuoteStatus(`Refresh failed: ${err.message || err}`);
+          }
+        });
+      }
 
-      connectBtn?.addEventListener('click', async () => {
-        if (!window.ethereum) {
-          alert('MetaMask not found');
-          return;
-        }
+      if (CONFIG.MARKET_ROUTE_ENABLED && els.buyCigoBtn) {
+        els.buyCigoBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.open(
+            'https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560',
+            '_blank'
+          );
+        });
+      }
 
-        try {
-          walletSessionStarted = true;
+      if (els.connectBtn) {
+        els.connectBtn.addEventListener('click', async () => {
+          if (!window.ethereum) {
+            alert('MetaMask not found');
+            return;
+          }
 
-          const accounts = await window.ethereum.request({
-            method: 'eth_requestAccounts'
-          });
-
-          await ensureBSC();
-          await refreshWalletState(accounts[0]);
-        } catch (err) {
-          walletSessionStarted = false;
-          clearWalletSummary();
-          updateRouteGuidance(0, 0);
-          console.error(err);
-          setAppStatus(`Connection failed: ${err.message || err}`);
-        }
-      });
+          try {
+            state.walletSessionStarted = true;
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            await ensureBSC();
+            await refreshWalletState(accounts[0]);
+          } catch (err) {
+            state.walletSessionStarted = false;
+            clearWalletSummary();
+            updateRouteGuidance();
+            console.error(err);
+            setAppStatus(`Connection failed: ${err.message || err}`);
+          }
+        });
+      }
 
       if (window.ethereum) {
         window.ethereum.on('accountsChanged', async (accounts) => {
           try {
-            if (!walletSessionStarted) {
+            if (!state.walletSessionStarted) {
               clearWalletSummary();
-              updateRouteGuidance(0, 0);
+              updateRouteGuidance();
               setAppStatus('Click Connect wallet to begin.');
               return;
             }
 
             if (!accounts || !accounts.length) {
-              walletSessionStarted = false;
+              state.walletSessionStarted = false;
               clearWalletSummary();
-              updateRouteGuidance(0, 0);
+              updateRouteGuidance();
               setAppStatus('Wallet disconnected');
               return;
             }
@@ -2433,19 +2421,18 @@
 
         window.ethereum.on('chainChanged', async () => {
           try {
-            if (!walletSessionStarted) {
+            if (!state.walletSessionStarted) {
               clearWalletSummary();
-              updateRouteGuidance(0, 0);
+              updateRouteGuidance();
               setAppStatus('Click Connect wallet to begin.');
               return;
             }
 
             const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-
             if (!accounts || !accounts.length) {
-              walletSessionStarted = false;
+              state.walletSessionStarted = false;
               clearWalletSummary();
-              updateRouteGuidance(0, 0);
+              updateRouteGuidance();
               setAppStatus('Wallet disconnected');
               return;
             }
@@ -2459,73 +2446,86 @@
         });
       }
 
-      addCigoTopBtn?.addEventListener('click', async () => {
-        await addCigoToMetaMask();
+      if (els.addCigoTopBtn) {
+        els.addCigoTopBtn.addEventListener('click', async () => {
+          await addCigoToMetaMask();
+        });
+      }
+
+      bindCopyButton(
+        els.copyCigoContractTopBtn,
+        () => els.cigoContractTop?.textContent?.trim() || '',
+        'copy contract',
+        'copied'
+      );
+
+      els.copyButtons.forEach((button) => {
+        const idleText = button.textContent.trim() || 'copy';
+        bindCopyButton(button, () => button.dataset.copy || '', idleText, 'copied');
       });
 
-      quoteBtn?.addEventListener('click', () => {
-        const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
+      if (els.quoteBtn) {
+        els.quoteBtn.addEventListener('click', () => {
+          const { from, to, amount, isValidAmount } = getSelectedRoute();
 
-        if (!from || !to) {
-          setQuoteStatus('Select both a from asset and a to asset.');
-          return;
-        }
+          if (!from || !to) {
+            setQuoteStatus('Select both a from asset and a to asset.');
+            return;
+          }
+          if (!isValidAmount) {
+            setQuoteStatus('Enter a valid amount greater than zero.');
+            return;
+          }
+          if (from === to) {
+            setQuoteStatus('Choose two different assets.');
+            return;
+          }
 
-        if (!isValidAmount) {
-          setQuoteStatus('Enter a valid amount greater than zero.');
-          return;
-        }
+          const manualQuote = getManualQuote(from, to, amount);
+          if (!manualQuote) {
+            setQuoteStatus('This route is not active in the current shell.');
+            return;
+          }
 
-        if (from === to) {
-          setQuoteStatus('Choose two different assets.');
-          return;
-        }
-
-        const manualQuote = getManualQuote(from, to, amount);
-
-        if (manualQuote) {
           const adjustmentText = getQuoteAdjustmentText(manualQuote);
-
           setQuoteStatus(
             `Quote (${manualQuote.policyLabel}): ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to} | ${adjustmentText} | net value ≈ ${formatUsdAmount(manualQuote.netUsdValue)}`
           );
-          return;
-        }
+        });
+      }
 
-        setQuoteStatus('This route is not active in the current shell.');
-      });
+      if (els.swapBtn) {
+        els.swapBtn.addEventListener('click', async () => {
+          const { from, to, amount, isValidAmount } = getSelectedRoute();
 
-      swapBtn?.addEventListener('click', async () => {
-        const { from, to, amount, rawAmount, isValidAmount } = getSelectedRoute();
+          if (!from || !to) {
+            setQuoteStatus('Select both a from asset and a to asset.');
+            return;
+          }
+          if (!isValidAmount) {
+            setQuoteStatus('Enter a valid amount greater than zero.');
+            return;
+          }
+          if (from === to) {
+            setQuoteStatus('Choose two different assets.');
+            return;
+          }
+          if (!state.connectedAddress) {
+            setQuoteStatus('Connect wallet first.');
+            return;
+          }
 
-        if (!from || !to) {
-          setQuoteStatus('Select both a from asset and a to asset.');
-          return;
-        }
+          const manualQuote = getManualQuote(from, to, amount);
+          if (!manualQuote) {
+            setQuoteStatus('This route is not active in the current shell.');
+            return;
+          }
 
-        if (!isValidAmount) {
-          setQuoteStatus('Enter a valid amount greater than zero.');
-          return;
-        }
-
-        if (from === to) {
-          setQuoteStatus('Choose two different assets.');
-          return;
-        }
-
-        if (!connectedAddress) {
-          setQuoteStatus('Connect wallet first.');
-          return;
-        }
-
-        const manualQuote = getManualQuote(from, to, amount);
-
-        if (manualQuote) {
           try {
             await assertUsdtWalletCap(from, amount);
 
             const request = createLocalDraftRequest({
-              wallet: connectedAddress,
+              wallet: state.connectedAddress,
               fromAsset: from,
               toAsset: to,
               inputAmount: String(amount),
@@ -2538,62 +2538,54 @@
 
             revealRequestPanel();
 
-            if (
-              (from === 'CIGO' && to === 'COSIGO') ||
-              (from === 'COSIGO' && to === 'CIGO')
-            ) {
-              setQuoteStatus(
-                `Direct internal conversion request created: ${request.id || request.localDraftId} | ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to}`
-              );
-              return;
-            }
+            const prefix =
+              (from === 'CIGO' && to === 'COSIGO') || (from === 'COSIGO' && to === 'CIGO')
+                ? 'Direct internal conversion request created'
+                : 'Internal conversion request created';
 
             setQuoteStatus(
-              `Internal conversion request created: ${request.id || request.localDraftId} | ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to}`
+              `${prefix}: ${request.id || request.localDraftId} | ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to}`
             );
-            return;
           } catch (err) {
             console.error(err);
             setQuoteStatus(`Conversion request failed: ${err.message || err}`);
+          }
+        });
+      }
+
+      if (els.submitRequestBtn) {
+        els.submitRequestBtn.addEventListener('click', async () => {
+          try {
+            const request = await submitCurrentRequest();
+            if (request) {
+              setQuoteStatus(`Request submitted: ${request.id}`);
+            }
+          } catch (err) {
+            console.error(err);
+            setQuoteStatus(`Submit failed: ${err.message || err}`);
+          }
+        });
+      }
+
+      if (els.copyRequestBtn) {
+        els.copyRequestBtn.addEventListener('click', async () => {
+          if (!state.currentRequest) {
+            setQuoteStatus('No conversion request to copy.');
             return;
           }
-        }
 
-        setQuoteStatus('This route is not active in the current shell.');
-      });
-
-      submitRequestBtn?.addEventListener('click', async () => {
-        try {
-          const request = await submitCurrentRequest();
-
-          if (request) {
-            setQuoteStatus(`Request submitted: ${request.id}`);
-          }
-        } catch (err) {
-          console.error(err);
-          setQuoteStatus(`Submit failed: ${err.message || err}`);
-        }
-      });
-
-      copyRequestBtn?.addEventListener('click', async () => {
-        if (!currentRequest) {
-          setQuoteStatus('No conversion request to copy.');
-          return;
-        }
-
-        const text = JSON.stringify(currentRequest, null, 2);
-        const ok = await copyText(text);
-        setQuoteStatus(ok ? 'Conversion request copied.' : 'Failed to copy conversion request.');
-      });
-
-      clearRequestBtn?.addEventListener('click', () => {
-        clearRequest();
-        setQuoteStatus('Conversion request cleared.');
-      });
-
-      copyButtons.forEach((button) => {
-        // existing copy logic
+          const text = JSON.stringify(state.currentRequest, null, 2);
+          const ok = await copyText(text);
+          setQuoteStatus(ok ? 'Conversion request copied.' : 'Failed to copy conversion request.');
         });
+      }
+
+      if (els.clearRequestBtn) {
+        els.clearRequestBtn.addEventListener('click', () => {
+          clearRequest();
+          setQuoteStatus('Conversion request cleared.');
+        });
+      }
 
       window.addEventListener('focus', () => {
         autoRefreshCurrentRequest().catch(console.error);
@@ -2605,9 +2597,15 @@
         }
       });
 
+      if (els.requestPanel) els.requestPanel.hidden = true;
+      clearWalletSummary();
+      updateRouteGuidance();
+      syncRequestButtons();
+      setAppStatus('Click Connect wallet to begin.');
+      updateWalletLimitNote();
+
       loadPricingState();
       loadSavedRequest();
-
     });
   </script>
 </body>
