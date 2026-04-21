@@ -230,6 +230,11 @@
                     <input id="settingsDepthFactor" type="number" step="0.0001" min="0" />
                 </label>
 
+                <label>
+                    <span>24-hour USDT wallet cap</span>
+                    <input id="settingsUsdtDailyWalletCap" type="number" min="0" step="1" value="1000" />
+                </label>
+
             </div>
 
             <div class="row" style="margin-top:12px;">
@@ -266,6 +271,7 @@
 
         const settingsInventoryCigoEl = document.getElementById('settingsInventoryCigo');
         const settingsDepthFactorEl = document.getElementById('settingsDepthFactor');
+        const settingsUsdtDailyWalletCapEl = document.getElementById('settingsUsdtDailyWalletCap');
 
         adminKeyEl.value = sessionStorage.getItem('trade.adminKey') || '';
 
@@ -322,6 +328,7 @@
 
             if (settingsInventoryCigoEl) settingsInventoryCigoEl.value = settings.inventoryCigo ?? '';
             if (settingsDepthFactorEl) settingsDepthFactorEl.value = settings.depthFactor ?? '';
+            if (settingsUsdtDailyWalletCapEl) settingsUsdtDailyWalletCapEl.value = settings.usdtDailyWalletCap ?? '';
 
             return settings;
         }
@@ -336,6 +343,7 @@
                 cigoOutboundPremiumRate: Number(settingsCigoOutboundPremiumRateEl?.value || 0),
                 inventoryCigo: Number(settingsInventoryCigoEl?.value || 0),
                 depthFactor: Number(settingsDepthFactorEl?.value || 0),
+                usdtDailyWalletCap: Number(settingsUsdtDailyWalletCapEl?.value || 0),
             };
 
             const data = await apiJson('/api/admin/settings', {

@@ -57,9 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
         BSC_CHAIN_ID: '0x38',
         REQUEST_REFRESH_MS: 15000,
         COPY_RESET_MS: 1400,
-        CONNECT_BTN_DEFAULT: '3) Connect wallet',
-        CONNECT_BTN_READY: '3) Wallet ready',
-        CONNECT_BTN_WRONG_NETWORK: '3) Wrong network',
+        CONNECT_BTN_DEFAULT: '2) Connect wallet',
+        CONNECT_BTN_READY: '2) Wallet ready',
+        CONNECT_BTN_WRONG_NETWORK: '2) Wrong network',
         MARKET_ROUTE_ENABLED: false
     };
 
@@ -272,8 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateRouteGuidance() {
         if (els.buyCigoBtn) els.buyCigoBtn.textContent = 'buy CIGO';
-        if (els.quoteBtn) els.quoteBtn.textContent = '4) Get quote';
-        if (els.swapBtn) els.swapBtn.textContent = '5) Request swap';
+        if (els.quoteBtn) els.quoteBtn.textContent = '3) Get quote';
+        if (els.swapBtn) els.swapBtn.textContent = '4) Request swap';
     }
 
     function updateWalletSummary(address, bnb, cigo, usdt) {
@@ -1140,7 +1140,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!state.walletSessionStarted) {
                     clearWalletSummary();
                     updateRouteGuidance();
-                    setAppStatus('Click Connect wallet to begin.');
+                    setAppStatus('Click Connect wallet to begin - PC browser - CIGO custom token added');
                     return;
                 }
 
