@@ -73,32 +73,42 @@
             <span>official trade interface</span>
           </div>
 
-          <h1>trade CIGO.<br>exit to USDT.<br>move into COSIGO.</h1>
+          <h1>trade CIGO.<br>exit to USDT.<br>move into COSIGO&trade;.</h1>
 
           <p class="lead">
             Official request-based trade interface for <strong>CIGO, USDT, and COSIGO</strong>.
-          <div class="notice">
-            <strong>New here?</strong> Wallet-native trading through MetaMask, Trust Wallet, and PancakeSwap is best
-            treated as <strong>advanced-user only</strong>. For the simplest path, use the official trade flow below.
-          </div>
           </p>
 
           <div class="notice">
-            Create your request first. Do not send funds until your request is reviewed and settlement instructions are
-            shown.
+            <strong>New here?</strong> For advanced users, <a
+              href="https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560"
+              target="_blank" rel="noopener"><strong>PancakeSwap ↗</strong></a> remains available.
+            CIGO is new on DEX, so warning prompts may appear.
+            For the simplest path, use the official trade flow below.
+          </div>
+
+          <div class="notice">
+            Add <a href="https://market.cosigo.io/" target="_blank" rel="noopener"><strong>CIGO ↗</strong></a> and/or
+            <a href="https://token.cosigo.io/" target="_blank" rel="noopener"><strong>COSIGO&trade; ↗</strong></a>
+            to your wallet first. Create your request second. Do not send funds until your request is reviewed and
+            settlement instructions are shown.
           </div>
 
           <div class="cta-row">
-            <a class="btn btn-primary btn-step" href="#swap">1) start trade request</a>
+            <a class="btn btn-primary btn-step" href="#swap">1) prepare wallet and trade</a>
             <button class="btn btn-secondary" type="button" id="addCigoTopBtn">
-              MetaMask - Auto or Manual
+              1a) CIGO auto add (PC - MM)
             </button>
             <a class="btn btn-secondary" href="https://quote.cosigo.io/" target="_blank" rel="noopener">view quote
               logic</a>
             <a class="btn btn-secondary" href="https://market.cosigo.io/" target="_blank" rel="noopener">view market
               page</a>
             <div class="token-note">
-              Auto flows into desktop browser extension. Manual cell phone instructions are posted.
+              Auto (1a) flows into desktop browser extension. Manual (1b) cell phone instructions are posted.
+            </div>
+            <div class="token-note">
+              Questions or problems with wallet setup?
+              <a href="https://contact.cosigo.io/" target="_blank" rel="noopener"><strong>contact admin ↗</strong></a>
             </div>
           </div>
         </div>
@@ -108,9 +118,8 @@
             <div class="eyebrow">
               <span>CIGO details</span>
             </div>
-            <h2>CIGO on BNB Smart Chain</h2>
             <p class="side-card-copy">
-              If CIGO does not appear automatically in your wallet, import it manually using the official contract.
+              If CIGO does not appear automatically, import it manually using the official contract.
             </p>
           </div>
 
@@ -130,30 +139,37 @@
           </div>
 
           <div class="side-card-head" style="margin-top:16px;">
-            <h2>Manual import</h2>
+            <h2>1b) Manual import</h2>
             <p class="side-card-copy">
-              Advanced users can import CIGO manually in MetaMask.
+              Advanced mobile users — import CIGO manually, then use MetaMask Explorer to connect.
             </p>
           </div>
 
           <ol class="side-steps">
             <li>
-              <strong>Open MetaMask on BNB Smart Chain</strong>
-              <span>Switch to BNB Smart Chain before importing the token.</span>
+              <strong>Open MetaMask Explorer / trade.cosigo.io ↗</strong>
+              <span>Click <em>copy contract</em>, then back out to MetaMask.</span>
             </li>
             <li>
-              <strong>Choose Import tokens</strong>
-              <span>If CIGO does not appear automatically, use the manual import option.</span>
+              <strong>MetaMask / Home / Tokens / BNB Chain / + / Custom token</strong>
+              <span>Stay on BNB Chain before importing CIGO.</span>
             </li>
             <li>
-              <strong>Paste the official CIGO contract</strong>
-              <span>Use the contract shown below in this card.</span>
+              <strong>Paste copied address / Next / Import / Verify when done</strong>
+              <span>MetaMask should fill CIGO and 18 decimals before final import.</span>
             </li>
             <li>
-              <strong>Confirm and save</strong>
-              <span>MetaMask should fill CIGO and 18 decimals. Save to add it to your wallet.</span>
+              <strong>Open MetaMask Explorer / trade.cosigo.io ↗</strong>
+              <span>Connect wallet, choose from / to / amount, get quote, request swap, verify, then send
+                request.</span>
             </li>
           </ol>
+
+          <div class="token-note">
+            CIGO remains recoverable as long as your wallet seed phrase is written down, protected, and never shared. If
+            needed, you can restore your wallet and re-import the token later. Never enter your seed phrase into any
+            website.
+          </div>
 
           <div class="contract-wrap" style="margin-top:14px;">
             <code id="cigoContractTop">0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560</code>
@@ -186,7 +202,7 @@
       <h2>trade shell</h2>
 
       <article class="swap-shell">
-        <h3>start your request</h3>
+        <h3>trade selection below</h3>
         <div class="wallet-summary" id="walletSummary">
           <div class="wallet-summary-head">wallet status</div>
           <div class="wallet-summary-grid">
@@ -250,7 +266,7 @@
           </div>
 
           <div class="swap-note" id="swapStatus">
-            Start with a quote. Submit your request only after reviewing the route and amount.
+            Start with a quote. Submit your request only after reviewing route and amount.
           </div>
 
           <div class="request-panel" id="requestPanel">
@@ -270,7 +286,7 @@
                   <div class="settlement-head">next step</div>
                   <div class="settlement-title" id="settlementTitle">No action yet</div>
                   <div class="settlement-copy" id="settlementCopy">
-                    Create a request first to see the next step.
+                    Create a request first to see next step.
                   </div>
                   <ol class="settlement-list" id="settlementList" hidden></ol>
                   <div class="settlement-note" id="settlementNote" hidden></div>
@@ -279,7 +295,7 @@
                 <div class="cta-row">
                   <button class="btn btn-secondary" type="button" id="copyRequestBtn" hidden>copy request</button>
                   <button class="btn btn-secondary" type="button" id="clearRequestBtn" hidden>clear request</button>
-                  <button class="btn btn-secondary btn-step" id="submitRequestBtn" type="button" hidden>send
+                  <button class="btn btn-secondary btn-step" id="submitRequestBtn" type="button" hidden>5) send
                     request</button>
                   <button class="btn btn-secondary" type="button" id="refreshRequestBtn" hidden>refresh status</button>
                 </div>

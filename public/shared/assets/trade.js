@@ -1140,7 +1140,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!state.walletSessionStarted) {
                     clearWalletSummary();
                     updateRouteGuidance();
-                    setAppStatus('Click Connect wallet to begin - PC browser - CIGO custom token added');
+                    setAppStatus('Click Connect wallet to begin');
                     return;
                 }
 
