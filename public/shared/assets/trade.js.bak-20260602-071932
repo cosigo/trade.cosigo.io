@@ -510,82 +510,34 @@ async function getBestWalletProvider() {
 }
 
 async function addCigoToWallet() {
-    const BNB_CHAIN_ID = '0x38';
+    const { provider, label } = await getBestWalletProvider();
 
-    const BNB_CHAIN_PARAMS = {
-        chainId: BNB_CHAIN_ID,
-        chainName: 'BNB Smart Chain',
-        nativeCurrency: {
-            name: 'BNB',
-            symbol: 'BNB',
-            decimals: 18
-        },
-        rpcUrls: [
-            'https://bsc-dataseed.bnbchain.org'
-        ],
-        blockExplorerUrls: [
-            'https://bscscan.com'
-        ]
-    };
-
-    const CIGO_TOKEN_PARAMS = {
-        type: 'ERC20',
-        options: {
-            address: '0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560',
-            symbol: 'CIGO',
-            decimals: 18,
-            image: 'https://market.cosigo.io/shared/assets/icons/cigo_256.png'
-        }
-    };
+    if (!provider) {
+        setAppStatus('No wallet detected.');
+        return;
+    }
 
     try {
-        if (!window.ethereum) {
-            alert('MetaMask or compatible wallet not found.');
-            return;
-        }
-
-        const currentChainId = await window.ethereum.request({
-            method: 'eth_chainId'
-        });
-
-        if (String(currentChainId).toLowerCase() !== BNB_CHAIN_ID.toLowerCase()) {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: BNB_CHAIN_ID }]
-                });
-            } catch (switchErr) {
-                const errorCode = switchErr?.code || switchErr?.data?.originalError?.code;
-
-                if (errorCode === 4902) {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [BNB_CHAIN_PARAMS]
-                    });
-
-                    await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: BNB_CHAIN_ID }]
-                    });
-                } else {
-                    console.error('BNB Smart Chain switch failed:', switchErr);
-                    alert('Please switch MetaMask to BNB Smart Chain and try again.');
-                    return;
+        const wasAdded = await provider.request({
+            method: 'wallet_watchAsset',
+            params: {
+                type: 'ERC20',
+                options: {
+                    address: ADDRESSES.CIGO,
+                    symbol: 'CIGO',
+                    decimals: 18,
+                    image: 'https://market.cosigo.io/shared/assets/icons/cigo_256.png'
                 }
             }
-        }
-
-        const added = await window.ethereum.request({
-            method: 'wallet_watchAsset',
-            params: CIGO_TOKEN_PARAMS
         });
 
-        if (added) {
-            alert('CIGO added to wallet on BNB Smart Chain.');
-        }
+        setAppStatus(wasAdded ? `CIGO added to ${label}.` : `CIGO was not added to ${label}.`);
     } catch (err) {
-        console.error('CIGO auto-add failed:', err);
-        alert('Could not add CIGO. Make sure MetaMask is unlocked and try again.');
+        console.error(err);
+
+        setAppStatus(
+            `${label} did not add CIGO automatically. Add manually: ${ADDRESSES.CIGO}`
+        );
     }
 }
 
@@ -833,7 +785,7 @@ async function addCigoToWallet() {
                 steps: [
                     'Confirm the route and amount.',
                     'Click Send request.',
-                    'Refresh status for settlement address.'
+                    'Return later to refresh status if needed.'
                 ],
                 note: '<strong>Not yet submitted:</strong> this request is still local and has not entered the review queue.'
             });
