@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Shared Styles -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>COSIGO trading platform</title>
+  <link rel="stylesheet" href="/shared/assets/trade.css">
+  <meta name="description" content="Official trade interface for CIGO, USDT, and COSIGO." />
+  <meta name="author" content="COSIGO">
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://trade.cosigo.io/" />
+
+  <meta name="keywords" content="CIGO, COSIGO, trade, USDT, BNB Smart Chain">
+
+  <!-- Favicons -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="COSIGO trading platform">
+  <meta property="og:description" content="Official request-based trade interface for CIGO, USDT, and COSIGO.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="COSIGO">
+  <meta property="og:url" content="https://trade.cosigo.io/">
+  <meta property="og:image" content="https://trade.cosigo.io/shared/assets/icons/cigo_256.png">
+  <meta property="og:image" content="https://trade.cosigo.io/shared/assets/icons/cosigo_master_256.png">
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="https://trade.cosigo.io/">
+        <img src="/shared/assets/icons/cosigo_master_256.png" alt="COSIGO token icon" class="brand-icon">
+        <img src="/shared/assets/icons/cigo_256.png" alt="CIGO token icon" class="brand-icon">
+        <span>
+          COSIGO / CIGO Trade Platform
+          <small>trade · exit · reference</small>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="#swap">trade shell</a>
+
+        <a class="nav-link-with-icon" href="https://quote.cosigo.io/" target="_blank" rel="noopener">
+          <img class="nav-link-icon" src="/shared/assets/icons/cigo_256.png" alt="" />
+          <span>quote</span>
+        </a>
+
+        <a class="nav-link-with-icon" href="https://market.cosigo.io/" target="_blank" rel="noopener">
+          <img class="nav-link-icon" src="/shared/assets/icons/cigo_256.png" alt="" />
+          <span>market</span>
+        </a>
+
+        <a class="nav-link-with-icon" href="https://token.cosigo.io/" target="_blank" rel="noopener">
+          <img class="nav-link-icon" src="/shared/assets/icons/cosigo_master_256.png" alt="" />
+          <span>COSIGO</span>
+        </a>
+
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="hero wrap">
+      <div class="hero-grid">
+        <div class="card">
+          <div class="eyebrow">
+            <span>official trade interface</span>
+          </div>
+
+          <h1>trade CIGO.<br>exit to USDT.<br>move into COSIGO&trade;.</h1>
+
+          <p class="lead">
+            Official request-based trade interface for <strong>CIGO, USDT, and COSIGO</strong>.
+          </p>
+
+          <div class="notice">
+            <strong>New here?</strong> For advanced users, <a
+              href="https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560"
+              target="_blank" rel="noopener"><strong>PancakeSwap ↗</strong></a> remains available.
+            CIGO is new on DEX, so warning prompts may appear.
+            For the simplest path, use the official trade flow below.
+          </div>
+
+          <div class="notice">
+            Add <a href="https://market.cosigo.io/" target="_blank" rel="noopener"><strong>CIGO ↗</strong></a> and/or
+            <a href="https://token.cosigo.io/" target="_blank" rel="noopener"><strong>COSIGO&trade; ↗</strong></a>
+            to your wallet first. Create your request second. Do not send funds until your request is reviewed and
+            settlement instructions are shown.
+          </div>
+
+          <div class="cta-row">
+            <a class="btn btn-primary btn-step" href="#swap">1) prepare wallet and trade</a>
+            <button class="btn btn-secondary" type="button" id="addCigoTopBtn">
+              1a) CIGO auto add (PC)
+            </button>
+            <a class="btn btn-secondary" href="https://quote.cosigo.io/" target="_blank" rel="noopener">view quote
+              logic</a>
+            <a class="btn btn-secondary" href="https://market.cosigo.io/" target="_blank" rel="noopener">market detail
+            </a>
+            <a class="btn btn-secondary"
+              href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560#code" target="_blank"
+              rel="noopener">view contract
+            </a>
+            <a class="btn btn-secondary" href="https://rabby.io/" target="_blank" rel="noopener">Install Rabby
+              Wallet</a>
+            </a>
+            <div class="token-note">
+              Auto (1a) flows into desktop browser extension. Manual (1b) cell phone instructions are posted.
+            </div>
+            <div class="token-note">
+              Questions or problems with wallet setup?
+              <a href="https://contact.cosigo.io/" target="_blank" rel="noopener"><strong>contact admin ↗</strong></a>
+            </div>
+          </div>
+        </div>
+
+        <aside class="card">
+          <div class="side-card-head">
+            <div class="eyebrow">
+              <span>CIGO details</span>
+            </div>
+            <p class="side-card-copy">
+              If CIGO does not appear automatically, import it manually using the official contract.
+            </p>
+          </div>
+
+          <div class="token-meta-box">
+            <div class="token-meta-row">
+              <span>network</span>
+              <strong>BNB Smart Chain</strong>
+            </div>
+            <div class="token-meta-row">
+              <span>symbol</span>
+              <strong>CIGO</strong>
+            </div>
+            <div class="token-meta-row">
+              <span>decimals</span>
+              <strong>18</strong>
+            </div>
+          </div>
+
+          <section class="step-card">
+            <h3>1b) Manual import — Rabby Wallet recommended</h3>
+
+            <p>
+              Advanced users can import CIGO manually into Rabby Wallet, then connect to
+              trade.cosigo.io from Rabby or another compatible wallet browser.
+            </p>
+
+            <ol>
+              <li>Open <strong>Rabby Wallet</strong>.</li>
+              <li>Switch to <strong>BNB Smart Chain</strong>.</li>
+              <li>Choose <strong>Add token</strong> or <strong>Import token</strong>.</li>
+              <li>Paste the official CIGO contract address.</li>
+              <li>Confirm that Rabby fills <strong>CIGO</strong> with <strong>18 decimals</strong>.</li>
+              <li>Import the token.</li>
+              <li>
+                Open
+                <a href="https://trade.cosigo.io" target="_blank" rel="noopener">trade.cosigo.io</a>.
+              </li>
+              <li>
+                Connect wallet, choose from / to / amount, get quote, request swap,
+                verify, then send request.
+              </li>
+            </ol>
+
+            <div class="notice warning">
+              <strong>MetaMask caution:</strong>
+              In CIGO’s documented experience, MetaMask has behaved as a hostile,
+              inconsistent, and reputation-damaging interface. Use MetaMask cautiously,
+              verify all wallet behavior before relying on it, and consider Rabby Wallet
+              for normal CIGO access.
+              <a href="https://labels.cosigo.io" target="_blank" rel="noopener">
+                Read the public record / why this warning exists →
+              </a>
+            </div>
+          </section>
+
+          <div class="token-note">
+            CIGO remains recoverable as long as your wallet seed phrase is written down, protected, and never shared. If
+            needed, you can restore your wallet and re-import the token later. Never enter your seed phrase into any
+            website.
+          </div>
+
+          <div class="contract-wrap" style="margin-top:14px;">
+            <code id="cigoContractTop">0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560</code>
+            <button class="copy-btn" type="button" id="copyCigoContractTopBtn">copy contract</button>
+          </div>
+
+          <div class="token-meta-box" id="cigoPoolBox">
+            <div class="token-meta-row">
+              <span>available fulfillment</span>
+              <strong id="cigoAvailableNow">loading...</strong>
+            </div>
+            <div class="token-meta-row">
+              <span>committed reserve</span>
+              <strong id="cigoCommittedReserve">loading...</strong>
+            </div>
+            <div class="token-meta-row">
+              <span>custodian wallet</span>
+              <a id="cigoCustodianShort" href="#" target="_blank" rel="noopener">loading...</a>
+            </div>
+            <div class="token-meta-row">
+              <span>treasury reserve</span>
+              <a id="cigoTreasuryShort" href="#" target="_blank" rel="noopener">loading...</a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section wrap" id="swap">
+      <h2>trade shell</h2>
+
+      <article class="swap-shell">
+        <div class="wallet-summary" id="walletSummary">
+          <div class="wallet-summary-head">wallet status</div>
+          <div class="wallet-summary-grid">
+            <div class="wallet-cell">
+              <span class="wallet-label">address</span>
+              <span class="wallet-value" id="walletAddress">Not connected</span>
+            </div>
+            <div class="wallet-cell">
+              <span class="wallet-label">BNB</span>
+              <span class="wallet-value" id="walletBNB">0.0000</span>
+            </div>
+            <div class="wallet-cell">
+              <span class="wallet-label">CIGO</span>
+              <span class="wallet-value" id="walletCIGO">0.00</span>
+            </div>
+            <div class="wallet-cell">
+              <span class="wallet-label">USDT</span>
+              <span class="wallet-value" id="walletUSDT">0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="token-note" id="pricingPolicyNote">Loading pricing policy...</div>
+        <div class="token-note" id="walletLimitNote">
+          24-hour USDT wallet cap will appear after wallet connection.
+        </div>
+
+        <div class="swap-box">
+          <div class="swap-row">
+            <h3>input interface</h3>
+            <label for="fromToken">from</label>
+            <select id="fromToken" class="swap-select">
+              <option>CIGO</option>
+              <option>USDT</option>
+              <option>COSIGO</option>
+            </select>
+          </div>
+
+          <div class="swap-row">
+            <label for="toToken">to</label>
+            <select id="toToken" class="swap-select">
+              <option>CIGO</option>
+              <option>USDT</option>
+              <option>COSIGO</option>
+            </select>
+          </div>
+
+          <div class="swap-row">
+            <label for="amountIn">amount</label>
+            <input id="amountIn" class="swap-input" type="text" placeholder="0.00">
+          </div>
+
+          <div class="swap-row">
+            <label>trade status</label>
+            <input id="quoteStatusField" class="swap-input" type="text" value="No quote yet" readonly>
+          </div>
+
+          <div class="cta-row">
+            <button class="btn btn-primary btn-step" type="button" id="connectBtn">connect wallet</button>
+            <button class="btn btn-secondary btn-step" type="button" id="quoteBtn">get quote</button>
+            <button class="btn btn-secondary btn-step" type="button" id="swapBtn">request swap</button>
+          </div>
+
+          <div class="swap-note" id="swapStatus">
+            Start with a quote. Submit your request only after reviewing route and amount.
+          </div>
+
+          <div class="request-panel" id="requestPanel">
+            <div class="request-head">conversion request</div>
+            <div class="request-card" id="requestCard">
+              <div class="request-empty" id="requestEmpty">No conversion request created yet.</div>
+
+              <div class="request-body" id="requestBody" hidden>
+                <div class="request-row"><strong>reference</strong><span id="requestId">-</span></div>
+                <div class="request-row"><strong>route</strong><span id="requestRoute">-</span></div>
+                <div class="request-row"><strong>input</strong><span id="requestInput">-</span></div>
+                <div class="request-row"><strong>output</strong><span id="requestOutput">-</span></div>
+                <div class="request-row"><strong>estimated value</strong><span id="requestValue">-</span></div>
+                <div class="request-row"><strong>status</strong><span id="requestStatus">draft</span></div>
+
+                <div class="settlement-box" id="settlementBox" hidden>
+                  <div class="settlement-head">next step</div>
+                  <div class="settlement-title" id="settlementTitle">No action yet</div>
+                  <div class="settlement-copy" id="settlementCopy">
+                    Create a request first to see next step.
+                  </div>
+                  <ol class="settlement-list" id="settlementList" hidden></ol>
+                  <div class="settlement-note" id="settlementNote" hidden></div>
+                </div>
+
+                <div class="cta-row">
+                  <button class="btn btn-secondary" type="button" id="copyRequestBtn" hidden>copy request</button>
+                  <button class="btn btn-secondary" type="button" id="clearRequestBtn" hidden>clear request</button>
+                  <button class="btn btn-secondary btn-step" id="submitRequestBtn" type="button" hidden>5) send
+                    request</button>
+                  <button class="btn btn-secondary" type="button" id="refreshRequestBtn" hidden>refresh status</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+    <section class="section wrap" aria-labelledby="spot-ref-title" style="padding-top:0;">
+      <div class="card" style="margin-top:14px;">
+        <div class="hd">
+          <div class="title" id="spot-ref-title">Live silver and currency reference</div>
+          <div class="hint">
+            → market ticker is 3rd party and COSIGO&trade; is not responsible for any error it may present.
+          </div>
+        </div>
+
+        <div class="ticker-shell" style="margin-top:16px;">
+          <iframe src="/assets/silver-ticker.html" loading="lazy" title="Live silver and currency ticker"
+            class="ticker-frame">
+          </iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" aria-label="Important notice" style="padding-top:18px;">
+      <div class="notice">
+        <div class="hero-card">
+          <strong>Important notice for users, reviewers, and labelers:</strong>
+          CIGO is more accurately described as a protected, intelligently controlled token with strong
+          administrative and market-defense features, not by the prejudicial “malicious” label applied in
+          MetaMask-related warning flows. CIGO was designed as a speculative market-access token with
+          protective mechanisms intended to limit bot pressure, whale concentration, and liquidity abuse
+          during fragile stages of market formation. Those features may raise centralization concerns and
+          deserve open review, but that is not the same as a malicious designation or the impairment of
+          normal wallet operability. No specific abusive function or actual misconduct by CIGO was identified
+          to COSIGO by the two representatives involved. Both declined to remove or correct the designation
+          and appeared to treat CIGO as though it were a scam token, despite the absence of any clearly stated
+          finding of fraud or exploit. Centralized scanners and labeling systems currently operate with broad
+          discretion and limited accountability. Holders who acquired CIGO did so with notice that it is a
+          controlled-risk token structure with explicit protections and restrictions. CIGO is not a naked meme
+          or hype token. Its design is controlled and deliberate, and in that respect is closer to administratively
+          managed tokens such as USDT than to an unmanaged meme asset. Secure is a fair description; scam is not.
+          Relevant notices and disclosures are stated throughout the COSIGO website. In light of third-party
+          restrictions, opaque warning systems, and inconsistent wallet behavior, holders have been advised to
+          approach CIGO trades carefully, review all warnings, and make informed decisions while adverse labels
+          remain in place. COSIGO currently regards Rabby wallet as a more transparent and functional option.
+          For further details, see
+          <a href="https://labels.cosigo.io/" target="_blank" rel="noopener"><strong>labels.cosigo.io ↗</strong></a>.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer wrap">
+    <div class="footer-card">
+      <strong>Phase note:</strong> Official request-based trade flow for CIGO, USDT, and COSIGO.
+      local draft creation, submitted server-backed requests, and admin-reviewed lifecycle handling are active.
+    </div>
+  </footer>
+
+  <script src="/shared/assets/trade.js" defer></script>
+</body>
+
+</html>

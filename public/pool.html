@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CIGO Pool / Liquidity</title>
+  <meta name="description" content="CIGO / BSC-USD (USDT) pool and liquidity tools on BNB Smart Chain." />
+  <meta name="robots" content="index,follow" />
+  <link rel="stylesheet" href="/shared/assets/trade.css">
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <script src="/shared/assets/pool-status.js?v=20260613-150352" defer></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">
+        <img src="/shared/assets/icons/cigo_256.png" alt="CIGO token icon" class="brand-icon">
+        <span>
+          CIGO Pool
+          <small>liquidity · reserves · LP tools</small>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="/">live swap</a>
+        <a href="/pool.html">pool</a>
+        <a href="/request.html">request trade</a>
+        <a href="https://market.cosigo.io/" target="_blank" rel="noopener">market</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <div class="hero-grid">
+        <div class="card">
+          <div class="eyebrow">
+            <span>pool tools</span>
+          </div>
+
+          <h1>CIGO / BSC-USD (USDT)<br>liquidity pool.</h1>
+
+          <p class="lead">
+            View live pool information and prepare liquidity tools for the active
+            <strong>CIGO / BSC-USD (USDT)</strong> pool on <strong>BNB Smart Chain</strong>.
+          </p>
+
+          <div class="token-meta-box" id="instantPoolBox" style="margin-top:14px;">
+            <div class="token-meta-row">
+              <span>CIGO in BSC-USD pool</span>
+              <strong id="poolCigoUsdt">loading...</strong>
+            </div>
+            <div class="token-meta-row">
+              <span>CIGO in WBNB pool</span>
+              <strong id="poolCigoWbnb">loading...</strong>
+            </div>
+            <div class="token-meta-row">
+              <span>total pool CIGO</span>
+              <strong id="poolCigoTotal">loading...</strong>
+            </div>
+            <div class="token-meta-row">
+              <span>custodian + treasury</span>
+              <strong id="poolReserveTotal">loading...</strong>
+            </div>
+            <div class="token-meta-row">
+              <span>pool data</span>
+              <strong id="poolUpdatedAt">loading...</strong>
+            </div>
+          </div>
+
+          <div class="swap-box" style="margin-top:18px;">
+            <div class="swap-row">
+              <h3>add liquidity shell</h3>
+              <label for="cigoAmount">CIGO amount</label>
+              <input id="cigoAmount" class="swap-input" type="text" placeholder="0.00" disabled>
+            </div>
+
+            <div class="swap-row">
+              <label for="usdtAmount">BSC-USD (USDT) amount</label>
+              <input id="usdtAmount" class="swap-input" type="text" placeholder="0.00" disabled>
+            </div>
+
+            <div class="cta-row">
+              <button class="btn btn-primary btn-step" type="button" disabled>connect wallet</button>
+              <button class="btn btn-secondary btn-step" type="button" disabled>approve CIGO</button>
+              <button class="btn btn-secondary btn-step" type="button" disabled>approve BSC-USD</button>
+              <button class="btn btn-secondary btn-step" type="button" disabled>add liquidity</button>
+            </div>
+
+            <div class="swap-note">
+              Liquidity tools are being installed step by step. This page is safe:
+              no wallet connection, approval, or liquidity transaction is active yet.
+            </div>
+          </div>
+        </div>
+
+        <aside class="card">
+          <div class="eyebrow">
+            <span>LP notes</span>
+          </div>
+
+          <div class="notice">
+            Adding liquidity is different from swapping. Liquidity providers deposit
+            both assets and receive LP tokens representing their share of the pool.
+          </div>
+
+          <div class="notice">
+            For normal buyers, use <a href="/"><strong>Live Swap</strong></a>.
+            For reviewed settlement or COSIGO conversion, use
+            <a href="/request.html"><strong>Request Trade</strong></a>.
+          </div>
+
+          <div class="contract-wrap" style="margin-top:14px;">
+            <code>CIGO / BSC-USD (USDT) pool</code>
+          </div>
+
+          <div class="cta-row" style="margin-top:14px;">
+            <a class="btn btn-secondary" href="/">live swap</a>
+            <a class="btn btn-secondary" href="https://bscscan.com/address/0xDed1e63B6262C0328876b7774f65c08505dd559A" target="_blank" rel="noopener">view pool</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

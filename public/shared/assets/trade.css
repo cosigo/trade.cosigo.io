@@ -791,3 +791,24 @@
       text-align: left;
     }
   }
+/* readable dropdowns */
+select,
+.swap-select {
+  color: #f4f7fb;
+  background-color: #111827;
+  border-color: rgba(255,255,255,0.22);
+}
+
+select option,
+.swap-select option {
+  color: #111827;
+  background-color: #ffffff;
+}
+
+select:focus,
+.swap-select:focus {
+  color: #ffffff;
+  background-color: #111827;
+  outline: 2px solid rgba(125, 211, 252, 0.65);
+  outline-offset: 2px;
+}
