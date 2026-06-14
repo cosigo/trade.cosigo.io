@@ -14,14 +14,17 @@
 
     if (toggle) {
       const inner = toggle.closest('.topbar-inner');
+      if (!inner) return;
+
       const open = inner.classList.toggle('nav-open');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+
       ev.preventDefault();
       ev.stopPropagation();
       return;
     }
 
-    if (ev.target.closest('.nav a')) {
+    if (ev.target.closest('.topbar .nav a')) {
       closeAll();
       return;
     }
