@@ -1616,3 +1616,56 @@ button {
   margin: 0;
   width: 100%;
 }
+
+/* pool liquidity active controls */
+.lp-status {
+  margin-top: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(15, 23, 42, 0.64);
+  overflow-wrap: anywhere;
+}
+
+#lpSlippageBps {
+  width: 100%;
+}
+
+/* pool page numbered liquidity guide */
+.liquidity-guide-box {
+  margin: 14px 0 18px;
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.62);
+}
+
+.liquidity-guide-box h2 {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+}
+
+.liquidity-steps {
+  margin: 0;
+  padding-left: 1.35rem;
+}
+
+.liquidity-steps li {
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+
+.liquidity-steps li::marker {
+  font-weight: 900;
+}
+
+@media (max-width: 760px) {
+  .liquidity-guide-box {
+    padding: 12px;
+  }
+}
+
+/* liquidity warnings */
+.liquidity-tax-warning {
+  margin: 12px 0;
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(120, 53, 15, 0.22);
+}

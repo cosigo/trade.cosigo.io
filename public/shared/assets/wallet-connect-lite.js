@@ -210,7 +210,7 @@
     buttons.forEach((btn) => {
       btn.disabled = true;
       btn.dataset.oldText = btn.textContent;
-      btn.textContent = 'connecting...';
+      btn.textContent = btn.id === 'connectPoolWalletBtn' ? '1 connecting...' : 'connecting...';
     });
 
     try {
@@ -226,7 +226,7 @@
       setStatus(`connected: ${shortAddress(account)}`);
 
       buttons.forEach((btn) => {
-        btn.textContent = `connected ${shortAddress(account)}`;
+        btn.textContent = btn.id === 'connectPoolWalletBtn' ? `1 connected ${shortAddress(account)}` : `connected ${shortAddress(account)}`;
       });
 
       await renderWalletBalances(account);
@@ -235,7 +235,7 @@
       setStatus(err && err.message ? err.message : 'Wallet connection failed.');
 
       buttons.forEach((btn) => {
-        btn.textContent = btn.dataset.oldText || 'connect wallet';
+        btn.textContent = btn.dataset.oldText || (btn.id === 'connectPoolWalletBtn' ? '1 connect wallet' : 'connect wallet');
       });
     } finally {
       buttons.forEach((btn) => {
@@ -261,7 +261,7 @@
             const account = accounts[0];
             setStatus(`connected: ${shortAddress(account)}`);
             buttons.forEach((btn) => {
-              btn.textContent = `connected ${shortAddress(account)}`;
+              btn.textContent = btn.id === 'connectPoolWalletBtn' ? `1 connected ${shortAddress(account)}` : `connected ${shortAddress(account)}`;
             });
             renderWalletBalances(account);
           }
