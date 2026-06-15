@@ -2,100 +2,125 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <title>CIGO Live Swap</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-
-  <title>CIGO Live Swap — COSIGO</title>
-  <meta name="description" content="Official CIGO live swap interface using a direct PancakeSwap V2 route on BNB Smart Chain.">
+  <meta name="description" content="Official live CIGO / BSC-USD swap interface on BNB Smart Chain.">
   <meta name="author" content="COSIGO">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://trade.cosigo.io/">
-  <meta name="keywords" content="CIGO, COSIGO, BNB Smart Chain, PancakeSwap, BSC-USD, USDT">
 
-  <link rel="icon" type="image/png" sizes="256x256" href="/shared/assets/icons/cigo_256.png?v=20260613">
-  <link rel="apple-touch-icon" sizes="256x256" href="/shared/assets/icons/cigo_256.png?v=20260613">
+  <link rel="stylesheet" href="/shared/assets/trade-home.css?v=20260614-190952">
 
-  <meta property="og:title" content="CIGO Live Swap — COSIGO">
-  <meta property="og:description" content="Official CIGO live swap interface using a direct PancakeSwap V2 route on BNB Smart Chain.">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <meta property="og:title" content="CIGO Live Swap">
+  <meta property="og:description" content="Official live CIGO / BSC-USD swap interface on BNB Smart Chain.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="COSIGO">
   <meta property="og:url" content="https://trade.cosigo.io/">
   <meta property="og:image" content="https://trade.cosigo.io/shared/assets/icons/cigo_256.png">
 
-  <link rel="stylesheet" href="/shared/assets/trade.css?v=20260614-054012">
-
-  <script src="/shared/assets/swap-clean.js?v=20260613-150028" defer></script>
+  <script src="/shared/assets/mobile-nav.js?v=20260613-160904" defer></script>
+  <script src="/shared/assets/swap-clean.js?v=20260614-133352" defer></script>
   <script src="/shared/assets/cigo-status.js?v=20260613-150028" defer></script>
   <script src="/shared/assets/cigo-swap-limit.js?v=20260613-150028" defer></script>
-  <script src="/shared/assets/mobile-nav.js?v=20260613-160904" defer></script>
 </head>
-<body>
 
+<body>
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="https://trade.cosigo.io/">
-        <img src="/shared/assets/icons/cosigo_master_256.png" alt="COSIGO token icon" class="brand-icon">
-        <img src="/shared/assets/icons/cigo_256.png" alt="CIGO token icon" class="brand-icon">
+        <span class="brand-icons">
+          <img src="/shared/assets/icons/cosigo_master_256.png" alt="COSIGO token icon" class="brand-icon">
+          <img src="/shared/assets/icons/cigo_256.png" alt="CIGO token icon" class="brand-icon">
+        </span>
         <span>
           COSIGO / CIGO
           <small>Live Swap · BNB Smart Chain</small>
         </span>
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Open navigation">menu</button>
       </a>
 
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Open navigation">menu</button>
+
       <nav class="nav" aria-label="Primary">
-        <a href="https://cosigo.io/">home</a>
-        <a href="https://trade.cosigo.io/">CIGO swap</a>
-        <a href="https://trade.cosigo.io/rabby.html">Rabby guide</a>
-        <a href="https://trade.cosigo.io/request.html#swap">request desk</a>
-        <a href="https://trade.cosigo.io/pool.html">pool status</a>
-        <a href="https://quote.cosigo.io/">quote model</a>
+        <a href="https://cosigo.io/" target="_blank" rel="noopener">home</a>
+        <a href="https://trade.cosigo.io/request.html">request</a>
+        <a href="https://trade.cosigo.io/pool.html">pool</a>
+        <a href="https://trade.cosigo.io/guides.html">guides</a>
+        <a href="https://quote.cosigo.io/">pre-quote</a>
         <a href="https://market.cosigo.io/">market</a>
         <a href="https://snakepit.cosigo.io/security_notice.html#summary">security notes</a>
+        <a class="nav-link-with-icon" href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560" target="_blank" rel="noopener">
+          <img class="nav-link-icon" src="/shared/assets/icons/cigo_256.png" alt="">
+          token
+        </a>
       </nav>
     </div>
   </header>
 
-  <main class="wrap" style="padding-top:40px;">
+  <main class="wrap">
     <section class="card">
-
-      <div class="notice" style="margin-bottom:18px;">
+      <div class="notice">
         <strong>Status:</strong> Live pool swap for CIGO and BSC-USD (USDT).
-        The old reviewed/manual trade flow remains available at <strong>Request Trade</strong>.
+        The reviewed/manual request flow remains available at <strong>request</strong>.
       </div>
 
       <h1>CIGO live swap</h1>
+
       <p class="lead">
-        Live CIGO / BSC-USD (USDT) pool swap on BNB Smart Chain. Rabby Wallet is recommended.
+        Live CIGO / BSC-USD (USDT) pool swap on BNB Smart Chain. <a class="rabby-hover-link" href="https://rabby.io" target="_blank" rel="noopener">Rabby Wallet</a> is recommended.
       </p>
 
-
-      <div class="notice" style="margin-bottom:18px;">
-        <strong>No rainbow doodles.</strong>
-        CIGO is presented plainly: contracts, balances, liquidity, trade steps, risks, and status.
-        No mascot theater. No soft cartoon distractions. Just the working interface and the facts needed to use it carefully.
+      <div class="notice">
+        <strong>Plain interface:</strong>
+        contracts, balances, liquidity, trade steps, risks, and status. No mascot theater. No hidden interface fee.
       </div>
 
-
-      <div class="notice" style="margin-bottom:18px;">
+      <div class="notice">
         <strong>What fees apply?</strong>
         This interface does <strong>not</strong> add a trade.cosigo.io fee and does <strong>not</strong> use a wallet swap aggregator.
-        A CIGO pool swap may include CIGO contract tax, the normal PancakeSwap V2 pool trading fee, BNB network gas, and slippage from pool movement.
-        No hidden interface fee. Review the Rabby confirmation before signing.
+        A CIGO pool swap may include CIGO contract tax, the normal PancakeSwap V2 pool trading fee, BNB network gas,
+        and slippage from pool movement. Review the Rabby confirmation before signing.
       </div>
 
-
-      <div class="notice" style="margin-bottom:18px;">
+      <div class="notice">
         <strong>Public swap limit:</strong>
         this interface limits each swap to approximately <strong>$300</strong>.
         This protects against accidental large approvals, pool movement, and user error.
-        The limit applies only to trade.cosigo.io. Amount must not exceed wallet balance.
       </div>
 
-      <div class="wallet-summary" style="margin-top:18px;">
-        <div class="wallet-summary-head" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-          <span>wallet status</span>
-          <button class="btn btn-primary" id="cleanConnectBtn" type="button">connect wallet</button>
+
+
+      <div class="wallet-summary">
+        <div class="wallet-summary-head">CIGO public status</div>
+
+        <div class="wallet-summary-grid">
+          <div class="wallet-cell"><span class="wallet-label">total supply</span><span class="wallet-value" id="statusTotalSupply">Loading…</span></div>
+          <div class="wallet-cell"><span class="wallet-label">custodian held</span><span class="wallet-value" id="statusCustodianHeld">Loading…</span></div>
+          <div class="wallet-cell"><span class="wallet-label">treasury held</span><span class="wallet-value" id="statusTreasuryHeld">Loading…</span></div>
+          <div class="wallet-cell"><span class="wallet-label">known held reserve</span><span class="wallet-value" id="statusKnownHeld">Loading…</span></div>
+          <div class="wallet-cell"><span class="wallet-label">live pool liquidity</span><span class="wallet-value" id="statusPoolLiquidity">Loading…</span></div>
+          <div class="wallet-cell"><span class="wallet-label">estimated public float</span><span class="wallet-value" id="statusEstimatedFloat">Loading…</span></div>
         </div>
+
+        <div class="swap-note">
+          <strong>Pool split:</strong> <span id="statusPoolBreakdown">Loading…</span><br>
+          <strong>Updated:</strong> <span id="statusUpdatedAt">Loading…</span><br>
+          Estimated public float subtracts known custodian, treasury, and PancakeSwap pool balances from total supply.
+        </div>
+      </div>
+
+      <div class="wallet-summary">
+        <div class="wallet-summary-head with-action">
+          <span>wallet status</span>
+          <button class="btn btn-primary" id="cleanConnectBtn" type="button">1a connect wallet</button>
+        </div>
+
         <div class="wallet-summary-grid">
           <div class="wallet-cell"><span class="wallet-label">address</span><span class="wallet-value" id="cleanAddress">Not connected</span></div>
           <div class="wallet-cell"><span class="wallet-label">network</span><span class="wallet-value" id="cleanNetwork">Not connected</span></div>
@@ -105,27 +130,9 @@
         </div>
       </div>
 
-
-      <div class="wallet-summary" style="margin-top:18px;">
-        <div class="wallet-summary-head">CIGO public status</div>
-        <div class="wallet-summary-grid">
-          <div class="wallet-cell"><span class="wallet-label">total supply</span><span class="wallet-value" id="statusTotalSupply">Loading…</span></div>
-          <div class="wallet-cell"><span class="wallet-label">custodian held</span><span class="wallet-value" id="statusCustodianHeld">Loading…</span></div>
-          <div class="wallet-cell"><span class="wallet-label">treasury held</span><span class="wallet-value" id="statusTreasuryHeld">Loading…</span></div>
-          <div class="wallet-cell"><span class="wallet-label">known held reserve</span><span class="wallet-value" id="statusKnownHeld">Loading…</span></div>
-          <div class="wallet-cell"><span class="wallet-label">live pool liquidity</span><span class="wallet-value" id="statusPoolLiquidity">Loading…</span></div>
-          <div class="wallet-cell"><span class="wallet-label">estimated public float</span><span class="wallet-value" id="statusEstimatedFloat">Loading…</span></div>
-        </div>
-        <div class="swap-note" style="margin-top:10px;">
-          <strong>Pool split:</strong> <span id="statusPoolBreakdown">Loading…</span><br>
-          <strong>Updated:</strong> <span id="statusUpdatedAt">Loading…</span><br>
-          Estimated public float subtracts known custodian, treasury, and PancakeSwap pool balances from total supply.
-        </div>
-      </div>
-
-      <div class="swap-box" style="margin-top:18px;">
+      <div class="swap-box">
         <div class="swap-row">
-          <label>from</label>
+          <label for="cleanFrom">from</label>
           <select id="cleanFrom" class="swap-select">
             <option value="BSC-USD">BSC-USD (USDT)</option>
             <option value="CIGO">CIGO</option>
@@ -133,7 +140,7 @@
         </div>
 
         <div class="swap-row">
-          <label>to</label>
+          <label for="cleanTo">to</label>
           <select id="cleanTo" class="swap-select">
             <option value="CIGO">CIGO</option>
             <option value="BSC-USD">BSC-USD (USDT)</option>
@@ -141,23 +148,22 @@
         </div>
 
         <div class="swap-row">
-          <label>amount</label>
+          <label for="cleanAmount">amount</label>
           <input id="cleanAmount" class="swap-input" value="0.50" inputmode="decimal">
         </div>
 
-
-
-        <div class="swap-note" style="margin-top:8px;">
-          Starter example: <strong>0.50 BSC-USD (USDT)</strong>. Use a leading zero before decimals: <strong>0.50</strong>, not <strong>.50</strong>.
+        <div class="swap-note">
+          Starter example: <strong>0.50 BSC-USD (USDT)</strong>. Use a leading zero before decimals:
+          <strong>0.50</strong>, not <strong>.50</strong>.
         </div>
 
         <div class="swap-row">
-          <label>estimated output</label>
+          <label for="cleanEstimated">estimated output</label>
           <input id="cleanEstimated" class="swap-input" value="No estimate yet" readonly>
         </div>
 
         <div class="swap-row">
-          <label>slippage</label>
+          <label for="cleanSlippage">slippage</label>
           <select id="cleanSlippage" class="swap-select">
             <option value="50">0.5% tight</option>
             <option value="100" selected>1.0% normal</option>
@@ -165,48 +171,49 @@
           </select>
         </div>
 
-        <div class="token-meta-box" style="margin-top:14px;">
+        <div class="token-meta-box">
           <div class="token-meta-row"><span>route</span><strong id="cleanRoute">No quote yet</strong></div>
           <div class="token-meta-row"><span>price estimate</span><strong id="cleanPrice">No quote yet</strong></div>
           <div class="token-meta-row"><span>minimum received</span><strong id="cleanMin">No quote yet</strong></div>
           <div class="token-meta-row"><span>approved allowance</span><strong id="cleanAllowance">Not checked</strong></div>
         </div>
 
-
-        <div class="notice" style="margin-top:18px;">
-          <strong>Swap steps</strong>
-          <ol style="margin:10px 0 0 20px; line-height:1.7;">
-            <li><strong>Connect wallet.</strong></li>
-            <li><strong>Enter amount</strong> and click <strong>estimate</strong>.</li>
-            <li>If approval says <strong>not enough</strong>, click <strong>approve BSC-USD</strong>.</li>
-            <li><strong>First Rabby confirmation:</strong> approve the exact BSC-USD (USDT) amount shown for PancakeSwap Router. This does not buy CIGO yet.</li>
-            <li>Wait for the approval transaction to complete.</li>
-            <li>Return here and click <strong>estimate</strong> again to verify approval.</li>
-            <li>When approval shows the entered amount as approved, click <strong>swap</strong>.</li>
-            <li><strong>Second Rabby confirmation:</strong> swap the approved BSC-USD (USDT) amount for CIGO.</li>
-            <li>After swap completes, approval resets. Click <strong>estimate</strong> before another swap.</li>
-          </ol>
+        <div class="swap-actions">
+          <button class="btn btn-secondary" id="cleanResetBtn" type="button">2b edit original amount</button>
+          <button class="btn btn-secondary" id="cleanEstimateBtn" type="button">3a estimate</button>
+          <button class="btn btn-secondary" id="cleanApproveBtn" type="button">4a approve exact input</button>
+          <button class="btn btn-secondary" id="cleanSwapBtn" type="button" disabled>5 swap</button>
         </div>
 
-        <div class="notice warning" style="margin-top:12px;">
+        <div class="swap-note swap-status" id="cleanStatus">
+          Ready. Estimate first, approve only if needed, then swap.
+        </div>
+        <div class="notice swap-steps-simple">
+          <strong>Swap steps</strong>
+
+          <div class="swap-step-list">
+            <div class="swap-step-line"><span>1a</span><p>connect wallet</p></div>
+            <div class="swap-step-line"><span>1b</span><p>confirm wallet address, BNB Chain, and balances</p></div>
+            <div class="swap-step-line"><span>2a</span><p>choose from / to tokens</p></div>
+            <div class="swap-step-line"><span>2b</span><p>edit original amount</p></div>
+            <div class="swap-step-line"><span>3a</span><p>estimate</p></div>
+            <div class="swap-step-line"><span>3b</span><p>review quote / allowance</p></div>
+            <div class="swap-step-line"><span>4a</span><p>approve exact input</p></div>
+            <div class="swap-step-line"><span>4b</span><p>wait for Rabby approval confirmation</p></div>
+            <div class="swap-step-line"><span>3a</span><p>estimate again</p></div>
+            <div class="swap-step-line"><span>5</span><p>swap</p></div>
+            <div class="swap-step-line"><span>5b</span><p>wait for Rabby swap confirmation</p></div>
+            <div class="swap-step-line"><span>6</span><p>confirm result</p></div>
+          </div>
+        </div>
+
+        <div class="notice warning">
           <strong>Why two Rabby confirmations?</strong>
           A new exact-approval swap uses two separate blockchain transactions:
           first an <strong>approval</strong>, then the actual <strong>swap</strong>.
           If approval is already verified, only the swap confirmation is needed.
         </div>
-
-
-        <div class="cta-row" style="margin-top:18px;">
-          <button class="btn btn-secondary" id="cleanResetBtn" type="button">cancel / edit amount</button>
-          <button class="btn btn-secondary" id="cleanEstimateBtn" type="button">estimate</button>
-          <button class="btn btn-secondary" id="cleanApproveBtn" type="button">approve exact input</button>
-          <button class="btn btn-secondary" id="cleanSwapBtn" type="button" disabled>swap</button>
-        </div>
-
-        <div class="swap-note" id="cleanStatus" style="margin-top:18px;">
-          Ready. Estimate first, approve only if needed, then swap.
-        </div>
-      </div>
+</div>
     </section>
   </main>
 </body>

@@ -233,7 +233,7 @@
     lastQuote = { from, to, amountRaw: amountRaw.toString(), minRaw: minRaw.toString() };
 
     const enough = await checkAllowance(amountRaw, from);
-    status(enough ? 'Estimate complete. Approval verified. Swap test is armed.' : 'Estimate complete. Approval needed.');
+    status(enough ? 'Estimate complete. Approval verified. Swap is ready.' : 'Estimate complete. Approval needed.');
   }
 
   async function approve() {

@@ -1679,3 +1679,258 @@ button {
 
 
 /* page background and major shells */
+
+/* COSIGO unified guides page */
+.guides-page .guide-hero-card {
+  margin-bottom: 18px;
+}
+
+.guide-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.guide-section {
+  scroll-margin-top: 90px;
+}
+
+.guide-card {
+  padding: 16px;
+  border: 1px solid rgba(194, 178, 128, 0.30);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(31, 27, 34, 0.78), rgba(15, 13, 14, 0.82));
+}
+
+.guide-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.guide-head h2 {
+  margin: 0 0 6px;
+  color: #f3dfaa;
+}
+
+.guide-head p {
+  margin: 0;
+  color: #d8d2c4;
+  line-height: 1.45;
+}
+
+.guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.guide-reset,
+.guide-done {
+  cursor: pointer;
+  border: 1px solid rgba(214, 177, 96, 0.52);
+  background: rgba(120, 72, 32, 0.22);
+  color: #f8ead0;
+  border-radius: 999px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.guide-reset {
+  padding: 8px 11px;
+}
+
+.guide-done {
+  padding: 7px 10px;
+  min-width: 92px;
+}
+
+.guide-list {
+  display: grid;
+  gap: 8px;
+}
+
+.guide-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.40);
+}
+
+.guide-row.is-next {
+  border-color: rgba(214, 177, 96, 0.72);
+  box-shadow: 0 0 0 2px rgba(214, 177, 96, 0.10);
+}
+
+.guide-row.is-done {
+  opacity: 0.72;
+  background: rgba(42, 58, 42, 0.26);
+}
+
+.guide-num {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.64);
+  background: rgba(120, 53, 15, 0.30);
+  color: #f8ead0;
+  font-weight: 900;
+}
+
+.guide-copy strong {
+  display: block;
+  color: #fff7df;
+}
+
+.guide-copy span {
+  display: block;
+  color: #d8d2c4;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.guide-row.is-done .guide-num,
+.guide-row.is-done .guide-done {
+  background: rgba(65, 96, 65, 0.38);
+  border-color: rgba(163, 230, 163, 0.45);
+}
+
+.guide-warning {
+  margin-top: 12px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(251, 191, 36, 0.46);
+  background: rgba(120, 53, 15, 0.20);
+  color: #f8ead0;
+  line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .guide-head {
+    display: block;
+  }
+
+  .guide-actions {
+    justify-content: flex-start;
+    margin-top: 10px;
+  }
+
+  .guide-row {
+    grid-template-columns: auto 1fr;
+  }
+
+  .guide-done {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+/* trade page topbar centering fix */
+.topbar {
+  width: 100%;
+}
+
+.topbar .topbar-inner {
+  width: min(1180px, calc(100% - 32px));
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.topbar .brand {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.topbar .nav {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.topbar .nav a,
+.topbar .nav .nav-link-with-icon {
+  flex: 0 0 auto;
+}
+
+@media (min-width: 861px) {
+  .topbar .nav-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .topbar .topbar-inner {
+    width: min(100%, calc(100% - 20px));
+    justify-content: space-between;
+  }
+
+  .topbar .nav {
+    justify-content: flex-start;
+  }
+}
+
+/* keep live swap action buttons above the swap instructions */
+.swap-actions-above-steps {
+  margin-bottom: 14px;
+}
+
+/* align Rabby guide card with the other guide cards */
+.guides-page #rabby {
+  width: 100%;
+}
+
+.guides-page #rabby .guide-card {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.guides-page .guide-tabs a[href="#rabby"] {
+  border-color: rgba(147, 112, 219, 0.45);
+  background: rgba(80, 48, 118, 0.22);
+  color: #efe2ff;
+}
+
+/* force Rabby guide button and card alignment on guides page */
+.guides-page .guide-tabs .guide-rabby-btn,
+.guide-tabs .guide-rabby-btn {
+  border-color: rgba(147, 112, 219, 0.55) !important;
+  background: rgba(80, 48, 118, 0.26) !important;
+  color: #efe2ff !important;
+}
+
+.guides-page .rabby-guide-section,
+.rabby-guide-section {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  scroll-margin-top: 90px;
+}
+
+.guides-page .rabby-guide-section .guide-card,
+.rabby-guide-section .guide-card {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
