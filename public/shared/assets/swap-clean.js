@@ -15,6 +15,47 @@
   const E = id => document.getElementById(id);
 
   function status(text) { E('cleanStatus').textContent = text; }
+
+  function quoteText(id) {
+    const el = E(id);
+    if (!el) return '';
+    return (el.value || el.textContent || '').trim();
+  }
+
+  function selectedSlippageText() {
+    const el = E('cleanSlippage') || document.querySelector('select[id*="slippage" i]');
+    const raw = (el && (el.options ? el.options[el.selectedIndex]?.text : el.value)) || '1.0%';
+    const m = String(raw).match(/[0-9]+(?:\.[0-9]+)?\s*%/);
+    return m ? m[0].replace(/\s+/g, '') : '1.0%';
+  }
+
+  function refreshQuoteResult() {
+    const box = E('cleanQuoteResult');
+    if (!box) return;
+
+    const expected = quoteText('cleanEstimated');
+    const minimum = quoteText('cleanMin');
+
+    if (!expected || /no quote/i.test(expected) || /no quote/i.test(minimum)) {
+      box.hidden = true;
+      return;
+    }
+
+    E('cleanQuoteExpected').textContent = expected;
+    E('cleanQuoteMinimum').textContent = minimum;
+    E('cleanQuoteSlip').textContent = selectedSlippageText();
+    box.hidden = false;
+  }
+
+  function clearQuoteResult() {
+    const box = E('cleanQuoteResult');
+    if (!box) return;
+    E('cleanQuoteExpected').textContent = 'No quote yet';
+    E('cleanQuoteMinimum').textContent = 'No quote yet';
+    box.hidden = true;
+  }
+
+
   function short(addr) { return addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : 'Not connected'; }
 
   function encAddress(addr) {
@@ -354,7 +395,23 @@ if (!lastQuote || lastQuote.from !== from || lastQuote.to !== to || lastQuote.am
   }
 
   E('cleanConnectBtn').onclick = () => connect().catch(err => status(err.message || 'Connect failed.'));
-  E('cleanEstimateBtn').onclick = estimate;
+  // quote-result-auto-refresh-patch
+  const quoteObserver = new MutationObserver(refreshQuoteResult);
+  ['cleanEstimated', 'cleanMin'].forEach((id) => {
+    const el = E(id);
+    if (el) quoteObserver.observe(el, { childList: true, characterData: true, subtree: true, attributes: true });
+  });
+
+  ['cleanAmount', 'cleanFrom', 'cleanTo', 'cleanSlippage'].forEach((id) => {
+    const el = E(id);
+    if (el) el.addEventListener('change', clearQuoteResult);
+    if (el && id === 'cleanAmount') el.addEventListener('input', clearQuoteResult);
+  });
+
+  E('cleanEstimateBtn').onclick = async function () {
+    await estimate();
+    refreshQuoteResult();
+  };
   E('cleanApproveBtn').onclick = approve;
   E('cleanSwapBtn').onclick = swap;
 

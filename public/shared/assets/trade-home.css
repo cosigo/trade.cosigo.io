@@ -621,3 +621,56 @@ code,
   border-bottom-color: currentColor;
   outline: none;
 }
+
+
+.quote-result-card {
+  margin: 14px 0 4px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(216, 180, 90, 0.34);
+  background:
+    linear-gradient(135deg, rgba(216, 180, 90, 0.13), rgba(148, 163, 184, 0.07)),
+    rgba(12, 18, 28, 0.82);
+}
+
+.quote-result-card[hidden] {
+  display: none !important;
+}
+
+.quote-result-main,
+.quote-result-sub {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quote-result-main span,
+.quote-result-sub span {
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(205, 213, 226, 0.78);
+}
+
+.quote-result-main strong {
+  font-size: 1.2rem;
+  color: #f4e4a6;
+}
+
+.quote-result-sub {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.quote-result-sub strong {
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.quote-result-foot {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: rgba(205, 213, 226, 0.72);
+}
+
