@@ -14,7 +14,18 @@
 
   const E = id => document.getElementById(id);
 
-  function status(text) { E('cleanStatus').textContent = text; }
+  function shortenTxText(text) {
+    return String(text || '').replace(/0x[a-fA-F0-9]{64}/g, (tx) => {
+      return tx.slice(0, 10) + '…' + tx.slice(-8);
+    });
+  }
+
+  function status(text) {
+    const el = E('cleanStatus');
+    if (!el) return;
+    el.textContent = shortenTxText(text);
+    el.title = String(text || '');
+  }
 
   function quoteText(id) {
     const el = E(id);

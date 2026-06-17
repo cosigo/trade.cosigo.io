@@ -1934,3 +1934,227 @@ button {
   margin-left: 0;
   margin-right: 0;
 }
+
+/* Rabby mobile in-app browser viewport guard
+   Prevents wallet return/reflow from letting cards, inputs, or long values expand offscreen. */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+
+.wrap,
+.section,
+.card,
+.panel,
+.swap-card,
+.swap-shell,
+.swap-panel,
+.swap-box,
+.quote-box,
+.status-card,
+.wallet-card,
+.request-card,
+.settlement-box,
+.asset-card,
+.stat-card,
+.step-card,
+.notice,
+.form-grid,
+.grid,
+.row {
+  max-width: 100%;
+  min-width: 0;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+  min-width: 0;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  font-size: 16px;
+}
+
+.stat-value,
+.quote-value,
+.output-value,
+.mono,
+code,
+.wallet-address,
+.address,
+.contract,
+.tx,
+#swapStatus,
+#quoteStatusField,
+#walletAddress,
+#walletCIGO,
+#walletUSDT,
+#walletBNB,
+#inventoryCigo,
+#availableFulfillment,
+#committedReserve,
+#poolLiquidityCigo {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 760px) {
+  .wrap,
+  .section {
+    width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .card,
+  .panel,
+  .swap-card,
+  .swap-shell,
+  .swap-panel,
+  .swap-box,
+  .quote-box,
+  .status-card,
+  .wallet-card,
+  .request-card,
+  .settlement-box,
+  .notice {
+    overflow: hidden;
+  }
+
+  .row,
+  .action-row,
+  .button-row {
+    display: flex;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .row > *,
+  .action-row > *,
+  .button-row > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .grid,
+  .form-grid,
+  .swap-grid,
+  .quote-grid,
+  .stats-grid,
+  .wallet-grid,
+  .request-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .stat-value,
+  .quote-value,
+  .output-value {
+    font-size: clamp(14px, 4vw, 20px);
+  }
+}
+
+
+/* Rabby post-transaction overflow hardening */
+@media (max-width: 820px) {
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  body * {
+    box-sizing: border-box;
+  }
+
+  a,
+  code,
+  pre,
+  .mono,
+  .tx,
+  .address,
+  .contract,
+  .wallet-address,
+  .request-id,
+  .status-line,
+  .settlement-box,
+  .settlement-box *,
+  #swapStatus,
+  #quoteStatusField,
+  #requestPanel,
+  #requestBody,
+  #requestId,
+  #requestRoute,
+  #requestInput,
+  #requestOutput,
+  #requestValue,
+  #requestStatus,
+  #settlementBox,
+  #settlementCopy,
+  #settlementNote,
+  #walletAddress {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .row,
+  .button-row,
+  .action-row,
+  .swap-actions,
+  .wallet-actions {
+    flex-wrap: wrap !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .card,
+  .panel,
+  .swap-card,
+  .swap-panel,
+  .swap-shell,
+  .request-card,
+  .settlement-box,
+  .notice {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+}
+

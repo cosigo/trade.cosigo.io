@@ -598,7 +598,6 @@ code,
   flex: 0 0 auto !important;
 }
 
-
 /* Home lead: Rabby Wallet animated external link */
 .rabby-hover-link {
   display: inline-block;
@@ -621,7 +620,6 @@ code,
   border-bottom-color: currentColor;
   outline: none;
 }
-
 
 .quote-result-card {
   margin: 14px 0 4px;
