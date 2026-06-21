@@ -53,6 +53,26 @@
 }
 </style>
 
+
+<style id="cigo-market-pill-inline-css">
+  .cigo-market-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px 3px 5px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 226, 150, 0.50);
+    background: rgba(0,0,0,0.24);
+    box-shadow: 0 0 12px rgba(214, 174, 94, 0.18);
+  }
+  .cigo-market-pill img {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    display: block;
+  }
+</style>
+
 </head>
 
 <body>
@@ -74,7 +94,11 @@
         <a href="https://trade.cosigo.io/request.html">request desk</a>
                 <a href="https://trade.cosigo.io/guides.html">guides</a>
 <a href="https://quote.cosigo.io/">pre-quote</a>
-        <a href="https://market.cosigo.io/">market</a>
+        <a class="cigo-market-pill" href="https://market.cosigo.io/" title="CIGO market notice">
+    <img src="/shared/assets/icons/cigo_256.png" alt="CIGO">
+    <span>market</span>
+  </a>
+  <a href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560" target="_blank" rel="noopener">token</a>
         <a href="https://snakepit.cosigo.io/security_notice.html#summary">security notes</a>
       </nav>
     </div>

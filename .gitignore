@@ -22,3 +22,4 @@ repo/backups/
 secrets/
 server.js.bak.*
 *.tmp
+backups/
