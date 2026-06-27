@@ -519,9 +519,9 @@
   }
 
   .request-status-submitted {
-    color: #cfe3ff;
-    background: rgba(103, 168, 255, 0.10);
-    border-color: rgba(103, 168, 255, 0.28);
+    color: #e9ddff;
+    background: rgba(124, 58, 237, 0.10);
+    border-color: rgba(124, 58, 237, 0.28);
   }
 
   .request-status-reviewed {
@@ -580,8 +580,8 @@
   }
 
   .settlement-pending {
-    border-color: rgba(103, 168, 255, 0.22);
-    background: rgba(103, 168, 255, 0.08);
+    border-color: rgba(124, 58, 237, 0.22);
+    background: rgba(124, 58, 237, 0.08);
   }
 
   .settlement-action {
@@ -635,10 +635,10 @@
   .token-note {
     margin-top: 12px;
     padding: 14px 16px;
-    border: 1px solid rgba(103, 168, 255, 0.16);
+    border: 1px solid rgba(124, 58, 237, 0.16);
     border-radius: 14px;
-    background: rgba(103, 168, 255, 0.08);
-    color: #d8e7fb;
+    background: rgba(124, 58, 237, 0.08);
+    color: #e7ddff;
   }
 
   .ticker-shell {
@@ -809,7 +809,7 @@ select:focus,
 .swap-select:focus {
   color: #ffffff;
   background-color: #111827;
-  outline: 2px solid rgba(125, 211, 252, 0.65);
+  outline: 2px solid rgba(167, 139, 250, 0.65);
   outline-offset: 2px;
 }
 
@@ -1673,8 +1673,8 @@ button {
 /* no-staking / no-reward disclosure on pool page */
 .liquidity-not-staking-warning {
   margin: 12px 0;
-  border-color: rgba(96, 165, 250, 0.48);
-  background: rgba(30, 64, 175, 0.18);
+  border-color: rgba(167, 139, 250, 0.48);
+  background: rgba(76, 29, 149, 0.18);
 }
 
 

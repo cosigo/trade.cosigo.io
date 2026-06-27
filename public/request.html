@@ -32,49 +32,52 @@
   <meta property="og:image" content="https://trade.cosigo.io/shared/assets/icons/cosigo_master_256.png">
   <script src="/shared/assets/mobile-nav.js?v=20260613-160904" defer></script>
 
-<style id="site-appendix-footer-style">
-.site-appendix-footer {
-  margin: 28px auto 0;
-  padding: 18px 16px 26px;
-  text-align: center;
-  font-size: 0.88rem;
-  opacity: 0.78;
-}
-.site-appendix-footer a {
-  color: inherit;
-  text-decoration: none;
-  border-bottom: 1px dotted currentColor;
-}
-.site-appendix-footer a:hover,
-.site-appendix-footer a:focus-visible {
-  opacity: 1;
-  border-bottom-style: solid;
-}
-</style>
+  <style id="site-appendix-footer-style">
+    .site-appendix-footer {
+      margin: 28px auto 0;
+      padding: 18px 16px 26px;
+      text-align: center;
+      font-size: 0.88rem;
+      opacity: 0.78;
+    }
+
+    .site-appendix-footer a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dotted currentColor;
+    }
+
+    .site-appendix-footer a:hover,
+    .site-appendix-footer a:focus-visible {
+      opacity: 1;
+      border-bottom-style: solid;
+    }
+  </style>
 
 
-<style id="cigo-market-pill-inline-css">
-  .cigo-market-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 10px 3px 5px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 226, 150, 0.50);
-    background: rgba(0,0,0,0.24);
-    box-shadow: 0 0 12px rgba(214, 174, 94, 0.18);
-  }
-  .cigo-market-pill img {
-    width: 18px;
-    height: 18px;
-    border-radius: 999px;
-    display: block;
-  }
-</style>
+  <style id="cigo-market-pill-inline-css">
+    .cigo-market-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px 3px 5px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 226, 150, 0.50);
+      background: rgba(0, 0, 0, 0.24);
+      box-shadow: 0 0 12px rgba(214, 174, 94, 0.18);
+    }
+
+    .cigo-market-pill img {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: block;
+    }
+  </style>
 
 </head>
 
-<body >
+<body>
   <header class="topbar">
     <div class="wrap topbar-inner">
       <a class="brand" href="https://trade.cosigo.io/">
@@ -95,10 +98,11 @@
         <a href="https://trade.cosigo.io/guides.html">guides</a>
         <a href="https://quote.cosigo.io/">pre-quote</a>
         <a class="cigo-market-pill" href="https://market.cosigo.io/" title="CIGO market notice">
-    <img src="/shared/assets/icons/cigo_256.png" alt="CIGO">
-    <span>market</span>
-  </a>
-  <a href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560" target="_blank" rel="noopener">token</a>
+          <img src="/shared/assets/icons/cigo_256.png" alt="CIGO">
+          <span>market</span>
+        </a>
+        <a href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560" target="_blank"
+          rel="noopener">token</a>
         <a href="https://snakepit.cosigo.io/security_notice.html#summary">security notes</a>
       </nav>
     </div>
@@ -119,19 +123,22 @@
             Official request-based trade interface for <strong>CIGO, USDT, and COSIGO</strong>.
           </p>
 
-          <div class="notice">
-            <strong>New here?</strong> For advanced users, <a
-              href="https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560"
-              target="_blank" rel="noopener"><strong>PancakeSwap ↗</strong></a> remains available.
-            CIGO is new on DEX, so warning prompts may appear.
-            For the simplest path, use the official trade flow below.
+          <div class="eyebrow">
+            wallet setup · reviewed request flow
           </div>
 
           <div class="notice">
-            Add <a href="https://market.cosigo.io/" target="_blank" rel="noopener"><strong>CIGO ↗</strong></a> and/or
+            <strong>New here?</strong>
+            Add
+            <a href="https://market.cosigo.io/" target="_blank" rel="noopener"><strong>CIGO ↗</strong></a>
+            and/or
             <a href="https://token.cosigo.io/" target="_blank" rel="noopener"><strong>COSIGO&trade; ↗</strong></a>
-            to your wallet first. Create your request second. Do not send funds until your request is reviewed and
-            settlement instructions are shown.
+            to your wallet first, then create your request below. Do not send funds until your request is reviewed and
+            settlement instructions are shown. For the simplest path, use the official trade flow on this page.
+            Advanced users may also use
+            <a href="https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560"
+              target="_blank" rel="noopener"><strong>PancakeSwap ↗</strong></a>,
+            but CIGO is new on DEX, so warning prompts may appear.
           </div>
 
           <div class="cta-row">
@@ -139,21 +146,12 @@
             <button class="btn btn-secondary" type="button" id="addCigoTopBtn">
               1a) CIGO auto add (PC)
             </button>
-            <a class="btn btn-secondary" href="https://quote.cosigo.io/" target="_blank" rel="noopener">view quote
-              logic</a>
-            <a class="btn btn-secondary" href="https://market.cosigo.io/" target="_blank" rel="noopener">market detail
-            </a>
-            <a class="btn btn-secondary"
-              href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560#code" target="_blank"
-              rel="noopener">view contract
-            </a>
             <a class="btn btn-secondary" href="https://rabby.io/" target="_blank" rel="noopener">Install Rabby
               Wallet</a>
             <div class="token-note">
-              Auto (1a) flows into desktop browser extension. Manual (1b) cell phone instructions are posted.
-            </div>
-            <div class="token-note">
-              Questions or problems with wallet setup?
+              <strong>Wallet setup help:</strong>
+              Use <strong>1a</strong> for desktop browser / android auto-add, or follow manual <strong>1b</strong>
+              cell phone instructions. Questions or problems?
               <a href="https://contact.cosigo.io/" target="_blank" rel="noopener"><strong>contact admin ↗</strong></a>
             </div>
           </div>
@@ -209,16 +207,6 @@
               </li>
             </ol>
 
-            <div class="notice warning">
-              <strong>MetaMask caution:</strong>
-              In CIGO’s documented experience, MetaMask has behaved as a hostile,
-              inconsistent, and reputation-damaging interface. Use MetaMask cautiously,
-              verify all wallet behavior before relying on it, and consider Rabby Wallet
-              for normal CIGO access.
-              <a href="https://labels.cosigo.io" target="_blank" rel="noopener">
-                Read the public record / why this warning exists →
-              </a>
-            </div>
           </section>
 
           <div class="token-note">
@@ -378,32 +366,41 @@
     </section>
 
     <section class="wrap" aria-label="Important notice" style="padding-top:18px;">
-      <div class="notice">
-        <div class="hero-card">
+      <div class="notice warning">
+        <p>
           <strong>Important notice for users, reviewers, and labelers:</strong>
-          CIGO is more accurately described as a protected, intelligently controlled token with strong
-          administrative and market-defense features, not by the prejudicial “malicious” label applied in
-          MetaMask-related warning flows. CIGO was designed as a speculative market-access token with
-          protective mechanisms intended to limit bot pressure, whale concentration, and liquidity abuse
-          during fragile stages of market formation. Those features may raise centralization concerns and
-          deserve open review, but that is not the same as a malicious designation or the impairment of
-          normal wallet operability. No specific abusive function or actual misconduct by CIGO was identified
-          to COSIGO by the two representatives involved. Both declined to remove or correct the designation
-          and appeared to treat CIGO as though it were a scam token, despite the absence of any clearly stated
-          finding of fraud or exploit. Centralized scanners and labeling systems currently operate with broad
-          discretion and limited accountability. Holders who acquired CIGO did so with notice that it is a
-          controlled-risk token structure with explicit protections and restrictions. CIGO is not a naked meme
-          or hype token. Its design is controlled and deliberate, and in that respect is closer to administratively
-          managed tokens such as USDT than to an unmanaged meme asset. Secure is a fair description; scam is not.
-          Relevant notices and disclosures are stated throughout the COSIGO website. In light of third-party
-          restrictions, opaque warning systems, and inconsistent wallet behavior, holders have been advised to
-          approach CIGO trades carefully, review all warnings, and make informed decisions while adverse labels
-          remain in place. COSIGO currently regards Rabby wallet as a more transparent and functional option.
+          CIGO is presented by COSIGO as a controlled-risk, administratively managed market-access token with protective
+          features intended to limit bot pressure, whale concentration, and liquidity abuse during early market
+          formation.
+          Those controls may raise centralization concerns and deserve open review, but COSIGO does not regard them as
+          evidence of fraud, exploit behavior, or a malicious token design.
+        </p>
+
+        ```
+        <p>
+          COSIGO has disputed third-party wallet and scanner labels that impair normal CIGO access without clearly
+          identifying
+          a specific abusive function or confirmed misconduct. Centralized warning systems may operate with broad
+          discretion,
+          inconsistent behavior, and limited accountability. Holders should therefore review all public disclosures,
+          understand
+          that CIGO is not an unmanaged meme asset, and approach trades carefully while adverse labels remain in place.
+        </p>
+
+        <p>
+          <strong>Wallet caution:</strong>
+          In CIGO’s documented experience, MetaMask-related warning flows have been inconsistent and
+          reputation-damaging.
+          Use MetaMask cautiously, verify wallet behavior before relying on it, and consider Rabby Wallet for normal
+          CIGO access.
           For further details, see
           <a href="https://labels.cosigo.io/" target="_blank" rel="noopener"><strong>labels.cosigo.io ↗</strong></a>.
-        </div>
+        </p>
+        ```
+
       </div>
     </section>
+
 
   </main>
 
