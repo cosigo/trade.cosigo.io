@@ -2159,3 +2159,48 @@ code,
 }
 
 
+
+/* === CIGO system footer v1 === */
+.cigo-system-footer {
+  margin: 34px auto 0;
+  padding: 24px 16px 30px;
+  color: rgba(234, 228, 212, 0.78);
+  text-align: center;
+  border-top: 1px solid rgba(236, 197, 112, 0.16);
+}
+
+.cigo-footer-inner {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.cigo-footer-info {
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.cigo-footer-info strong {
+  color: #fff3cf;
+}
+
+.cigo-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 14px;
+  margin-top: 14px;
+  font-size: 0.82rem;
+}
+
+.cigo-footer-links a {
+  color: rgba(255, 243, 207, 0.82);
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(255, 243, 207, 0.42);
+}
+
+.cigo-footer-links a:hover,
+.cigo-footer-links a:focus-visible {
+  color: #fff3cf;
+  border-bottom-style: solid;
+}
+/* === end CIGO system footer v1 === */
