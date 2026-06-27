@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         pricing: {
             ozUsdReference: 100,
-            cigoUsdReference: 0.01,
+            cigoUsdReference: 0.0177,
             cigoInboundHaircutRate: 0.10,
             cigoOutboundPremiumRate: 0.05,
             cigoSellBasis: 0.009,
@@ -602,6 +602,17 @@ async function addCigoToWallet() {
         };
     }
 
+
+    function formatCigoUsdAmount(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return '$0.0000';
+
+        return '$' + n.toLocaleString(undefined, {
+            minimumFractionDigits: 4,
+            maximumFractionDigits: 6
+        });
+    }
+
     function updatePricingPolicyNote() {
         if (!els.pricingPolicyNote) return;
 
@@ -615,6 +626,7 @@ async function addCigoToWallet() {
             `Reference ounce basis: <strong>${formatUsdAmount(pricing.ozUsdReference)}</strong> per troy ounce.<br>` +
             `COSIGO digital exit fee: <strong>${formatPercent(pricing.digitalExitFeeRate)}</strong>.<br>` +
             `COSIGO physical silver redemption fee: <strong>${formatPercent(pricing.physicalRedemptionFeeRate)}</strong>.<br>` +
+            `CIGO reference basis: <strong>${formatCigoUsdAmount(pricing.cigoUsdReference)}</strong> per CIGO.<br>` +
             `CIGO sell basis discount: <strong>${formatPercent(pricing.cigoInboundHaircutRate)}</strong>.<br>` +
             `CIGO buy basis premium: <strong>${formatPercent(pricing.cigoOutboundPremiumRate)}</strong>.<br>` +
             `<span style="color:#9cabbd;">${updatedText}</span><br>` +
@@ -693,6 +705,39 @@ async function addCigoToWallet() {
         }
 
         return `fee ${formatPercent(manualQuote.feeRate)}`;
+    }
+
+
+    function getQuoteBasisText(manualQuote) {
+        if (!manualQuote) return '';
+
+        const pricing = state.pricing;
+        const cigoRef = formatCigoUsdAmount(pricing.cigoUsdReference);
+        const cigoBuy = formatCigoUsdAmount(pricing.cigoBuyBasis);
+        const cigoSell = formatCigoUsdAmount(pricing.cigoSellBasis);
+        const cosigoBasis = formatUsdAmount(pricing.cosigoUsdBasis);
+
+        if (manualQuote.policyLabel === 'usdt to cigo') {
+            return `CIGO reference ${cigoRef}; buy basis ${cigoBuy}`;
+        }
+
+        if (manualQuote.policyLabel === 'cigo to usdt') {
+            return `CIGO reference ${cigoRef}; sell basis ${cigoSell}`;
+        }
+
+        if (manualQuote.policyLabel === 'cigo to cosigo') {
+            return `CIGO reference ${cigoRef}; COSIGO basis ${cosigoBasis}`;
+        }
+
+        if (manualQuote.policyLabel === 'cosigo to cigo') {
+            return `COSIGO basis ${cosigoBasis}; CIGO reference ${cigoRef}`;
+        }
+
+        if (manualQuote.policyLabel === 'usdt to cosigo' || manualQuote.policyLabel === 'cosigo to usdt') {
+            return `COSIGO basis ${cosigoBasis}`;
+        }
+
+        return '';
     }
 
     function getManualQuote(from, to, amount) {
@@ -1336,8 +1381,9 @@ async function addCigoToWallet() {
             }
 
             const adjustmentText = getQuoteAdjustmentText(manualQuote);
+            const basisText = getQuoteBasisText(manualQuote);
             setQuoteStatus(
-                `Quote (${manualQuote.policyLabel}): ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to} | ${adjustmentText} | net value ≈ ${formatUsdAmount(manualQuote.netUsdValue)}`
+                `Quote (${manualQuote.policyLabel}): ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to} | ${basisText}${basisText ? ' | ' : ''}${adjustmentText} | net value ≈ ${formatUsdAmount(manualQuote.netUsdValue)}`
             );
         });
     }
@@ -1391,8 +1437,9 @@ async function addCigoToWallet() {
                         ? 'Direct internal conversion request created'
                         : 'Internal conversion request created';
 
+                const basisText = getQuoteBasisText(manualQuote);
                 setQuoteStatus(
-                    `${prefix}: ${request.id || request.localDraftId} | ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to}`
+                    `${prefix}: ${request.id || request.localDraftId} | ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to}${basisText ? ' | ' + basisText : ''}`
                 );
             } catch (err) {
                 console.error(err);
