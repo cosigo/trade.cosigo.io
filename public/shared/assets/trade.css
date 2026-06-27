@@ -2158,49 +2158,110 @@ code,
   }
 }
 
-
-
-/* === CIGO system footer v1 === */
+/* === CIGO system footer v2 === */
 .cigo-system-footer {
-  margin: 34px auto 0;
-  padding: 24px 16px 30px;
-  color: rgba(234, 228, 212, 0.78);
-  text-align: center;
-  border-top: 1px solid rgba(236, 197, 112, 0.16);
+  width: min(1120px, calc(100% - 28px)) !important;
+  margin: 38px auto 26px !important;
+  padding: 0 !important;
+  text-align: center !important;
+  color: rgba(234, 228, 212, 0.82) !important;
 }
 
 .cigo-footer-inner {
-  max-width: 980px;
-  margin: 0 auto;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  padding: 22px 18px 24px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(236, 197, 112, 0.20) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 243, 207, 0.08), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(167, 139, 250, 0.10), transparent 38%),
+    linear-gradient(180deg, rgba(15, 12, 9, 0.84), rgba(8, 9, 12, 0.72)) !important;
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035) !important;
 }
 
 .cigo-footer-info {
-  font-size: 0.9rem;
-  line-height: 1.65;
+  max-width: 920px !important;
+  margin: 0 auto !important;
+  font-size: 0.92rem !important;
+  line-height: 1.65 !important;
+  text-align: center !important;
+  overflow-wrap: anywhere !important;
 }
 
 .cigo-footer-info strong {
-  color: #fff3cf;
+  color: #fff3cf !important;
+  font-weight: 850 !important;
 }
 
 .cigo-footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px 14px;
-  margin-top: 14px;
-  font-size: 0.82rem;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  max-width: 920px !important;
+  margin: 18px auto 0 !important;
+  padding: 0 !important;
+  text-align: center !important;
 }
 
 .cigo-footer-links a {
-  color: rgba(255, 243, 207, 0.82);
-  text-decoration: none;
-  border-bottom: 1px dotted rgba(255, 243, 207, 0.42);
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 34px !important;
+  padding: 8px 12px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(236, 197, 112, 0.30) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 243, 207, 0.075), rgba(167, 139, 250, 0.055)) !important;
+  color: #fff3cf !important;
+  font-size: 0.82rem !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  text-decoration: none !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  box-shadow: 0 0 14px rgba(214, 174, 94, 0.08) !important;
 }
 
 .cigo-footer-links a:hover,
 .cigo-footer-links a:focus-visible {
-  color: #fff3cf;
-  border-bottom-style: solid;
+  color: #ffffff !important;
+  border-color: rgba(236, 197, 112, 0.58) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 243, 207, 0.13), rgba(167, 139, 250, 0.10)) !important;
+  box-shadow:
+    0 0 18px rgba(214, 174, 94, 0.18),
+    0 0 16px rgba(167, 139, 250, 0.12) !important;
+  transform: translateY(-1px);
 }
-/* === end CIGO system footer v1 === */
+
+@media (max-width: 640px) {
+  .cigo-system-footer {
+    width: min(100% - 18px, 1120px) !important;
+    margin-top: 28px !important;
+  }
+
+  .cigo-footer-inner {
+    padding: 18px 12px 20px !important;
+    border-radius: 18px !important;
+  }
+
+  .cigo-footer-info {
+    font-size: 0.86rem !important;
+  }
+
+  .cigo-footer-links {
+    gap: 8px !important;
+  }
+
+  .cigo-footer-links a {
+    width: 100% !important;
+  }
+}
+/* === end CIGO system footer v2 === */
+
