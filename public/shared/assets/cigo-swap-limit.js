@@ -1,5 +1,5 @@
 (() => {
-  const CAP_USD = 300;
+  const CAP_USD = 500;
   const GAS_MIN_BNB = 0.00003;
 
   const E = (id) => document.getElementById(id);

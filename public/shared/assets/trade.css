@@ -8,7 +8,7 @@
     --gold: #ffb84d;
     --gold2: #ff8a3d;
     --green: #47d18c;
-    --blue: #68a9ff;
+    --blue: #a78bfa;
     --radius: 22px;
     --shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
     --max: 1180px;
@@ -2157,4 +2157,5 @@ code,
     overflow-x: hidden !important;
   }
 }
+
 
