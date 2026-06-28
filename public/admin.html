@@ -144,6 +144,12 @@
             color: #c9f5df;
         }
 
+        .status-cancelled {
+            background: rgba(255, 95, 95, 0.10);
+            border-color: rgba(255, 95, 95, 0.30);
+            color: #ffb4b4;
+        }
+
         .msg {
             margin-top: 12px;
             color: #9cabbd;
@@ -161,6 +167,7 @@
                 <select id="statusFilter">
                     <option value="submitted">submitted</option>
                     <option value="reviewed">reviewed</option>
+                    <option value="cancelled">cancelled</option>
                     <option value="">all</option>
                 </select>
                 <button id="loadBtn" type="button">Load queue</button>
@@ -284,6 +291,7 @@
             if (status === 'submitted') return 'status status-submitted';
             if (status === 'reviewed') return 'status status-reviewed';
             if (status === 'completed') return 'status status-completed';
+            if (status === 'cancelled') return 'status status-cancelled';
             if (status === 'draft') return 'status status-draft';
             return 'status';
         }
@@ -375,9 +383,14 @@
                 const actions = [];
                 if (r.status === 'submitted') {
                     actions.push(`<button type="button" data-id="${r.id}" data-next="reviewed">Mark reviewed</button>`);
+                    actions.push(`<button type="button" data-id="${r.id}" data-next="cancelled">Cancel unpaid</button>`);
                 }
                 if (r.status === 'reviewed') {
                     actions.push(`<button type="button" data-id="${r.id}" data-next="completed">Mark completed</button>`);
+                    actions.push(`<button type="button" data-id="${r.id}" data-next="cancelled">Cancel unpaid</button>`);
+                }
+                if (r.status === 'completed') {
+                    actions.push(`<button type="button" data-id="${r.id}" data-next="cancelled">Cancel / void completed</button>`);
                 }
 
                 div.innerHTML = `
@@ -392,6 +405,7 @@
             <div class="label">submitted</div><div class="mono">${r.submittedAt || '-'}</div>
             <div class="label">reviewed</div><div class="mono">${r.reviewedAt || '-'}</div>
             <div class="label">completed</div><div class="mono">${r.completedAt || '-'}</div>
+            <div class="label">cancelled</div><div class="mono">${r.cancelledAt || '-'}</div>
             <div class="label">wallet</div><div class="mono">${r.wallet || '-'}</div>
             <div class="label">input</div><div class="mono">${r.inputAmount} ${r.fromAsset}</div>
             <div class="label">output</div><div class="mono">${r.outputAmount} ${r.toAsset}</div>
@@ -417,6 +431,20 @@
                             status: next,
                             note: `Admin changed status to ${next}`
                         };
+
+                        if (next === 'cancelled') {
+                            const cancelNote = window.prompt(
+                                'Cancellation note:',
+                                'Invoice cancelled: customer did not pay.'
+                            );
+
+                            if (cancelNote === null) {
+                                setMsg('Cancellation cancelled.');
+                                return;
+                            }
+
+                            payload.note = cancelNote.trim() || 'Invoice cancelled by admin.';
+                        }
 
                         if (next === 'reviewed') {
                             const settlementAddress = window.prompt('Settlement address (full 0x address):', '');
