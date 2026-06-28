@@ -6,8 +6,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>COSIGO trading platform</title>
-  <link rel="stylesheet" href="/shared/assets/trade.css?v=20260627-222300">
-  <link rel="stylesheet" href="/shared/assets/cigo-footer.css?v=20260627-222708">
+  <link rel="stylesheet" href="/shared/assets/trade.css?v=20260627-235942">
+  <link rel="stylesheet" href="/shared/assets/cigo-footer.css?v=20260628-001436">
   <meta name="description" content="Official trade interface for CIGO, USDT, and COSIGO." />
   <meta name="author" content="COSIGO">
   <meta name="robots" content="index,follow" />
@@ -349,22 +349,6 @@
         </div>
       </article>
     </section>
-    <section class="section wrap" aria-labelledby="spot-ref-title" style="padding-top:0;">
-      <div class="card" style="margin-top:14px;">
-        <div class="hd">
-          <div class="title" id="spot-ref-title">Live silver and currency reference</div>
-          <div class="hint">
-            → market ticker is 3rd party and COSIGO&trade; is not responsible for any error it may present.
-          </div>
-        </div>
-
-        <div class="ticker-shell" style="margin-top:16px;">
-          <iframe src="/assets/silver-ticker.html" loading="lazy" title="Live silver and currency ticker"
-            class="ticker-frame">
-          </iframe>
-        </div>
-      </div>
-    </section>
 
     <section class="wrap" aria-label="Important notice" style="padding-top:18px;">
       <div class="notice warning">
@@ -377,7 +361,6 @@
           evidence of fraud, exploit behavior, or a malicious token design.
         </p>
 
-        ```
         <p>
           COSIGO has disputed third-party wallet and scanner labels that impair normal CIGO access without clearly
           identifying
@@ -397,24 +380,34 @@
           For further details, see
           <a href="https://labels.cosigo.io/" target="_blank" rel="noopener"><strong>labels.cosigo.io ↗</strong></a>.
         </p>
-        ```
-
       </div>
     </section>
 
+    <section class="section wrap" aria-labelledby="spot-ref-title" style="padding-top:0;">
+      <div class="card" style="margin-top:14px;">
+        <div class="hd">
+          <div class="title" id="spot-ref-title">Live silver and currency reference</div>
+          <div class="hint">
+            → market ticker is 3rd party and COSIGO&trade; is not responsible for any error it may present.
+          </div>
+        </div>
+
+        <div class="ticker-shell" style="margin-top:16px;">
+          <iframe src="/assets/silver-ticker.html" loading="lazy" title="Live silver and currency ticker"
+            class="ticker-frame">
+          </iframe>
+        </div>
+      </div>
+    </section>
 
   </main>
-
-  <footer class="footer wrap">
-    <div class="footer-card">
-      <strong>Phase note:</strong> Official request-based trade flow for CIGO, USDT, and COSIGO.
-      local draft creation, submitted server-backed requests, and admin-reviewed lifecycle handling are active.
-    </div>
-  </footer>
-
-  <script src="/shared/assets/trade.js?v=20260627-231104" defer></script>
-  <footer class="cigo-system-footer">
+<footer class="cigo-system-footer">
     <div class="cigo-footer-inner">
+      <div class="cigo-footer-phase-note">
+        <strong>Phase note:</strong> Official request-based trade flow for CIGO, USDT, and COSIGO.
+        Local draft creation, submitted server-backed requests, and admin-reviewed lifecycle handling are active.
+      </div>
+
       <div class="cigo-footer-info">
         <strong>CIGO market-access pages are published by the COSIGO&trade; system.</strong><br>
         CIGO is a separate speculative market-access token for trading, liquidity, and public market activity.
@@ -433,6 +426,7 @@
       </div>
     </div>
   </footer>
+  <script src="/shared/assets/trade.js?v=20260627-235942" defer></script>
 </body>
 
 </html>
