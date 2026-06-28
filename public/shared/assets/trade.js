@@ -622,15 +622,23 @@ async function addCigoToWallet() {
             : `Pricing version ${pricing.version}`;
 
         els.pricingPolicyNote.innerHTML =
-            `<strong>Current pricing policy:</strong><br>` +
-            `Reference ounce basis: <strong>${formatUsdAmount(pricing.ozUsdReference)}</strong> per troy ounce.<br>` +
-            `COSIGO digital exit fee: <strong>${formatPercent(pricing.digitalExitFeeRate)}</strong>.<br>` +
-            `COSIGO physical silver redemption fee: <strong>${formatPercent(pricing.physicalRedemptionFeeRate)}</strong>.<br>` +
-            `CIGO reference basis: <strong>${formatCigoUsdAmount(pricing.cigoUsdReference)}</strong> per CIGO.<br>` +
-            `CIGO sell basis discount: <strong>${formatPercent(pricing.cigoInboundHaircutRate)}</strong>.<br>` +
-            `CIGO buy basis premium: <strong>${formatPercent(pricing.cigoOutboundPremiumRate)}</strong>.<br>` +
-            `<span style="color:#9cabbd;">${updatedText}</span><br>` +
-            `<a href="https://redeem.cosigo.io/" target="_blank" rel="noopener">open physical redemption page</a>`;
+            `<div class="pricing-policy-title">Current pricing policy</div>` +
+            `<div class="pricing-policy-grid">` +
+              `<div class="pricing-policy-section pricing-policy-cosigo">` +
+                `<div class="pricing-policy-label">COSIGO&trade; silver-reference layer</div>` +
+                `<div>Reference ounce basis: <strong>${formatUsdAmount(pricing.ozUsdReference)}</strong> per troy ounce.</div>` +
+                `<div>Digital exit fee: <strong>${formatPercent(pricing.digitalExitFeeRate)}</strong>.</div>` +
+                `<div>Physical silver redemption fee: <strong>${formatPercent(pricing.physicalRedemptionFeeRate)}</strong>.</div>` +
+                `<a href="https://redeem.cosigo.io/" target="_blank" rel="noopener">open physical redemption page</a>` +
+              `</div>` +
+              `<div class="pricing-policy-section pricing-policy-cigo">` +
+                `<div class="pricing-policy-label">CIGO market-access layer</div>` +
+                `<div>Reference basis: <strong>${formatCigoUsdAmount(pricing.cigoUsdReference)}</strong> per CIGO.</div>` +
+                `<div>Sell basis discount: <strong>${formatPercent(pricing.cigoInboundHaircutRate)}</strong>.</div>` +
+                `<div>Buy basis premium: <strong>${formatPercent(pricing.cigoOutboundPremiumRate)}</strong>.</div>` +
+              `</div>` +
+            `</div>` +
+            `<div class="pricing-policy-updated">${updatedText}</div>`;
     }
 
     async function loadPricingState() {
