@@ -972,6 +972,196 @@ async function addCigoToWallet() {
         });
     }
 
+    function getInvoicePopup() {
+        let popup = document.getElementById('latestInvoicePopup');
+
+        if (popup) return popup;
+
+        popup = document.createElement('div');
+        popup.id = 'latestInvoicePopup';
+        popup.className = 'invoice-popup';
+        popup.hidden = true;
+        popup.innerHTML = `
+            <div class="invoice-popup-backdrop" data-invoice-close></div>
+            <div class="invoice-popup-card" role="dialog" aria-modal="true" aria-labelledby="latestInvoiceTitle">
+                <div class="invoice-popup-head">
+                    <div>
+                        <div class="eyebrow">approved request found</div>
+                        <h2 id="latestInvoiceTitle">payment instructions ready</h2>
+                    </div>
+                    <button type="button" class="invoice-popup-close" data-invoice-close aria-label="Close invoice popup">×</button>
+                </div>
+                <div class="invoice-popup-body" id="latestInvoiceBody"></div>
+                <div class="invoice-popup-actions">
+                    <button type="button" id="latestInvoiceCopyBtn">copy payment address</button>
+                    <button type="button" id="latestInvoiceRefreshBtn">refresh status</button>
+                    <button type="button" id="latestInvoiceViewBtn">view request panel</button>
+                    <button type="button" data-invoice-close>close</button>
+                </div>
+            </div>
+        `;
+
+        popup.addEventListener('click', (ev) => {
+            if (ev.target && ev.target.matches('[data-invoice-close]')) {
+                popup.hidden = true;
+            }
+        });
+
+        document.body.appendChild(popup);
+        return popup;
+    }
+
+    async function copyTextToClipboard(value) {
+        const text = String(value || '');
+
+        if (!text) return false;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.left = '-9999px';
+        document.body.appendChild(area);
+        area.select();
+
+        let ok = false;
+        try {
+            ok = document.execCommand('copy');
+        } finally {
+            area.remove();
+        }
+
+        return ok;
+    }
+
+    function requestHasPaymentInstructions(request) {
+        return (
+            request &&
+            String(request.status || '').toLowerCase() === 'reviewed' &&
+            request.settlement &&
+            request.settlement.address
+        );
+    }
+
+    function showLatestInvoicePopup(request) {
+        if (!requestHasPaymentInstructions(request)) return false;
+
+        const settlement = request.settlement || {};
+        const settlementAsset = settlement.asset || request.fromAsset || request.from || '-';
+        const settlementAmount = settlement.amount || request.inputAmount || '-';
+        const settlementNetwork = settlement.network || 'BNB Smart Chain';
+        const settlementAddress = settlement.address || '';
+        const settlementNote = settlement.note || '';
+        const routeText = request.route || `${request.fromAsset || request.from || '-'} → ${request.toAsset || request.to || '-'}`;
+        const requestId = request.id || request.localDraftId || '-';
+
+        const popup = getInvoicePopup();
+        const body = document.getElementById('latestInvoiceBody');
+
+        if (!body) return false;
+
+        body.innerHTML = `
+            <div class="invoice-popup-grid">
+                <div>
+                    <span>request</span>
+                    <strong>${escapeHtml(requestId)}</strong>
+                </div>
+                <div>
+                    <span>route</span>
+                    <strong>${escapeHtml(routeText)}</strong>
+                </div>
+                <div>
+                    <span>send exact amount</span>
+                    <strong>${escapeHtml(formatAssetAmount(settlementAmount, settlementAsset))} ${escapeHtml(settlementAsset)}</strong>
+                </div>
+                <div>
+                    <span>network</span>
+                    <strong>${escapeHtml(settlementNetwork)}</strong>
+                </div>
+            </div>
+
+            <div class="invoice-address-box">
+                <span>payment address</span>
+                <code>${escapeHtml(settlementAddress)}</code>
+            </div>
+
+            <p class="invoice-popup-note">
+                Verify the address and network before sending. Keep the transaction hash or payment proof.
+                ${settlementNote ? `<br><strong>Note:</strong> ${escapeHtml(settlementNote)}` : ''}
+            </p>
+        `;
+
+        const copyBtn = document.getElementById('latestInvoiceCopyBtn');
+        const refreshBtn = document.getElementById('latestInvoiceRefreshBtn');
+        const viewBtn = document.getElementById('latestInvoiceViewBtn');
+
+        if (copyBtn) {
+            copyBtn.onclick = async () => {
+                const ok = await copyTextToClipboard(settlementAddress);
+                setQuoteStatus(ok ? 'Payment address copied.' : 'Could not copy payment address.');
+            };
+        }
+
+        if (refreshBtn) {
+            refreshBtn.onclick = async () => {
+                try {
+                    const refreshed = await refreshCurrentRequestFromServer();
+                    if (refreshed) {
+                        showLatestInvoicePopup(refreshed);
+                        setQuoteStatus(`Request refreshed: ${refreshed.id} (${refreshed.status})`);
+                    }
+                } catch (err) {
+                    setQuoteStatus(`Refresh failed: ${err.message || err}`);
+                }
+            };
+        }
+
+        if (viewBtn) {
+            viewBtn.onclick = () => {
+                popup.hidden = true;
+                if (els.requestPanel) {
+                    els.requestPanel.hidden = false;
+                    els.requestPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            };
+        }
+
+        popup.hidden = false;
+        return true;
+    }
+
+    async function recoverLatestWalletInvoice(address) {
+        if (!address) return null;
+
+        const data = await apiJson(`${CONFIG.API_BASE}/requests/latest?wallet=${encodeURIComponent(address)}`);
+        const request = data.request || null;
+
+        if (!request || !request.id) return null;
+
+        saveRequest(request);
+        renderRequest(request);
+
+        const statusText = String(request.status || '').toLowerCase();
+
+        if (requestHasPaymentInstructions(request)) {
+            if (state.invoicePopupShownFor !== request.id) {
+                showLatestInvoicePopup(request);
+                state.invoicePopupShownFor = request.id;
+            }
+
+            setQuoteStatus(`Approved request recovered: ${request.id}. Payment instructions are ready.`);
+        } else if (statusText === 'submitted') {
+            setQuoteStatus(`Request recovered: ${request.id}. Pending review.`);
+        }
+
+        return request;
+    }
+
     function renderRequest(request) {
         if (!request || (!request.id && !request.isLocalDraft && !request.localDraftId)) {
             state.currentRequest = null;
@@ -1249,6 +1439,12 @@ async function addCigoToWallet() {
         );
         setQuoteStatus('Ready for quote');
         await loadWalletLimitState(address);
+
+        try {
+            await recoverLatestWalletInvoice(address);
+        } catch (err) {
+            console.warn('Could not recover latest wallet invoice', err);
+        }
     }
 
     if (els.refreshRequestBtn) {
