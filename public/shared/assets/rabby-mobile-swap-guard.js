@@ -1,6 +1,29 @@
 (function () {
   "use strict";
 
+  function shouldRunOnThisDevice() {
+    const ua = navigator.userAgent || "";
+    const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+
+    const narrowScreen = window.matchMedia
+      ? window.matchMedia("(max-width: 900px)").matches
+      : window.innerWidth <= 900;
+
+    const touchPointer = window.matchMedia
+      ? window.matchMedia("(pointer: coarse)").matches
+      : false;
+
+    return mobileUA || (narrowScreen && touchPointer);
+  }
+
+  /*
+    This file exists only to keep long Rabby/preflight messages from
+    blowing out the phone layout. It should not alter desktop wallet flow.
+  */
+  if (!shouldRunOnThisDevice()) {
+    return;
+  }
+
   const TARGETS = [
     "#cleanStatus",
     "#quoteStatusField",

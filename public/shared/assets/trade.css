@@ -2490,47 +2490,50 @@ code,
 }
 
 /* Rabby mobile swap guard: prevent long tx/error text from forcing page wider than phone */
-html,
-body {
-  max-width: 100%;
-  overflow-x: hidden;
+@media (max-width: 900px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  .swap-box,
+  .swap-card,
+  .card,
+  .panel,
+  .notice,
+  .status,
+  .status-box,
+  #cleanStatus,
+  #quoteStatusField,
+  #liquidityStatus,
+  #walletBalanceMount {
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  #cleanStatus,
+  #quoteStatusField,
+  #liquidityStatus {
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+    font-size: 16px;
+  }
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-.swap-box,
-.swap-card,
-.card,
-.panel,
-.notice,
-.status,
-.status-box,
-#cleanStatus,
-#quoteStatusField,
-#liquidityStatus,
-#walletBalanceMount {
-  max-width: 100%;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-#cleanStatus,
-#quoteStatusField,
-#liquidityStatus {
-  white-space: normal;
-  line-height: 1.35;
-}
-
-input,
-select,
-textarea,
-button {
-  max-width: 100%;
-  font-size: 16px;
-}
 
