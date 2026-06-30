@@ -1,105 +1,15 @@
 (function () {
   "use strict";
 
-  function shouldRunOnThisDevice() {
-    const ua = navigator.userAgent || "";
-    const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
-
-    const narrowScreen = window.matchMedia
-      ? window.matchMedia("(max-width: 900px)").matches
-      : window.innerWidth <= 900;
-
-    const touchPointer = window.matchMedia
-      ? window.matchMedia("(pointer: coarse)").matches
-      : false;
-
-    return mobileUA || (narrowScreen && touchPointer);
-  }
-
   /*
-    This file exists only to keep long Rabby/preflight messages from
-    blowing out the phone layout. It should not alter desktop wallet flow.
+    Disabled 2026-06-30:
+    Rabby mobile in-app browser showed all swap fields stuck on loading
+    after the active MutationObserver guard was added.
+
+    Keep this file as a harmless no-op so cached pages that request it
+    do not fail with a missing script. Mobile overflow protection remains
+    in trade.css.
   */
-  if (!shouldRunOnThisDevice()) {
-    return;
-  }
 
-  const TARGETS = [
-    "#cleanStatus",
-    "#quoteStatusField",
-    "#liquidityStatus",
-    "#walletBalanceMount"
-  ];
-
-  function compact(text) {
-    const raw = String(text || "");
-
-    return raw
-      .replace(/0x[a-fA-F0-9]{64}/g, function (tx) {
-        return tx.slice(0, 10) + "…" + tx.slice(-8);
-      })
-      .replace(/0x[a-fA-F0-9]{40}/g, function (addr) {
-        return addr.slice(0, 8) + "…" + addr.slice(-6);
-      })
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function guard(el) {
-    if (!el || el.dataset.rabbyGuardBusy === "1") return;
-
-    const raw = el.textContent || "";
-    if (!raw) return;
-
-    const shortText = compact(raw);
-
-    el.dataset.rabbyGuardBusy = "1";
-    el.dataset.fullStatus = raw;
-    el.setAttribute("title", raw);
-    el.style.overflowWrap = "anywhere";
-    el.style.wordBreak = "break-word";
-    el.style.maxWidth = "100%";
-
-    if (shortText !== raw) {
-      el.textContent = shortText + "  Tap for full details.";
-    }
-
-    el.dataset.rabbyGuardBusy = "0";
-  }
-
-  function scan() {
-    TARGETS.forEach(function (sel) {
-      document.querySelectorAll(sel).forEach(guard);
-    });
-  }
-
-  document.addEventListener("click", function (ev) {
-    const el = ev.target.closest(TARGETS.join(","));
-    if (!el || !el.dataset.fullStatus) return;
-
-    if (el.dataset.expandedStatus === "1") {
-      el.dataset.expandedStatus = "0";
-      el.textContent = compact(el.dataset.fullStatus) + "  Tap for full details.";
-    } else {
-      el.dataset.expandedStatus = "1";
-      el.textContent = el.dataset.fullStatus;
-    }
-  });
-
-  const obs = new MutationObserver(scan);
-
-  function start() {
-    scan();
-    obs.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start);
-  } else {
-    start();
-  }
+  return;
 })();
