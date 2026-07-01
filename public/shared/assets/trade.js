@@ -796,16 +796,21 @@ async function addCigoToWallet() {
         if (!quote || !quote.serverPreview) return '';
 
         const capBps = Number(quote.cigoRequestPoolCapBps || 0);
-        const bufferText = capBps > 0 ? `${((10000 - capBps) / 100).toFixed(2)}%` : 'configured';
+        const deltaPct = capBps > 0 ? Math.abs(10000 - capBps) / 100 : null;
+        const adjustmentText = deltaPct === null
+            ? 'with configured desk adjustment'
+            : capBps >= 10000
+                ? `plus ${deltaPct.toFixed(2)}% manual desk premium`
+                : `minus ${deltaPct.toFixed(2)}% safety buffer`;
 
         if (quote.fromAsset === 'USDT' && quote.toAsset === 'CIGO' && Number.isFinite(Number(quote.cigoPoolRouterOutputAmount))) {
             const routerText = `${formatAssetAmount(Number(quote.cigoPoolRouterOutputAmount), 'CIGO')} CIGO`;
-            return `Server-capped to live Pancake router estimate (${routerText}) minus ${bufferText} safety buffer`;
+            return `Server-anchored to live Pancake router estimate (${routerText}) ${adjustmentText}`;
         }
 
         if (Number.isFinite(Number(quote.cigoPoolRouterUsdValue))) {
             const routerText = formatUsdAmount(Number(quote.cigoPoolRouterUsdValue));
-            return `Server-capped to live Pancake router estimate (${routerText}) minus ${bufferText} safety buffer`;
+            return `Server-anchored to live Pancake router estimate (${routerText}) ${adjustmentText}`;
         }
 
         return 'Server-capped to live pool estimate';
