@@ -749,7 +749,7 @@ async function addCigoToWallet() {
     }
 
     function routeUsesServerPreview(from, to) {
-        return from === 'CIGO' && to === 'USDT';
+        return (from === 'CIGO' && to === 'USDT') || (from === 'USDT' && to === 'CIGO');
     }
 
     async function getServerQuotePreview(from, to, amount) {
@@ -773,6 +773,8 @@ async function addCigoToWallet() {
         }
 
         return {
+            fromAsset: from,
+            toAsset: to,
             output,
             grossUsdValue: netUsdValue + feeUsdValue,
             feeUsdValue,
@@ -783,6 +785,9 @@ async function addCigoToWallet() {
             cigoManualUsdValue: quote.cigoManualUsdValue,
             cigoPoolRouterUsdValue: quote.cigoPoolRouterUsdValue,
             cigoPoolCappedUsdValue: quote.cigoPoolCappedUsdValue,
+            cigoManualOutputAmount: quote.cigoManualOutputAmount,
+            cigoPoolRouterOutputAmount: quote.cigoPoolRouterOutputAmount,
+            cigoPoolCappedOutputAmount: quote.cigoPoolCappedOutputAmount,
             cigoRequestPoolCapBps: quote.cigoRequestPoolCapBps
         };
     }
@@ -790,10 +795,16 @@ async function addCigoToWallet() {
     function getServerPreviewAdjustmentText(quote) {
         if (!quote || !quote.serverPreview) return '';
 
+        const capBps = Number(quote.cigoRequestPoolCapBps || 0);
+        const bufferText = capBps > 0 ? `${((10000 - capBps) / 100).toFixed(2)}%` : 'configured';
+
+        if (quote.fromAsset === 'USDT' && quote.toAsset === 'CIGO' && Number.isFinite(Number(quote.cigoPoolRouterOutputAmount))) {
+            const routerText = `${formatAssetAmount(Number(quote.cigoPoolRouterOutputAmount), 'CIGO')} CIGO`;
+            return `Server-capped to live Pancake router estimate (${routerText}) minus ${bufferText} safety buffer`;
+        }
+
         if (Number.isFinite(Number(quote.cigoPoolRouterUsdValue))) {
             const routerText = formatUsdAmount(Number(quote.cigoPoolRouterUsdValue));
-            const capBps = Number(quote.cigoRequestPoolCapBps || 0);
-            const bufferText = capBps > 0 ? `${((10000 - capBps) / 100).toFixed(2)}%` : 'configured';
             return `Server-capped to live Pancake router estimate (${routerText}) minus ${bufferText} safety buffer`;
         }
 
