@@ -748,6 +748,74 @@ async function addCigoToWallet() {
         return '';
     }
 
+    function routeUsesServerPreview(from, to) {
+        return from === 'CIGO' && to === 'USDT';
+    }
+
+    async function getServerQuotePreview(from, to, amount) {
+        const data = await apiJson(`${CONFIG.API_BASE}/quote/preview`, {
+            method: 'POST',
+            body: JSON.stringify({
+                fromAsset: from,
+                toAsset: to,
+                inputAmount: String(amount)
+            })
+        });
+
+        const quote = data.quote || {};
+        const output = Number(quote.outputAmount);
+        const netUsdValue = Number(quote.basisValue ?? quote.outputAmount ?? 0);
+        const feeUsdValue = Number(quote.feeAmount || 0);
+        const feeRate = Number(quote.feeRate || 0);
+
+        if (!Number.isFinite(output) || output <= 0 || !Number.isFinite(netUsdValue)) {
+            throw new Error('Server quote preview returned an invalid amount.');
+        }
+
+        return {
+            output,
+            grossUsdValue: netUsdValue + feeUsdValue,
+            feeUsdValue,
+            netUsdValue,
+            feeRate,
+            policyLabel: quote.pricingPolicy || 'cigo to usdt',
+            serverPreview: true,
+            cigoManualUsdValue: quote.cigoManualUsdValue,
+            cigoPoolRouterUsdValue: quote.cigoPoolRouterUsdValue,
+            cigoPoolCappedUsdValue: quote.cigoPoolCappedUsdValue,
+            cigoRequestPoolCapBps: quote.cigoRequestPoolCapBps
+        };
+    }
+
+    function getServerPreviewAdjustmentText(quote) {
+        if (!quote || !quote.serverPreview) return '';
+
+        if (Number.isFinite(Number(quote.cigoPoolRouterUsdValue))) {
+            const routerText = formatUsdAmount(Number(quote.cigoPoolRouterUsdValue));
+            const capBps = Number(quote.cigoRequestPoolCapBps || 0);
+            const bufferText = capBps > 0 ? `${((10000 - capBps) / 100).toFixed(2)}%` : 'configured';
+            return `Server-capped to live Pancake router estimate (${routerText}) minus ${bufferText} safety buffer`;
+        }
+
+        return 'Server-capped to live pool estimate';
+    }
+
+    async function getDisplayedQuote(from, to, amount) {
+        const manualQuote = getManualQuote(from, to, amount);
+        if (!manualQuote) return null;
+
+        if (!routeUsesServerPreview(from, to)) {
+            return manualQuote;
+        }
+
+        const serverQuote = await getServerQuotePreview(from, to, amount);
+        return {
+            ...manualQuote,
+            ...serverQuote,
+            policyLabel: manualQuote.policyLabel
+        };
+    }
+
     function getManualQuote(from, to, amount) {
         if (!Number.isFinite(amount) || amount <= 0) return null;
 
@@ -1562,7 +1630,7 @@ async function addCigoToWallet() {
     });
 
     if (els.quoteBtn) {
-        els.quoteBtn.addEventListener('click', () => {
+        els.quoteBtn.addEventListener('click', async () => {
             const { from, to, amount, isValidAmount } = getSelectedRoute();
 
             if (!from || !to) {
@@ -1578,17 +1646,27 @@ async function addCigoToWallet() {
                 return;
             }
 
-            const manualQuote = getManualQuote(from, to, amount);
-            if (!manualQuote) {
-                setQuoteStatus('This route is not active in the current shell.');
-                return;
-            }
+            try {
+                if (routeUsesServerPreview(from, to)) {
+                    setQuoteStatus('Reading server-capped live pool estimate...');
+                }
 
-            const adjustmentText = getQuoteAdjustmentText(manualQuote);
-            const basisText = getQuoteBasisText(manualQuote);
-            setQuoteStatus(
-                `Quote (${manualQuote.policyLabel}): ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to} | ${basisText}${basisText ? ' | ' : ''}${adjustmentText} | net value ≈ ${formatUsdAmount(manualQuote.netUsdValue)}`
-            );
+                const manualQuote = await getDisplayedQuote(from, to, amount);
+                if (!manualQuote) {
+                    setQuoteStatus('This route is not active in the current shell.');
+                    return;
+                }
+
+                const adjustmentText = manualQuote.serverPreview
+                    ? getServerPreviewAdjustmentText(manualQuote)
+                    : getQuoteAdjustmentText(manualQuote);
+                const basisText = getQuoteBasisText(manualQuote);
+                setQuoteStatus(
+                    `Quote (${manualQuote.policyLabel}): ${formatAssetAmount(amount, from)} ${from} ≈ ${formatAssetAmount(manualQuote.output, to)} ${to} | ${basisText}${basisText ? ' | ' : ''}${adjustmentText} | net value ≈ ${formatUsdAmount(manualQuote.netUsdValue)}`
+                );
+            } catch (err) {
+                setQuoteStatus(`Quote failed: ${err.message || err}`);
+            }
         });
     }
 
@@ -1613,7 +1691,7 @@ async function addCigoToWallet() {
                 return;
             }
 
-            const manualQuote = getManualQuote(from, to, amount);
+            let manualQuote = getManualQuote(from, to, amount);
             if (!manualQuote) {
                 setQuoteStatus('This route is not active in the current shell.');
                 return;
@@ -1621,6 +1699,11 @@ async function addCigoToWallet() {
 
             try {
                 await assertUsdtWalletCap(from, amount);
+
+                if (routeUsesServerPreview(from, to)) {
+                    setQuoteStatus('Reading server-capped live pool estimate before creating request...');
+                    manualQuote = await getDisplayedQuote(from, to, amount);
+                }
 
                 const request = createLocalDraftRequest({
                     wallet: state.connectedAddress,
