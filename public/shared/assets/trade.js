@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         BSC_CHAIN_ID: '0x38',
         REQUEST_REFRESH_MS: 15000,
         COPY_RESET_MS: 1400,
-        CONNECT_BTN_DEFAULT: '2) Connect wallet',
+        CONNECT_BTN_DEFAULT: '1) Connect wallet',
         CONNECT_BTN_READY: '2) Wallet ready',
         CONNECT_BTN_WRONG_NETWORK: '2) Wrong network',
         MARKET_ROUTE_ENABLED: false
