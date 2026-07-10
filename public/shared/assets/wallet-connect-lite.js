@@ -34,6 +34,18 @@
     return fracText ? `${wholeText}.${fracText}` : wholeText;
   }
 
+  function formatUnitsFixed(value, decimals = 18, fixedDigits = 2) {
+    const raw = typeof value === 'bigint' ? value : BigInt(value || 0);
+    const base = 10n ** BigInt(decimals);
+    const whole = raw / base;
+    const frac = raw % base;
+
+    const wholeText = whole.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const fracText = frac.toString().padStart(decimals, '0').slice(0, fixedDigits).padEnd(fixedDigits, '0');
+
+    return `${wholeText}.${fracText}`;
+  }
+
   function setStatus(text) {
     const ids = [
       'walletStatus',
@@ -158,7 +170,7 @@
 
       setText('walletBnbBalance', `${formatUnits(hexToBigInt(bnbRaw), 18, 5)} BNB`);
       setText('walletCigoBalance', `${formatUnits(cigoRaw, 18, 4)} CIGO`);
-      setText('walletUsdtBalance', `${formatUnits(usdtRaw, 18, 4)} BSC-USD`);
+      setText('walletUsdtBalance', `${formatUnitsFixed(usdtRaw, 18, 2)} BSC-USD`);
 
       setText(
         'walletBalanceNote',
