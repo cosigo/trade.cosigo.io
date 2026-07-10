@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>COSIGO trading platform</title>
   <link rel="stylesheet" href="/shared/assets/trade.css?v=20260627-235942">
-  <link rel="stylesheet" href="/shared/assets/request.css?v=20260708-152029Z">
+  <link rel="stylesheet" href="/shared/assets/request.css?v=20260709-stability1">
   <link rel="stylesheet" href="/shared/assets/cigo-footer.css?v=20260628-001436">
   <meta name="description" content="Official trade interface for CIGO, USDT, and COSIGO." />
   <meta name="author" content="COSIGO">
@@ -116,6 +116,15 @@
         <div class="token-note" id="walletLimitNote">
           24-hour USDT wallet cap will appear after wallet connection.
         </div>
+
+        <div class="token-note cigo-liquidity-desk-card" id="cigoLiquidityDeskCard">
+          <strong>Large purchase liquidity plan:</strong>
+          Approved large CIGO desk purchases may allocate at least <strong>90%</strong>, and up to <strong>95%</strong>, of settlement USDT back into public CIGO / BSC-USD liquidity, matched with treasury CIGO.
+          <button class="btn btn-secondary cigo-liquidity-desk-open" type="button" id="cigoLiquidityDeskOpen">
+            view $250 tier plan
+          </button>
+        </div>
+
 
         <div class="swap-box">
           <div class="swap-row">
@@ -362,6 +371,7 @@
     </div>
   </footer>
   <script src="/shared/assets/trade.js?v=20260701-161250&v=20260627-235942" defer></script>
+  <script src="/shared/assets/cigo-liquidity-desk-popup.js?v=20260709-mount1"></script>
 </body>
 
 </html>

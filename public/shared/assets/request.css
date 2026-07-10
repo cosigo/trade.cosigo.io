@@ -388,3 +388,60 @@
   text-underline-offset: 3px;
 }
 /* REQUEST COMPACT WARNING CARD END */
+
+/* REQUEST SCROLL STABILITY PATCH START */
+/*
+  Reduces visible layout jumping while wallet/API/ticker content finishes loading.
+  This does not hide the page and does not change trade logic.
+*/
+
+.request-page .wallet-summary,
+.request-page #pricingPolicyNote,
+.request-page #walletLimitNote,
+.request-page #cigoLiquidityDeskCard,
+.request-page #cigoPoolBox,
+.request-page .request-panel,
+.request-page .ticker-shell {
+  overflow-anchor: none;
+}
+
+.request-page .wallet-summary {
+  min-height: 118px;
+}
+
+.request-page #pricingPolicyNote,
+.request-page #walletLimitNote,
+.request-page #cigoLiquidityDeskCard {
+  min-height: 48px;
+}
+
+.request-page #cigoPoolBox {
+  min-height: 158px;
+}
+
+.request-page .request-panel {
+  min-height: 118px;
+}
+
+.request-page .ticker-shell {
+  min-height: 190px;
+}
+
+.request-page .ticker-frame {
+  display: block;
+  width: 100%;
+  min-height: 170px;
+}
+
+.request-page .wallet-value,
+.request-page .stat-value,
+.request-page .token-meta-row strong,
+.request-page .token-meta-row a {
+  font-variant-numeric: tabular-nums;
+}
+
+.request-page img {
+  max-width: 100%;
+  height: auto;
+}
+/* REQUEST SCROLL STABILITY PATCH END */
