@@ -25,6 +25,3 @@ https://trade.cosigo.io/bnb-review.html
 
 Market notice:
 https://market.cosigo.io/
-
-Security notice:
-https://snakepit.cosigo.io/security_notice.html
