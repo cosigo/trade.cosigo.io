@@ -632,10 +632,11 @@ async function addCigoToWallet() {
                 `<a href="https://redeem.cosigo.io/" target="_blank" rel="noopener">open physical redemption page</a>` +
               `</div>` +
               `<div class="pricing-policy-section pricing-policy-cigo">` +
-                `<div class="pricing-policy-label">CIGO market-access layer</div>` +
-                `<div>Reference basis: <strong>${formatCigoUsdAmount(pricing.cigoUsdReference)}</strong> per CIGO.</div>` +
-                `<div>Sell basis discount: <strong>${formatPercent(pricing.cigoInboundHaircutRate)}</strong>.</div>` +
-                `<div>Buy basis premium: <strong>${formatPercent(pricing.cigoOutboundPremiumRate)}</strong>.</div>` +
+                `<div class="pricing-policy-label">CIGO manual direct-order pricing</div>` +
+                `<div><strong>Manual pricing override:</strong> applies only to direct CIGO purchase and sale requests submitted through this page. It is separate from the live PancakeSwap pool spot price.</div>` +
+                `<div>Manual reference basis: <strong>${formatCigoUsdAmount(pricing.cigoUsdReference)}</strong> per CIGO.</div>` +
+                `<div>Direct-order sell discount: <strong>${formatPercent(pricing.cigoInboundHaircutRate)}</strong>.</div>` +
+                `<div>Direct-order buy premium: <strong>${formatPercent(pricing.cigoOutboundPremiumRate)}</strong>.</div>` +
               `</div>` +
             `</div>` +
             `<div class="pricing-policy-updated">${updatedText}</div>`;

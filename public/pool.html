@@ -35,6 +35,7 @@
   <link rel="stylesheet" href="/shared/assets/cigo-footer.css?v=20260627-222708">
   <link rel="stylesheet" href="/shared/assets/pool.css?v=20260708-193404Z">
   <script src="/shared/assets/pool-status.js?v=20260614-081931" defer></script>
+  <script src="/shared/assets/cigo-pool-price.js?v=20260717-spot1" defer></script>
   <script src="/shared/assets/mobile-nav.js?v=20260614-081931" defer></script>
 
   <script src="/shared/assets/wallet-connect-lite.js?v=20260614-081931" defer></script>
@@ -85,8 +86,7 @@
         </a>
         <a href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560" target="_blank"
           rel="noopener">token</a>
-        <a href="https://snakepit.cosigo.io/security_notice.html#summary">security notes</a>
-      </nav>
+</nav>
     </div>
   </header>
 
@@ -106,6 +106,10 @@
           </p>
 
           <div class="token-meta-box" id="instantPoolBox" style="margin-top:14px;">
+            <div class="token-meta-row">
+              <span>live CIGO pool spot price</span>
+              <strong data-cigo-pool-price aria-live="polite">loading...</strong>
+            </div>
             <div class="token-meta-row">
               <span>CIGO in BSC-USD pool</span>
               <strong id="poolCigoUsdt">loading...</strong>
@@ -273,12 +277,10 @@
       </div>
 
       <div class="cigo-footer-links">
-        <a href="/appendix.html">site appendix / quick reference</a>
         <a href="https://cosigo.io/">COSIGO official</a>
-        <a href="https://market.cosigo.io/">CIGO market notice</a>
-        <a href="https://labels.cosigo.io/">public label record</a>
-        <a href="https://snakepit.cosigo.io/security_notice.html#summary">security notes</a>
+        <a href="/appendix.html">site appendix / quick reference</a>
         <a href="https://github.com/cosigo" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="https://market.cosigo.io/">CIGO market notice</a>
       </div>
     </div>
   </footer>

@@ -33,6 +33,7 @@
   <meta property="og:image" content="https://trade.cosigo.io/shared/assets/icons/cigo_256.png">
   <meta property="og:image" content="https://trade.cosigo.io/shared/assets/icons/cosigo_master_256.png">
   <script src="/shared/assets/mobile-nav.js?v=20260613-160904" defer></script>
+  <script src="/shared/assets/cigo-pool-price.js?v=20260717-spot1" defer></script>
 
 </head>
 
@@ -62,8 +63,7 @@
         </a>
         <a href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560" target="_blank"
           rel="noopener">token</a>
-        <a href="https://snakepit.cosigo.io/security_notice.html#summary">security notes</a>
-      </nav>
+</nav>
     </div>
   </header>
 
@@ -113,6 +113,11 @@
         </div>
 
         <div class="token-note" id="pricingPolicyNote">Loading pricing policy...</div>
+        <div class="token-note">
+          <strong>Live CIGO pool spot price:</strong>
+          <span data-cigo-pool-price aria-live="polite">loading...</span><br>
+          Pool reserve-ratio reference before CIGO tax, PancakeSwap fee, slippage, and price impact.
+        </div>
         <div class="token-note" id="walletLimitNote">
           24-hour USDT wallet cap will appear after wallet connection.
         </div>
@@ -361,16 +366,14 @@
       </div>
 
       <div class="cigo-footer-links">
-        <a href="/appendix.html">site appendix / quick reference</a>
         <a href="https://cosigo.io/">COSIGO official</a>
-        <a href="https://market.cosigo.io/">CIGO market notice</a>
-        <a href="https://labels.cosigo.io/">public label record</a>
-        <a href="https://snakepit.cosigo.io/security_notice.html#summary">security notes</a>
+        <a href="/appendix.html">site appendix / quick reference</a>
         <a href="https://github.com/cosigo" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="https://market.cosigo.io/">CIGO market notice</a>
       </div>
     </div>
   </footer>
-  <script src="/shared/assets/trade.js?v=20260701-161250&v=20260627-235942" defer></script>
+  <script src="/shared/assets/trade.js?v=20260717-manual-pricing1" defer></script>
   <script src="/shared/assets/cigo-liquidity-desk-popup.js?v=20260709-mount1"></script>
 </body>
 
