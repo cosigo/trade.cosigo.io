@@ -59,6 +59,8 @@
       display: block;
     }
   </style>
+  <!-- CIGO_MESSAGE_NUGGET_STYLE_V1 -->
+  <link rel="stylesheet" href="/cigo-message-nugget.css?v=20260718-1">
 </head>
 
 <body class="pool-page">
@@ -86,9 +88,21 @@
         </a>
         <a href="https://bscscan.com/token/0x3a38e963f524E0dDFB75dFa1752b4Cd1364F5560" target="_blank"
           rel="noopener">token</a>
+        <!-- CIGO_MESSAGE_NUGGET_NAV_V1 -->
+        <a class="cigo-message-nav" href="https://message.cosigo.io/" title="Reveal the deterministic message associated with a confirmed CIGO transaction hash">
+          <span class="cigo-message-nav-icon"><svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <path d="M10 27h44v27H10z" fill="currentColor" opacity=".2"/>
+  <path d="M10 27h44v27H10zM8 34h48M32 27v27" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M15 27v-5c0-9 7-15 17-15s17 6 17 15v5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <path d="M27 34h10v10H27z" fill="currentColor"/>
+</svg></span>
+          <span>message</span>
+        </a>
 </nav>
     </div>
   </header>
+
+
 
   <main>
     <section class="hero wrap">
@@ -176,7 +190,26 @@
               Enter either CIGO or BSC-USD amount, then click estimate amounts.
             </div>
 
-            <div class="swap-note wallet-status-note">
+
+  <!-- CIGO_MESSAGE_NUGGET_BANNER_V1 -->
+  <aside class="cigo-message-nugget-wrap" aria-label="CIGO transfer message">
+    <a class="cigo-message-nugget" href="https://message.cosigo.io/" title="Paste a confirmed BSC transaction hash to reveal its CIGO message">
+      <span class="cigo-message-chest" aria-hidden="true"><svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <path d="M10 27h44v27H10z" fill="currentColor" opacity=".2"/>
+  <path d="M10 27h44v27H10zM8 34h48M32 27v27" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M15 27v-5c0-9 7-15 17-15s17 6 17 15v5" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <path d="M27 34h10v10H27z" fill="currentColor"/>
+</svg></span>
+      <span class="cigo-message-copy">
+        <span class="cigo-message-kicker">Treasure in the hash</span>
+        <strong>Every confirmed CIGO transfer unlocks a message.</strong>
+        <small>Paste the BSC transaction hash to reveal its deterministic selection.</small>
+      </span>
+      <span class="cigo-message-action">reveal message ↗</span>
+    </a>
+  </aside>
+
+<div class="swap-note wallet-status-note">
               <div id="walletBalanceMount" class="wallet-balance-mount"></div>
             </div>
 

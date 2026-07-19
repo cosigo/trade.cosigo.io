@@ -27,6 +27,63 @@
     el.title = String(text || '');
   }
 
+  async function copyText(value) {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(value);
+        return;
+      } catch (_) {
+        // Fall through to the compatibility copy path.
+      }
+    }
+
+    const helper = document.createElement('textarea');
+    helper.value = value;
+    helper.setAttribute('readonly', '');
+    helper.style.position = 'fixed';
+    helper.style.opacity = '0';
+    document.body.appendChild(helper);
+    helper.select();
+    const copied = document.execCommand('copy');
+    helper.remove();
+    if (!copied) throw new Error('Clipboard copy was blocked.');
+  }
+
+  function statusSwapSubmitted(tx) {
+    const el = E('cleanStatus');
+    if (!el) return;
+
+    const abbreviated = shortenTxText(tx);
+    const copyButton = document.createElement('button');
+    copyButton.type = 'button';
+    copyButton.className = 'cigo-tx-copy';
+    copyButton.textContent = `copy ${abbreviated}`;
+    copyButton.title = `Copy full transaction hash: ${tx}`;
+    copyButton.setAttribute('aria-label', 'Copy the full submitted swap transaction hash');
+
+    copyButton.addEventListener('click', async () => {
+      try {
+        await copyText(tx);
+        copyButton.textContent = 'copied ✓';
+        copyButton.title = 'Full transaction hash copied';
+        setTimeout(() => {
+          copyButton.textContent = `copy ${abbreviated}`;
+          copyButton.title = `Copy full transaction hash: ${tx}`;
+        }, 2200);
+      } catch (_) {
+        copyButton.textContent = 'copy failed';
+        copyButton.title = tx;
+      }
+    });
+
+    el.replaceChildren(
+      document.createTextNode('Swap submitted: '),
+      copyButton,
+      document.createTextNode(' Wait for transaction completed. Then click estimate before another swap.')
+    );
+    el.title = `Swap submitted: ${tx}. Wait for transaction completed. Then click estimate before another swap.`;
+  }
+
   function quoteText(id) {
     const el = E(id);
     if (!el) return '';
@@ -385,7 +442,7 @@ if (!lastQuote || lastQuote.from !== from || lastQuote.to !== to || lastQuote.am
 
       const tx = await req('eth_sendTransaction', [txRequest]);
 
-      status(`Swap submitted: ${tx}. Wait for transaction completed. Then click estimate before another swap.`);
+      statusSwapSubmitted(tx);
       E('cleanSwapBtn').disabled = true;
       E('cleanSwapBtn').textContent = 'swap submitted';
       E('cleanAllowance').textContent = 'Recheck after swap';
