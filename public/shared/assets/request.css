@@ -445,3 +445,22 @@
   height: auto;
 }
 /* REQUEST SCROLL STABILITY PATCH END */
+
+/* CIGO_DISCOUNT_DESK_BACKGROUND_V1 */
+body.request-page {
+  position: relative;
+  isolation: isolate;
+  background: #080b0f;
+}
+
+body.request-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(8, 11, 15, 0.72) 0%, rgba(8, 11, 15, 0.84) 52%, rgba(8, 11, 15, 0.95) 100%),
+    radial-gradient(circle at 50% 20%, rgba(8, 11, 15, 0.08), rgba(8, 11, 15, 0.62) 78%),
+    url("/shared/assets/cigo-background.png?v=20260728-bg1") center top / cover no-repeat;
+}
